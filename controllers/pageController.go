@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"blog.ka1em.site/model"
 	"log"
-	"blog.ka1em.site/common"
-	"blog.ka1em.site/data"
+	//"blog.ka1em.site/common"
+	//"blog.ka1em.site/data"
 
 	"github.com/gorilla/mux"
 )
@@ -16,8 +16,8 @@ func ServePage(w http.ResponseWriter, r *http.Request) {
 
 	thisPage := model.Page{}
 
-	resp := &data.PageRepository{}
-	resp.DB = common.GetDB()
+	resp := &model.Page{}
+	//resp.DB = common.GetDB()
 
 	err := resp.GetByPageID(pageGUID, &thisPage)
 	if err != nil {
