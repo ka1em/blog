@@ -1,11 +1,13 @@
-package model
+package common
 
 import (
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
-	//"database/sql"
-	"github.com/jinzhu/gorm"
 	"log"
+
+	"blog.ka1em.site/model"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 var DB *gorm.DB
@@ -18,8 +20,14 @@ func init() {
 		return
 	}
 
-	//更新最新数据
-	if err := DB.AutoMigrate(&User{}, &Session{}, &Cookie{}, &Page{}).Error; err != nil {
+	//update  tabel
+	err = DB.AutoMigrate(
+		&model.User{},
+		&model.Session{},
+		&model.Page{},
+		&model.Comment{}).Error
+
+	if err != nil {
 		log.Println(err.Error())
 		return
 	}

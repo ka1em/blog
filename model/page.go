@@ -1,32 +1,29 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
-	"html/template"
 	"log"
+
+	"github.com/jinzhu/gorm"
 )
 
 type Page struct {
 	gorm.Model
-	Title      string
-	RawContent string
-	Content    template.HTML
-	Date       string
+	Title      string `gorm:varchar(256)`
+	RawContent string `gorm:"text"`
+	Content    string `gorm:"text"`
 	Comments   []Comment
-	Session    Session
+	Session    Session `json:"-" gorm:"-"`
+
+	//Content    template.HTML `gorm:"text"`
+	//Date       string
 }
 
 type Comment struct {
 	gorm.Model
-	Content string
+	Content string `gorm:"text"`
 }
 
 func (p *Page) GetByPageID(pageGUID string, page *Page) error {
-	//sql := "select page_title,page_content,page_date from pages where page_guid=?"
-	//err := r.DB.QueryRow(sql, pageGUID).Scan(&p.Title, &p.Content, &p.Date)
-	//if err != nil {
-	//	return err
-	//}
 	if err := DB.Where("page_guid = ?", pageGUID).First(page).Error; err != nil {
 		log.Println(err.Error())
 		return err

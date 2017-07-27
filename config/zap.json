@@ -1,0 +1,18 @@
+{
+    "level": "debug",
+    "encoding": "json",
+    "outputPaths": [
+        "/tmp/blog.log"
+    ],
+    "errorOutputPaths": [
+        "/tmp/blog.err.log"
+    ],
+    "initialFields": {
+        "blog.ka1em.site": "debug"
+    },
+    "encoderConfig": {
+        "messageKey": "message",
+        "levelKey": "level",
+        "levelEncoder": "lowercase"
+    }
+}

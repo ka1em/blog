@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"net/http"
-	"blog.ka1em.site/model"
 	"log"
-	//"blog.ka1em.site/common"
-	//"blog.ka1em.site/data"
+	"net/http"
+	"time"
+
+	"blog.ka1em.site/model"
 
 	"github.com/gorilla/mux"
 )
@@ -32,7 +32,7 @@ func ServePage(w http.ResponseWriter, r *http.Request) {
 		  	</head>
 		<body>
 			<h1>` + thisPage.Content + `</h1>
-			<div>` + thisPage.Date + `</div>
+			<div>` + thisPage.CreatedAt.Format(time.ANSIC) + `</div>
 		</body>
 		</html>`
 

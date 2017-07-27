@@ -1,8 +1,9 @@
 package model
 
 import (
-	//"github.com/jinzhu/gorm"
 	"time"
+
+	"blog.ka1em.site/common"
 )
 
 /*
@@ -20,34 +21,33 @@ CREATE TABLE `users` (
 */
 type User struct {
 	//Id   int
-	ID         uint `gorm:"primary_key"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	DeletedAt  *time.Time `sql:"index"`
-	UserName   string
-	UserGuid   string
-	UserEmail  string
-	UserPasswd string
-	UserSalt   string
+	ID         uint64 `json:"id,string"     gorm:"primary_key"`
+	UserName   string `json:"user_name"     gorm:"not null; varchar(256)" form:"user_name"`
+	UserGuid   string `json:"user_guid"     gorm:"not null; varchar(256)" form:"user_guid"`
+	UserEmail  string `json:"user_email"    gorm:"not null; varchar(256)" form:"user_email"`
+	UserPasswd string `json:"user_passwd"   gorm:"not null; varchar(256)" form:"user_passwd"`
+	UserSalt   string `json:"-"             gorm:"varchar(256)`
+
+	Role string `json:"role" gorm:"not nulll; varchar(64)"` //角色 admin:管理员 users:用户
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `sql:"index"`
 }
 
-type Session struct {
-	Id              string
-	Authenticated   bool
-	Unauthenticated bool
-	User            User
+func (u *User) TabelName() string {
+	if u.Role == "admin" {
+		return "admin_users"
+	} else {
+		return "users"
+	}
 }
 
-type Cookie struct {
-	Name       string
-	Value      string
-	Path       string
-	Domain     string
-	Expires    time.Time
-	RawExpires string
-	MaxAge     int
-	Secure     bool
-	HttpOnly   bool
-	Raw        string
-	Unparsed   []string
+func (u *User) CreateUser() error {
+	err := common.DB.Create(u).Error
+	if err != nil {
+		common.Suggar.Error(err.Error)
+		return err
+	}
+	return nil
 }
