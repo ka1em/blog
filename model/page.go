@@ -23,8 +23,10 @@ type Comment struct {
 	Content string `gorm:"text"`
 }
 
-func (p *Page) GetByPageID(pageGUID string, page *Page) error {
-	if err := DB.Where("page_guid = ?", pageGUID).First(page).Error; err != nil {
+// GET page by page_guid
+func (p *Page) GetByPageGUID(pageGUID string) error {
+	if err := DB.Where("page_guid = ?", pageGUID).First(p).Error; err != nil {
+
 		log.Println(err.Error())
 		return err
 	}

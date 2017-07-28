@@ -44,7 +44,7 @@ func (u *User) TabelName() string {
 }
 
 func (u *User) CreateUser() error {
-	err := common.DB.Create(u).Error
+	err := DB.Create(u).Error
 	if err != nil {
 		common.Suggar.Error(err.Error)
 		return err

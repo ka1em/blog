@@ -1,6 +1,14 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"crypto/rand"
+	"encoding/base64"
+	"io"
+
+	"blog.ka1em.site/common"
+)
 
 /*
 CREATE TABLE `sessions` (
@@ -25,4 +33,34 @@ type Session struct {
 	Authenticated   bool `json:"authenticated,string"      gorm:"-"`
 	Unauthenticated bool `json:"unauthenticated,string"    gorm:"-"`
 	User            User `json:"user"                      gorm:"-"`
+}
+
+func (s *Session) GenerateSessionId() (string, error) {
+	sid := make([]byte, 24)
+	_, err := io.ReadFull(rand.Reader, sid)
+	if err != nil {
+		common.Suggar.Error(err.Error())
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(sid), nil
+}
+
+func (s *Session) GetSessionUID(sid string) (uint64, error) {
+	if err := DB.Where("session_id = ?", sid).First(s).Error; err != nil {
+		common.Suggar.Error(err.Error())
+		return 0, err
+	}
+	return s.UserId, nil
+}
+
+func (s *Session) UpdateSession(sid string, uid uint64) error {
+	const timeFmt = "2006-01-02T15:04:05.999999999"
+	tstamp := time.Now().Format(timeFmt)
+	//err := DB.Model(s).Update("session_update", tstamp).Error
+	if err := DB.Exec("INSERT INTO sessions SET session_id=?, user_id=?, session_update=? "+
+		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?", sid, uid, tstamp, uid, tstamp).Error; err != nil {
+		common.Suggar.Error(err.Error())
+		return err
+	}
+	return nil
 }
