@@ -1,12 +1,13 @@
 package main
 
 import (
-	"blog.ka1em.site/router"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 
+	"blog.ka1em.site/common"
+	"blog.ka1em.site/router"
 	"github.com/go-errors/errors"
 )
 
@@ -26,7 +27,7 @@ func init() {
 
 	switch runtime.GOOS {
 	case "darwin":
-		err = os.Chdir("/Users/wangkaimin/go/src/blog.ka1em.site")
+		err = os.Chdir("~/go/src/blog.ka1em.site")
 	case "linux":
 		err = os.Chdir("/root/go/src/blog.ka1em.site")
 	default:
@@ -34,7 +35,7 @@ func init() {
 	}
 
 	if err != nil {
-		log.Fatal(err.Error())
+		common.Suggar.Error(err.Error())
 		return
 	}
 	return

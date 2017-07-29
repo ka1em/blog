@@ -3,6 +3,7 @@ package model
 import (
 	"blog.ka1em.site/common"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 var DB *gorm.DB

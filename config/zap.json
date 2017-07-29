@@ -2,10 +2,12 @@
     "level": "debug",
     "encoding": "json",
     "outputPaths": [
-        "/tmp/blog.log"
+        "/tmp/blog.log",
+        "stdout"
     ],
     "errorOutputPaths": [
-        "/tmp/blog.err.log"
+        "/tmp/blog.err.log",
+        "stderr"
     ],
     "initialFields": {
         "blog.ka1em.site": "debug"
