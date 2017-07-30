@@ -2,11 +2,13 @@ package model
 
 import (
 	"blog.ka1em.site/common"
+	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 var DB *gorm.DB
+var SchemaDecoder = schema.NewDecoder()
 
 func init() {
 	var err error

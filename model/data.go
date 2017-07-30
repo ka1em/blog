@@ -1,5 +1,7 @@
 package model
 
+import "encoding/json"
+
 type Data struct {
 	Code int                    `json:"code,string"`
 	Msg  string                 `json:"msg"`
@@ -14,4 +16,8 @@ func GetBaseData() *Data {
 	d.Data = map[string]interface{}{}
 
 	return d
+}
+
+func (d *Data) Marshal() ([]byte, error) {
+	return json.Marshal(d)
 }

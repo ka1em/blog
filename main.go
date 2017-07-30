@@ -27,7 +27,7 @@ func init() {
 
 	switch runtime.GOOS {
 	case "darwin":
-		err = os.Chdir("~/go/src/blog.ka1em.site")
+		err = os.Chdir("/Users/ka1em/go/src/blog.ka1em.site")
 	case "linux":
 		err = os.Chdir("/root/go/src/blog.ka1em.site")
 	default:

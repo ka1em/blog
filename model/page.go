@@ -7,29 +7,26 @@ import (
 )
 
 type Page struct {
-	Id        uint64     `json:"id,string" gorm:"primary_key"`
+	Id        uint64     `json:"id,string"           gorm:"primary_key"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"-" sql:"index"`
+	DeletedAt *time.Time `json:"-"                   sql:"index"`
 
-	PageGuid   string    `json:"page_guid" gorm:"varchar(64)"`
-	Title      string    `json:"title" gorm:"varchar(256)"`
-	RawContent string    `json:"raw_content" gorm:"text"`
-	Content    string    `json:"content" gorm:"text"`
+	PageGuid   string    `json:"page_guid"           gorm:"type:varchar(64)"`
+	Title      string    `json:"title"               gorm:"type:varchar(256)"`
+	RawContent string    `json:"-"                   gorm:"type:text"`
+	Content    string    `json:"content"             gorm:"type:text"`
 	Comments   []Comment `json:"comments"`
-	Session    Session   `json:"-" gorm:"-"`
-
-	//Content    template.HTML `gorm:"text"`
-	//Date       string
+	Session    Session   `json:"-"                   gorm:"-"`
 }
 
 type Comment struct {
-	Id        uint64     `json:"id,string" gorm:"primary_key"`
+	Id        uint64     `json:"id,string"           gorm:"primary_key"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"-" sql:"index"`
+	DeletedAt *time.Time `json:"-"                   sql:"index"`
 
-	Content string `json:"content" gorm:"text"`
+	Content string `json:"content"                   gorm:"type:text"`
 }
 
 // GET page by page_guid
