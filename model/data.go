@@ -29,6 +29,7 @@ func (d *Data) Marshal() ([]byte, error) {
 
 func (d *Data) ResponseJson(w http.ResponseWriter, datacode int, datamsg string, httpStateCode int) {
 	d.Code = datacode
+	//d.Msg =  common.ERRMAP[datacode]
 	d.Msg = datamsg
 	da, err := d.Marshal()
 	if err != nil {

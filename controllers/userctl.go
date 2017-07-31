@@ -52,10 +52,11 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	data := model.GetBaseData()
 
+	//创建用户
 	if err := u.CreateUser(); err != nil {
 		if err.Error() == "exists" {
 			common.Suggar.Error(err.Error())
-			data.ResponseJson(w, -1, err.Error(), http.StatusBadRequest)
+			data.ResponseJson(w, common.ERR_USER_EXIST, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -97,6 +98,7 @@ func weakPasswordHash(p string) []byte {
 	return hash.Sum(nil)
 }
 
+//
 func LoginPost(w http.ResponseWriter, r *http.Request) {
 	ValidateSession(w, r)
 	params := &loginParams{}

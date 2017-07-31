@@ -1,9 +1,10 @@
 package common
 
 const (
-	ERR_USER_EXIST = iota
+	_ = iota * -1
+	ERR_USER_EXIST
 )
 
-const ERRMAP map[int]string  = map[int]string{}{
-ERR_USER_EXIST
+var ERRMAP map[int]string = map[int]string{
+	ERR_USER_EXIST: "user name is exist",
 }
