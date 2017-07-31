@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
@@ -13,68 +14,82 @@ import (
 )
 
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
-
-	//if err := r.ParseForm(); err != nil {
-	//	http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-	//	common.Suggar.Error(err.Error())
-	//	return
-	//}
-
-	p := &RegistParams{}
-
-	p.UserName = r.FormValue("user_name")
-	p.UserEmail = r.FormValue("user_email")
-	p.UserPasswd = r.FormValue("user_passwd")
-
-	//gure := regexp.MustCompile("[^A-Za-z0-9]+")
-	//guid := gure.ReplaceAllString(params.name, "")
-	passwd := weakPasswordHash(p.UserPasswd)
-
-	common.Suggar.Debug("%s", p.UserName)
-	u := &model.User{}
-	u.UserName = p.UserName
-	u.UserEmail = p.UserEmail
-	u.UserPasswd = string(passwd)
-	//u.UserGuid = guid
-	common.Suggar.Debug("%+v", u)
-
-	if err := u.CreateUser(); err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		common.Suggar.Error(err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	p := &registParams{}
+
+	if err := p.get(r.PostForm); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		common.Suggar.Error(err.Error())
+		return
+	}
+
+	if err := p.valid(); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		common.Suggar.Error(err.Error())
+		return
+	}
+
+	common.Suggar.Debugf("%+v", p)
+
+	gure := regexp.MustCompile("[^A-Za-z0-9]+")
+	guid := gure.ReplaceAllString(p.UserName, "")
+	passwd := weakPasswordHash(p.UserPasswd)
+
+	common.Suggar.Debugf("%s", p.UserName)
+
+	u := &model.User{}
+	u.UserName = p.UserName
+	u.UserEmail = p.UserEmail
+	u.UserPasswd = string(passwd)
+	u.UserGuid = guid
+
+	common.Suggar.Debug("%+v", u)
+
+	data := model.GetBaseData()
+
+	if err := u.CreateUser(); err != nil {
+		if err.Error() == "exists" {
+			common.Suggar.Error(err.Error())
+			data.ResponseJson(w, -1, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, -2, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data.ResponseJson(w, 0, "SUCCESS", http.StatusOK)
 	return
 }
 
-type RegistParams struct {
-	UserName   string //`schema:"user_name"`
-	UserEmail  string //`schema:"user_email"`
-	UserPasswd string //`schema:"user_passwd"`
-	//pageGUID string //`schema:""`
+type registParams struct {
+	UserName   string `schema:"user_name"`
+	UserEmail  string `schema:"user_email"`
+	UserPasswd string `schema:"user_passwd"`
 }
 
-//func (rp *ResgistParams) get(u url.Values) error {
-//	or := &ResgistParams{}
-//	err := model.SchemaDecoder.Decode(or, u)
-//	if err != nil {
-//		common.Suggar.Error(err.Error())
-//		return err
-//	}
-//	rp.UserName = or.UserName
-//	rp.UserPasswd = or.UserPasswd
-//	rp.UserEmail = or.UserEmail
-//
-//	common.Suggar.Debug(rp.UserName)
-//	return nil
-//}
-//func (rp *ResgistParams) valid() error {
-//	if rp.UserName == "" || rp.UserEmail == "" || rp.UserPasswd == "" {
-//		return errors.New("name, email or passwd is null")
-//	}
-//	return nil
-//}
+func (rp *registParams) get(u url.Values) error {
+	err := model.SchemaDecoder.Decode(rp, u)
+	if err != nil {
+		common.Suggar.Error(err.Error())
+		return err
+	}
+
+	common.Suggar.Debug(rp.UserName)
+	return nil
+}
+func (rp *registParams) valid() error {
+	if rp.UserName == "" || rp.UserEmail == "" || rp.UserPasswd == "" {
+		return errors.New("name, email or passwd is null")
+	}
+	return nil
+}
 
 func weakPasswordHash(p string) []byte {
 	hash := sha1.New()

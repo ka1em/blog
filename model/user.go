@@ -3,6 +3,8 @@ package model
 import (
 	"time"
 
+	"errors"
+
 	"blog.ka1em.site/common"
 )
 
@@ -44,6 +46,11 @@ func (u *User) TabelName() string {
 }
 
 func (u *User) CreateUser() error {
+	//判断用户名是否存在
+	if !DB.Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
+		return errors.New("exists")
+	}
+
 	err := DB.Create(u).Error
 	if err != nil {
 		common.Suggar.Error(err.Error)
