@@ -14,8 +14,9 @@ import (
 )
 
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
+	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusBadRequest)
 		common.Suggar.Error(err.Error())
 		return
 	}
@@ -23,13 +24,13 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	p := &registParams{}
 
 	if err := p.get(r.PostForm); err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		data.ResponseJson(w, common.USER_PARAMAGET, http.StatusBadRequest)
 		common.Suggar.Error(err.Error())
 		return
 	}
 
 	if err := p.valid(); err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		data.ResponseJson(w, common.USER_PARAMVALID, http.StatusBadRequest)
 		common.Suggar.Error(err.Error())
 		return
 	}
@@ -50,22 +51,20 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	common.Suggar.Debug("%+v", u)
 
-	data := model.GetBaseData()
-
 	//创建用户
 	if err := u.CreateUser(); err != nil {
 		if err.Error() == "exists" {
 			common.Suggar.Error(err.Error())
-			data.ResponseJson(w, common.ERR_USER_EXIST, err.Error(), http.StatusBadRequest)
+			data.ResponseJson(w, common.USER_WASEXIST, http.StatusBadRequest)
 			return
 		}
 
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, -2, err.Error(), http.StatusInternalServerError)
+		data.ResponseJson(w, common.DATA_CREATEUSER, http.StatusInternalServerError)
 		return
 	}
 
-	data.ResponseJson(w, 0, "SUCCESS", http.StatusOK)
+	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
 	return
 }
 

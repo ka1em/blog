@@ -12,11 +12,11 @@ type Page struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"-"                   sql:"index"`
 
-	PageGuid   string    `json:"page_guid"           gorm:"type:varchar(64)"`
+	PageGuid   string    `json:"page_guid"           gorm:"type:varchar(64);unique_index"`
 	Title      string    `json:"title"               gorm:"type:varchar(256)"`
 	RawContent string    `json:"-"                   gorm:"type:text"`
 	Content    string    `json:"content"             gorm:"type:text"`
-	Comments   []Comment `json:"comments"`
+	Comments   []Comment `json:"comments"            gorm:"-"`
 	Session    Session   `json:"-"                   gorm:"-"`
 }
 
@@ -26,6 +26,7 @@ type Comment struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"-"                   sql:"index"`
 
+	PageId  uint64 `json:"page_id,string"            gorm:"type:bigint(20)"`
 	Content string `json:"content"                   gorm:"type:text"`
 }
 
