@@ -30,12 +30,32 @@ type Comment struct {
 	Content string `json:"content"                   gorm:"type:text"`
 }
 
+const TRUNCNUM = 20
+
 // GET page by page_guid
 func (p *Page) GetByPageGUID(pageGUID string) error {
 	if err := DB.Where("page_guid = ?", pageGUID).First(p).Error; err != nil {
 		common.Suggar.Error(err.Error())
 		return err
 	}
-
 	return nil
+}
+
+func (p *Page) GetAllPage(pIndex, pSize int) (pages []*Page, err error) {
+	if err := DB.Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
+		common.Suggar.Error(err.Error())
+		return nil, err
+	}
+	return pages, nil
+}
+
+func (p *Page) TruncatedText() string {
+	chars := 0
+	for i, _ := range p.Content {
+		chars++
+		if chars > TRUNCNUM {
+			return p.Content[:i] + ` ...`
+		}
+	}
+	return p.Content
 }

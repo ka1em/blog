@@ -23,28 +23,17 @@ func GetBaseData() *Data {
 	return d
 }
 
-func (d *Data) Marshal() ([]byte, error) {
-	return json.Marshal(d)
-}
-
 func (d *Data) ResponseJson(w http.ResponseWriter, datacode int, httpStateCode int) {
-
-	var (
-		err error
-		da  []byte
-	)
-
 	d.Code = datacode
 	d.Msg = common.ERRMAP[datacode]
 
-	if da, err = d.Marshal(); err != nil {
-		common.Suggar.Error(err.Error())
-		panic(err.Error())
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpStateCode)
-	w.Write(da)
+	err := json.NewEncoder(w).Encode(d)
+	if err != nil {
+		common.Suggar.Error(err.Error())
+		panic(err)
+	}
+
 	return
 }
