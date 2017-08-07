@@ -20,25 +20,11 @@ type Page struct {
 	Session    Session   `json:"-"                   gorm:"-"`
 }
 
-type Comment struct {
-	Id        uint64     `json:"id,string"           gorm:"primary_key"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"-"                   sql:"index"`
-
-	PageId  uint64 `json:"page_id,string"            gorm:"type:bigint(20)"`
-	Content string `json:"content"                   gorm:"type:text"`
-}
-
 const TRUNCNUM = 20
 
 // GET page by page_guid
 func (p *Page) GetByPageGUID(pageGUID string) error {
-	if err := DB.Where("page_guid = ?", pageGUID).First(p).Error; err != nil {
-		common.Suggar.Error(err.Error())
-		return err
-	}
-	return nil
+	return DB.Where("page_guid = ?", pageGUID).First(p).Error
 }
 
 func (p *Page) GetAllPage(pIndex, pSize int) (pages []*Page, err error) {

@@ -12,8 +12,11 @@ func InitRouters() *mux.Router {
 	r.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		http.ServeFile(writer, request, "/tmp/www/index.html")
 	})
+
 	r = SetPageRoutes(r)
 	r = SetUserRoutes(r)
+	r = SetCommentRoutes(r)
+
 	common.Suggar.Info("set route ok ")
 	return r
 }

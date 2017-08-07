@@ -10,32 +10,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ServePage(w http.ResponseWriter, r *http.Request) {
-	data := model.GetBaseData()
-	vars := mux.Vars(r)
-
-	pageGuid := vars["guid"]
-
-	if pageGuid == "" {
-		common.Suggar.Error("%s", "page guid is nil")
-		data.ResponseJson(w, common.PAGE_NOPAGEGUID, http.StatusBadRequest)
-		return
-	}
-
-	page := &model.Page{}
-
-	if err := page.GetByPageGUID(pageGuid); err != nil {
-		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PAGE_GUIDNOTFOUND, http.StatusNotFound)
-		return
-	}
-
-	data.Data["page"] = *page
-
-	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
-	return
-}
-
 func RedirIndex(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/home", 301)
 }
@@ -96,6 +70,12 @@ func APIPage(w http.ResponseWriter, r *http.Request) {
 		data.ResponseJson(w, common.PAGE_GUIDNOTFOUND, http.StatusNotFound)
 		return
 	}
+
+	c := &model.Comment{
+		PageId: p.Id,
+	}
+
+	c.GetComment(1, 10)
 
 	data.Data["page"] = *p
 	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
