@@ -10,7 +10,6 @@ import (
 
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
-	"github.com/gorilla/schema"
 )
 
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
@@ -99,52 +98,51 @@ func weakPasswordHash(p string) []byte {
 
 //
 func LoginPost(w http.ResponseWriter, r *http.Request) {
-	ValidateSession(w, r)
-	params := &loginParams{}
-	if err := params.get(r.PostForm); err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		common.Suggar.Error("%s", err.Error())
-		return
-	}
-
-	if err := params.valid(); err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	model.ValidateSeesion(w, r)
+	data := model.GetBaseData()
+	if err := r.ParseForm(); err != nil {
+		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusBadRequest)
 		common.Suggar.Error(err.Error())
 		return
 	}
 
-	params.passwd = string(weakPasswordHash(params.passwd))
+	name := r.PostFormValue("user_name")
+	passwd := r.PostFormValue("user_passwd")
+
+	passwd = string(weakPasswordHash(passwd))
 
 	u := &model.User{}
-	if ok := u.Login(params.name, params.passwd); !ok {
+	if ok := u.Login(name, passwd); !ok {
 		common.Suggar.Error("log err")
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusInternalServerError)
 		return
 	}
 
-	model.UpdateSession(model.UserSession.SessionId, u.ID)
+	model.UpdateSession(string(model.UserSession.UserId), u.ID)
 
-	common.Suggar.Debug(u.ID)
+	common.Suggar.Debugf("login user id = %d", u.ID)
+
 	http.Redirect(w, r, "/page/hello", 301)
 	return
 }
 
-type loginParams struct {
-	name   string `schema:"user_name"`
-	passwd string `schema:"user_passwd"`
-}
-
-func (l *loginParams) get(v url.Values) error {
-	err := schema.NewDecoder().Decode(l, v)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (l *loginParams) valid() error {
-	if l.name == "" || l.passwd == "" {
-		return errors.New("name or passwd is nil")
-	}
-	return nil
-}
+//
+//type loginParams struct {
+//	name   string `schema:"user_name"`
+//	passwd string `schema:"user_passwd"`
+//}
+//
+//func (l *loginParams) get(v url.Values) error {
+//	err := schema.NewDecoder().Decode(l, v)
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
+//
+//func (l *loginParams) valid() error {
+//	if l.name == "" || l.passwd == "" {
+//		return errors.New("name or passwd is nil")
+//	}
+//	return nil
+//}

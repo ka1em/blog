@@ -7,6 +7,8 @@ import (
 	"encoding/base64"
 	"io"
 
+	"net/http"
+
 	"blog.ka1em.site/common"
 	"github.com/gorilla/sessions"
 )
@@ -36,7 +38,7 @@ type Session struct {
 	User            User `json:"user"                      gorm:"-"`
 }
 
-var UserSession *Session
+var UserSession *Session = &Session{}
 
 var SessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))
 
@@ -46,6 +48,7 @@ func GetSessionUID(sid string) (uint64, error) {
 		common.Suggar.Error(err.Error())
 		return 0, err
 	}
+	common.Suggar.Debugf("session userid = %d", s.UserId)
 	return s.UserId, nil
 }
 
@@ -68,6 +71,21 @@ func GenerateSessionId() (string, error) {
 		common.Suggar.Error(err.Error())
 		return "", err
 	}
-	common.Suggar.Debug("base 64 session id %s", base64.URLEncoding.EncodeToString(sid))
+	common.Suggar.Debugf("base 64 session id %s", base64.URLEncoding.EncodeToString(sid))
 	return base64.URLEncoding.EncodeToString(sid), nil
+}
+
+func ValidateSeesion(w http.ResponseWriter, r *http.Request) {
+	session, _ := SessionStore.Get(r, "app-session")
+	if sid, valid := session.Values["sid"]; valid {
+		currentUid, _ := GetSessionUID(sid.(string))
+		UpdateSession(sid.(string), currentUid)
+		common.Suggar.Debugf("sid = %s", sid)
+	} else {
+		newSid, _ := GenerateSessionId()
+		session.Values["sid"] = newSid
+		session.Save(r, w)
+		UpdateSession(newSid, 0)
+		common.Suggar.Debugf("newSid = %s", newSid)
+	}
 }

@@ -60,6 +60,6 @@ func (u *User) CreateUser() error {
 }
 
 func (u *User) Login(name, passwd string) bool {
-	return DB.Exec("select id from users where user_name = ? and user_passwd = ?",
-		name, passwd).First(u).RecordNotFound()
+	return !DB.Exec("select id from users where user_name = ? and user_passwd = ?",
+		name, passwd).Find(u).RecordNotFound()
 }
