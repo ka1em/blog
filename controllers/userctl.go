@@ -112,7 +112,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	passwd = string(weakPasswordHash(passwd))
 
 	u := &model.User{}
-	if ok := u.Login(name, passwd); !ok {
+	if notfound := u.Login(name, passwd); notfound {
 		common.Suggar.Error("log err")
 		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusInternalServerError)
 		return
@@ -122,7 +122,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 
 	common.Suggar.Debugf("login user id = %d", u.ID)
 
-	http.Redirect(w, r, "/page/hello", 301)
+	//http.Redirect(w, r, "/api/page/hello", 301)
 	return
 }
 
