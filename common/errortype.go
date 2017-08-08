@@ -15,12 +15,12 @@ const (
 )
 
 var ERRMAP = map[int]string{
-	SUCCESS:           "sucess",
+	SUCCESS:           "success",
 	USER_WASEXIST:     "user name is exist",
 	USER_PARSEFORM:    "parse form error",
 	USER_PARAMAGET:    "param get error",
 	USER_PARAMVALID:   "param error",
-	PAGE_NOPAGEGUID:   "dont have page guid",
-	PAGE_GUIDNOTFOUND: "page guid not found",
+	PAGE_NOPAGEGUID:   "don't have page_guid",
+	PAGE_GUIDNOTFOUND: "page_guid not found",
 	DATA_CREATEUSER:   "database create user error",
 }
