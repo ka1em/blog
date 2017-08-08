@@ -38,36 +38,34 @@ type Session struct {
 	User            User `json:"user"                      gorm:"-"`
 }
 
-var UserSession *Session = &Session{}
+//var UserSession = new(Session)
 
 var SessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))
 
-func GetSessionUID(sid string) (uint64, error) {
-	s := &Session{}
-	if err := DB.Where("session_id = ?", sid).First(s).Error; err != nil {
+func (s *Session) GetSessionUID() error {
+	if err := DB.Where("session_id = ?", s.SessionId).First(s).Error; err != nil {
 		common.Suggar.Error(err.Error())
-		return 0, err
+		return err
 	}
 	common.Suggar.Debugf("session userid = %d", s.UserId)
-	return s.UserId, nil
+	return nil
 }
 
-func UpdateSession(sid string, uid uint64) error {
+func (s *Session) UpdateSession() error {
 	const timeFmt = "2006-01-02T15:04:05.999999999"
 	tstamp := time.Now().Format(timeFmt)
-	//err := DB.Model(s).Update("session_update", tstamp).Error
 	if err := DB.Exec("INSERT INTO sessions SET session_id=?, user_id=?, session_update=? "+
-		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?", sid, uid, tstamp, uid, tstamp).Error; err != nil {
+		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?", s.SessionId, s.UserId, tstamp, s.UserId, tstamp).Error; err != nil {
+		//if err := DB.Exec("update sessions SET session_id=?,  session_update=?  where user_id=?,", s.SessionId, tstamp, s.UserId).Error; err != nil {
 		common.Suggar.Error(err.Error())
 		return err
 	}
 	return nil
 }
 
-func GenerateSessionId() (string, error) {
+func (s *Session) GenerateSessionId() (string, error) {
 	sid := make([]byte, 24)
-	_, err := io.ReadFull(rand.Reader, sid)
-	if err != nil {
+	if _, err := io.ReadFull(rand.Reader, sid); err != nil {
 		common.Suggar.Error(err.Error())
 		return "", err
 	}
@@ -75,17 +73,27 @@ func GenerateSessionId() (string, error) {
 	return base64.URLEncoding.EncodeToString(sid), nil
 }
 
-func ValidateSeesion(w http.ResponseWriter, r *http.Request) {
-	session, _ := SessionStore.Get(r, "app-session")
+func (s *Session) CreateSeesion(w http.ResponseWriter, r *http.Request) error {
+	session, err := SessionStore.Get(r, "app-session")
+	if err != nil {
+		common.Suggar.Error(err.Error())
+		return err
+	}
+
 	if sid, valid := session.Values["sid"]; valid {
-		currentUid, _ := GetSessionUID(sid.(string))
-		UpdateSession(sid.(string), currentUid)
+		s.SessionId = sid.(string)
+		err := s.GetSessionUID()
+		if err != nil {
+			return err
+		}
+		s.UpdateSession()
 		common.Suggar.Debugf("sid = %s", sid)
 	} else {
-		newSid, _ := GenerateSessionId()
-		session.Values["sid"] = newSid
+		s.SessionId, _ = s.GenerateSessionId()
+		session.Values["sid"] = s.SessionId
 		session.Save(r, w)
-		UpdateSession(newSid, 0)
-		common.Suggar.Debugf("newSid = %s", newSid)
+		s.UpdateSession()
+		common.Suggar.Debugf("newSid = %s", s.SessionId)
 	}
+	return nil
 }

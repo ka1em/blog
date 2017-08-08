@@ -51,16 +51,13 @@ func (u *User) CreateUser() error {
 		return errors.New("exists")
 	}
 
-	err := DB.Create(u).Error
-	if err != nil {
+	if err := DB.Create(u).Error; err != nil {
 		common.Suggar.Error(err.Error)
 		return err
 	}
 	return nil
 }
 
-func (u *User) Login(name, passwd string) bool {
-	//return !DB.Exec("select id from users where user_name = ? and user_passwd = ?",
-	//	name, passwd).Find(u).RecordNotFound()
-	return DB.Where("user_name = ? and user_passwd = ?", name, passwd).Find(u).RecordNotFound()
+func (u *User) Login() bool {
+	return DB.Where("user_name = ? and user_passwd = ?", u.UserName, u.UserPasswd).Find(u).RecordNotFound()
 }

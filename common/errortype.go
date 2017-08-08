@@ -12,6 +12,10 @@ const (
 	PAGE_GUIDNOTFOUND
 
 	DATA_CREATEUSER = (iota * -1) - 30000 // -30000
+
+	LOGIN_ERR
+	MIDDLEWAREERR
+	NEED_LOGIN
 )
 
 var ERRMAP = map[int]string{
@@ -23,4 +27,7 @@ var ERRMAP = map[int]string{
 	PAGE_NOPAGEGUID:   "don't have page_guid",
 	PAGE_GUIDNOTFOUND: "page_guid not found",
 	DATA_CREATEUSER:   "database create user error",
+	LOGIN_ERR:         "login error",
+	MIDDLEWAREERR:     "middler ware error",
+	NEED_LOGIN:        "not login",
 }

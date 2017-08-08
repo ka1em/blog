@@ -1,12 +1,11 @@
 package controllers
 
 import (
-	"crypto/sha1"
-	"errors"
-	"io"
 	"net/http"
-	"net/url"
 	"regexp"
+
+	"crypto/sha256"
+	"encoding/hex"
 
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
@@ -20,33 +19,30 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := &registParams{}
+	name := r.PostFormValue("user_name")
+	email := r.PostFormValue("user_email")
+	passwd := r.PostFormValue("user_passwd")
 
-	if err := p.get(r.PostForm); err != nil {
-		data.ResponseJson(w, common.USER_PARAMAGET, http.StatusBadRequest)
-		common.Suggar.Error(err.Error())
-		return
-	}
-
-	if err := p.valid(); err != nil {
+	if name == "" || email == "" || passwd == "" {
 		data.ResponseJson(w, common.USER_PARAMVALID, http.StatusBadRequest)
-		common.Suggar.Error(err.Error())
+		common.Suggar.Error("register params is null")
 		return
 	}
 
-	common.Suggar.Debugf("%+v", p)
+	common.Suggar.Debugf("%+v", passwd)
 
 	gure := regexp.MustCompile("[^A-Za-z0-9]+")
-	guid := gure.ReplaceAllString(p.UserName, "")
-	passwd := weakPasswordHash(p.UserPasswd)
-
-	common.Suggar.Debugf("%s", p.UserName)
+	guid := gure.ReplaceAllString(name, "")
 
 	u := &model.User{}
-	u.UserName = p.UserName
-	u.UserEmail = p.UserEmail
-	u.UserPasswd = string(passwd)
+	u.UserName = name
+	u.UserEmail = email
 	u.UserGuid = guid
+
+	u.UserSalt = guid + "QWERdsfawer2314=="
+	pass := passwordHash(passwd, u.UserSalt)
+
+	u.UserPasswd = pass
 
 	common.Suggar.Debug("%+v", u)
 
@@ -67,39 +63,21 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-type registParams struct {
-	UserName   string `schema:"user_name"`
-	UserEmail  string `schema:"user_email"`
-	UserPasswd string `schema:"user_passwd"`
-}
-
-func (rp *registParams) get(u url.Values) error {
-	err := model.SchemaDecoder.Decode(rp, u)
-	if err != nil {
-		common.Suggar.Error(err.Error())
-		return err
-	}
-
-	common.Suggar.Debug(rp.UserName)
-	return nil
-}
-func (rp *registParams) valid() error {
-	if rp.UserName == "" || rp.UserEmail == "" || rp.UserPasswd == "" {
-		return errors.New("name, email or passwd is null")
-	}
-	return nil
-}
-
-func weakPasswordHash(p string) []byte {
-	hash := sha1.New()
-	io.WriteString(hash, p)
-	return hash.Sum(nil)
+func passwordHash(p, solt string) string {
+	hash := sha256.New()
+	s := p + solt
+	hash.Write([]byte(s))
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 //
 func LoginPost(w http.ResponseWriter, r *http.Request) {
-	model.ValidateSeesion(w, r)
+	u := &model.User{}
 	data := model.GetBaseData()
+
+	s := &model.Session{}
+	s.CreateSeesion(w, r)
+
 	if err := r.ParseForm(); err != nil {
 		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusBadRequest)
 		common.Suggar.Error(err.Error())
@@ -109,40 +87,28 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	name := r.PostFormValue("user_name")
 	passwd := r.PostFormValue("user_passwd")
 
-	passwd = string(weakPasswordHash(passwd))
+	gure := regexp.MustCompile("[^A-Za-z0-9]+")
+	guid := gure.ReplaceAllString(name, "")
 
-	u := &model.User{}
-	if notfound := u.Login(name, passwd); notfound {
+	salt := guid + "QWERdsfawer2314=="
+
+	u.UserName = name
+	u.UserPasswd = passwordHash(passwd, salt)
+
+	if notfound := u.Login(); notfound {
 		common.Suggar.Error("log err")
 		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusInternalServerError)
 		return
 	}
 
-	model.UpdateSession(string(model.UserSession.UserId), u.ID)
+	if err := s.UpdateSession(); err != nil {
+		common.Suggar.Error("log err")
+		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusInternalServerError)
+		return
+	}
 
 	common.Suggar.Debugf("login user id = %d", u.ID)
 
-	//http.Redirect(w, r, "/api/page/hello", 301)
+	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
 	return
 }
-
-//
-//type loginParams struct {
-//	name   string `schema:"user_name"`
-//	passwd string `schema:"user_passwd"`
-//}
-//
-//func (l *loginParams) get(v url.Values) error {
-//	err := schema.NewDecoder().Decode(l, v)
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
-//
-//func (l *loginParams) valid() error {
-//	if l.name == "" || l.passwd == "" {
-//		return errors.New("name or passwd is nil")
-//	}
-//	return nil
-//}

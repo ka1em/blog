@@ -7,12 +7,20 @@ import (
 
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 )
 
 func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	var err error
 	data := model.GetBaseData()
+
+	userId := context.Get(r, "user_id")
+	if userId == nil {
+		data.ResponseJson(w, common.NEED_LOGIN, http.StatusUnauthorized)
+		return
+	}
+
 	if err = r.ParseForm(); err != nil {
 		common.Suggar.Error(err.Error())
 		data.ResponseJson(w, common.USER_PARAMVALID, http.StatusBadRequest)

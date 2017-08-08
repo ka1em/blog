@@ -78,6 +78,8 @@ func APIPage(w http.ResponseWriter, r *http.Request) {
 	c.GetComment(1, 10)
 
 	data.Data["page"] = *p
+	data.Data["comments"] = *c
+
 	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
 	return
 }
