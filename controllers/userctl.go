@@ -101,6 +101,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.UserId = u.ID
 	if err := s.UpdateSession(); err != nil {
 		common.Suggar.Error("log err")
 		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusInternalServerError)

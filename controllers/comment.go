@@ -15,11 +15,15 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	var err error
 	data := model.GetBaseData()
 
-	userId := context.Get(r, "user_id")
-	if userId == nil {
+	var uid uint64
+	if userId := context.Get(r, "user_id"); userId == nil {
 		data.ResponseJson(w, common.NEED_LOGIN, http.StatusUnauthorized)
 		return
+	} else {
+		uid = userId.(uint64)
 	}
+
+	common.Suggar.Debug("api comment post user_id = %d", uid)
 
 	if err = r.ParseForm(); err != nil {
 		common.Suggar.Error(err.Error())
@@ -63,7 +67,19 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 }
 
 func APICommentGET(w http.ResponseWriter, r *http.Request) {
+	data := model.GetBaseData()
 
+	var uid uint64
+	if userId := context.Get(r, "user_id"); userId == nil {
+		data.ResponseJson(w, common.NEED_LOGIN, http.StatusUnauthorized)
+		return
+	} else {
+		uid = userId.(uint64)
+	}
+
+	common.Suggar.Debug("api comment post user_id = %d", uid)
+	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
+	return
 }
 
 func APICommentPUT(w http.ResponseWriter, r *http.Request) {

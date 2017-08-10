@@ -22,16 +22,16 @@ CREATE TABLE `sessions` (
     `session_update` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
     `session_active` tinyint(1) NOT NULL,
      PRIMARY KEY (`id`),
-     UNIQUE KEY `session_id` (`session_id`)) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+     UNIQUE KEY `session_id` (`session_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 */
 
 type Session struct {
-	Id            uint64    `json:"id,string"              gorm:"not null; AUTO_INCREMENT"`
-	SessionId     string    `json:"session_id"             gorm:"not null; default ''"`
+	Id            uint64    `json:"id,string"              gorm:"not null;primary_key; AUTO_INCREMENT"`
+	SessionId     string    `json:"session_id"             gorm:"type:varchar(191); unique_index;not null;default '' "`
 	UserId        uint64    `json:"user_id,string"         gorm:"not null"`
-	SessionStart  time.Time `json:"session_start,string"`
+	SessionStart  time.Time `json:"session_start,string"   sql:"DEFAULT:current_timestamp"`
 	SessionUpdate time.Time `json:"session_update,string"`
-	SessionActive uint      `json:"session_active,string"  gorm:"not null"`
+	SessionActive uint      `json:"session_active,string"  gorm:"type:tinyint(1); not null; default 0"`
 
 	Authenticated   bool `json:"authenticated,string"      gorm:"-"`
 	Unauthenticated bool `json:"unauthenticated,string"    gorm:"-"`
@@ -43,7 +43,7 @@ type Session struct {
 var SessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))
 
 func (s *Session) GetSessionUID() error {
-	if err := DB.Where("session_id = ?", s.SessionId).First(s).Error; err != nil {
+	if err := DB.Where("session_id = ?", s.SessionId).Order("session_update desc").First(s).Error; err != nil {
 		common.Suggar.Error(err.Error())
 		return err
 	}
@@ -54,8 +54,9 @@ func (s *Session) GetSessionUID() error {
 func (s *Session) UpdateSession() error {
 	const timeFmt = "2006-01-02T15:04:05.999999999"
 	tstamp := time.Now().Format(timeFmt)
-	if err := DB.Exec("INSERT INTO sessions SET session_id=?, user_id=?, session_update=? "+
-		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?", s.SessionId, s.UserId, tstamp, s.UserId, tstamp).Error; err != nil {
+	if err := DB.Exec( //"INSERT INTO sessions SET session_id=?, user_id=?, session_update=? "+
+		"INSERT INTO sessions (session_id,user_id,session_update) VALUES (?,?,?)"+
+			"ON DUPLICATE KEY UPDATE user_id=?, session_update=?", s.SessionId, s.UserId, tstamp, s.UserId, tstamp).Error; err != nil {
 		//if err := DB.Exec("update sessions SET session_id=?,  session_update=?  where user_id=?,", s.SessionId, tstamp, s.UserId).Error; err != nil {
 		common.Suggar.Error(err.Error())
 		return err

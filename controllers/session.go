@@ -14,7 +14,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	s := &model.Session{}
 	if sid, valid := session.Values["sid"]; valid {
 		s.SessionId = sid.(string)
-
+		common.Suggar.Debugf("validate session session id  = %d", s.SessionId)
 		if err := s.GetSessionUID(); err != nil {
 			common.Suggar.Error(err.Error())
 			data.ResponseJson(w, common.MIDDLEWAREERR, http.StatusOK)
@@ -22,6 +22,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		}
 
 		context.Set(r, "user_id", s.UserId)
+		common.Suggar.Debugf("validate session user_id = %d", s.UserId)
 		next(w, r)
 		return
 	}
