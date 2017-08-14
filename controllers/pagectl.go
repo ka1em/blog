@@ -10,10 +10,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func RedirIndex(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/home", 301)
-}
-
 func ServeIndex(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
@@ -37,7 +33,7 @@ func ServeIndex(w http.ResponseWriter, r *http.Request) {
 	pages, err := p.GetAllPage(pIndex, pSize)
 	if err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PAGE_GUIDNOTFOUND, http.StatusNotFound)
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -67,7 +63,7 @@ func APIPage(w http.ResponseWriter, r *http.Request) {
 	p := &model.Page{}
 	if err := p.GetByPageGUID(pageGuid); err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PAGE_GUIDNOTFOUND, http.StatusNotFound)
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 

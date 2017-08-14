@@ -7,9 +7,6 @@ import (
 
 func InitRouters() *mux.Router {
 	r := mux.NewRouter().StrictSlash(false)
-	//r.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-	//	http.ServeFile(writer, request, "/tmp/www/index.html")
-	//})
 
 	r = SetPageRoutes(r)
 	r = SetUserRoutes(r)

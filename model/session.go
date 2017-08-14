@@ -43,25 +43,13 @@ type Session struct {
 var SessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))
 
 func (s *Session) GetSessionUID() error {
-	if err := DB.Where("session_id = ?", s.SessionId).Order("session_update desc").First(s).Error; err != nil {
-		common.Suggar.Error(err.Error())
-		return err
-	}
-	common.Suggar.Debugf("session userid = %d", s.UserId)
-	return nil
+	return DB.Where("session_id = ? and session_active = 1", s.SessionId).Order("session_update desc").First(s).Error
 }
 
 func (s *Session) UpdateSession() error {
-	const timeFmt = "2006-01-02T15:04:05.999999999"
-	tstamp := time.Now().Format(timeFmt)
-	if err := DB.Exec( //"INSERT INTO sessions SET session_id=?, user_id=?, session_update=? "+
-		"INSERT INTO sessions (session_id,user_id,session_update) VALUES (?,?,?)"+
-			"ON DUPLICATE KEY UPDATE user_id=?, session_update=?", s.SessionId, s.UserId, tstamp, s.UserId, tstamp).Error; err != nil {
-		//if err := DB.Exec("update sessions SET session_id=?,  session_update=?  where user_id=?,", s.SessionId, tstamp, s.UserId).Error; err != nil {
-		common.Suggar.Error(err.Error())
-		return err
-	}
-	return nil
+	return DB.Exec("INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)"+
+		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?,session_active=?", s.SessionId, s.UserId, time.Now().Format(time.RFC3339), 1,
+		s.UserId, time.Now().Format(time.RFC3339), 1).Error
 }
 
 func (s *Session) GenerateSessionId() (string, error) {
@@ -71,7 +59,7 @@ func (s *Session) GenerateSessionId() (string, error) {
 		return "", err
 	}
 	common.Suggar.Debugf("base 64 session id %s", base64.URLEncoding.EncodeToString(sid))
-	return base64.URLEncoding.EncodeToString(sid), nil
+	return base64.StdEncoding.EncodeToString(sid), nil
 }
 
 func (s *Session) CreateSeesion(w http.ResponseWriter, r *http.Request) error {
@@ -97,4 +85,8 @@ func (s *Session) CreateSeesion(w http.ResponseWriter, r *http.Request) error {
 		common.Suggar.Debugf("newSid = %s", s.SessionId)
 	}
 	return nil
+}
+
+func (s *Session) CloseSession() error {
+	return DB.Exec("update sessions set session_active = 0 where user_id = ?", s.UserId).Error
 }

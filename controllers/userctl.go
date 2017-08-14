@@ -7,6 +7,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 
+	"strconv"
+
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
 )
@@ -14,7 +16,7 @@ import (
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
-		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusBadRequest)
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
 		common.Suggar.Error(err.Error())
 		return
 	}
@@ -24,7 +26,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	passwd := r.PostFormValue("user_passwd")
 
 	if name == "" || email == "" || passwd == "" {
-		data.ResponseJson(w, common.USER_PARAMVALID, http.StatusBadRequest)
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
 		common.Suggar.Error("register params is null")
 		return
 	}
@@ -50,12 +52,12 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	if err := u.CreateUser(); err != nil {
 		if err.Error() == "exists" {
 			common.Suggar.Error(err.Error())
-			data.ResponseJson(w, common.USER_WASEXIST, http.StatusBadRequest)
+			data.ResponseJson(w, common.USERNAMEEXIST, http.StatusBadRequest)
 			return
 		}
 
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.DATA_CREATEUSER, http.StatusInternalServerError)
+		data.ResponseJson(w, common.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
 
@@ -79,8 +81,8 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	s.CreateSeesion(w, r)
 
 	if err := r.ParseForm(); err != nil {
-		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusBadRequest)
-		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		common.Suggar.Error("user log in ", err.Error())
 		return
 	}
 
@@ -96,19 +98,47 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	u.UserPasswd = passwordHash(passwd, salt)
 
 	if notfound := u.Login(); notfound {
-		common.Suggar.Error("log err")
-		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusInternalServerError)
+		common.Suggar.Error("login err")
+		data.ResponseJson(w, common.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
 
 	s.UserId = u.ID
 	if err := s.UpdateSession(); err != nil {
-		common.Suggar.Error("log err")
-		data.ResponseJson(w, common.USER_PARSEFORM, http.StatusInternalServerError)
+		common.Suggar.Error("log err %s", err.Error())
+		data.ResponseJson(w, common.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
 
 	common.Suggar.Debugf("login user id = %d", u.ID)
+
+	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
+	return
+}
+
+func LogoutGET(w http.ResponseWriter, r *http.Request) {
+	data := model.GetBaseData()
+
+	var uid uint64
+	var userIds interface{}
+
+	if userIds = r.Context().Value("user_id"); userIds == nil {
+		common.Suggar.Error("need login ")
+		data.ResponseJson(w, common.NEEDLOGIN, http.StatusUnauthorized)
+		return
+	}
+	common.Suggar.Debugf("user_id in logout get : %s", userIds)
+
+	uid, _ = strconv.ParseUint(userIds.(string), 10, 64)
+
+	s := &model.Session{}
+	s.UserId = uid
+
+	if err := s.CloseSession(); err != nil {
+		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, common.PARAMSERR, http.StatusInternalServerError)
+		return
+	}
 
 	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
 	return

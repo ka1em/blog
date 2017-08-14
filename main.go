@@ -19,22 +19,3 @@ func main() {
 
 	http.ListenAndServe(PORT, r)
 }
-
-//func init() {
-//var err error
-//
-//switch runtime.GOOS {
-//case "darwin":
-//	err = os.Chdir("/Users/ka1em/go/src/blog.ka1em.site")
-//case "linux":
-//	err = os.Chdir("/root/go/src/blog.ka1em.site")
-//default:
-//	err = errors.New("Not darwin or linux")
-//}
-//
-//if err != nil {
-//	common.Suggar.Error(err.Error())
-//	return
-//}
-//return
-//}
