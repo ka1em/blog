@@ -22,6 +22,10 @@ type Page struct {
 
 const TRUNCNUM = 20
 
+func (p *Page) GetByID() error {
+	return DB.Where("id = ?", p.Id).First(p).Error
+}
+
 // GET page by page_guid
 func (p *Page) GetByPageGUID(pageGUID string) error {
 	return DB.Where("page_guid = ?", pageGUID).First(p).Error

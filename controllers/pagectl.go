@@ -8,12 +8,15 @@ import (
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
 	"github.com/gorilla/mux"
+	"errors"
 )
 
 func ServeIndex(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
-
+		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		return
 	}
 
 	var (
@@ -57,11 +60,21 @@ func ServeIndex(w http.ResponseWriter, r *http.Request) {
 func APIPage(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	vars := mux.Vars(r)
-	pageGuid := vars["guid"]
-	common.Suggar.Debugf("page guid : %s", pageGuid)
+	pageId := vars["id"]
+	common.Suggar.Debugf("page guid : %s", pageId)
 
-	p := &model.Page{}
-	if err := p.GetByPageGUID(pageGuid); err != nil {
+	pageIdn, err := strconv.ParseUint(pageId, 10, 64)
+	if err != nil {
+		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		return
+	}
+
+	p := &model.Page{
+		Id: pageIdn,
+	}
+
+	if err := p.GetByID(); err != nil {
 		common.Suggar.Error(err.Error())
 		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
 		return
@@ -78,4 +91,27 @@ func APIPage(w http.ResponseWriter, r *http.Request) {
 
 	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
 	return
+}
+
+func PageAdd(w http.ResponseWriter, r *http.Request) {
+	data := model.GetBaseData()
+
+	if err := r.ParseForm(); err != nil {
+		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		return
+	}
+
+	p := &model.Page{}
+	p.Content = r.PostFormValue("content")
+	p.Title = r.PostFormValue("title")
+
+	if p.Title == "" || p.Content == "" {
+		common.Suggar.Error(errors.New("title or content is nill"))
+		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		return
+	}
+
+	//todo
+
 }
