@@ -52,7 +52,6 @@ func (u *User) CreateUser() error {
 	}
 
 	if err := DB.Create(u).Error; err != nil {
-		common.Suggar.Error(err.Error)
 		return err
 	}
 	return nil

@@ -38,8 +38,6 @@ type Session struct {
 	User            User `json:"user"                      gorm:"-"`
 }
 
-//var UserSession = new(Session)
-
 var SessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))
 
 func (s *Session) GetSessionUID() error {
@@ -55,7 +53,6 @@ func (s *Session) UpdateSession() error {
 func (s *Session) GenerateSessionId() (string, error) {
 	sid := make([]byte, 24)
 	if _, err := io.ReadFull(rand.Reader, sid); err != nil {
-		common.Suggar.Error(err.Error())
 		return "", err
 	}
 	common.Suggar.Debugf("base 64 session id %s", base64.URLEncoding.EncodeToString(sid))
@@ -65,7 +62,6 @@ func (s *Session) GenerateSessionId() (string, error) {
 func (s *Session) CreateSeesion(w http.ResponseWriter, r *http.Request) error {
 	session, err := SessionStore.Get(r, "app-session")
 	if err != nil {
-		common.Suggar.Error(err.Error())
 		return err
 	}
 
