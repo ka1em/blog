@@ -22,8 +22,7 @@ CREATE TABLE `users` (
        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 */
 type User struct {
-	//Id   int
-	ID         uint64 `json:"user_id,string"     gorm:"primary_key"`
+	ID         uint64 `json:"id,string"          gorm:"primary_key"`
 	UserName   string `json:"user_name"          gorm:"not null; type:varchar(256)"`
 	UserGuid   string `json:"user_guid"          gorm:"type:varchar(256)" `
 	UserEmail  string `json:"user_email"         gorm:"not null; type:varchar(256)"`
