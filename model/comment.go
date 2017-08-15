@@ -24,7 +24,7 @@ func (c *Comment) AddComment() error {
 }
 
 func (c *Comment) GetComment(pIndex, pSize int) (comments []*Comment, err error) {
-	if err := DB.Order("created_at desc").Limit(pSize).Offset(pIndex).Find(&comments).Error; err != nil {
+	if err := DB.Order("created_at desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&comments).Error; err != nil {
 		common.Suggar.Error("%s", err.Error())
 		return nil, err
 	}

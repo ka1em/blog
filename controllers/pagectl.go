@@ -7,11 +7,12 @@ import (
 
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
-	"github.com/gorilla/mux"
 	"errors"
+	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 )
 
-func ServeIndex(w http.ResponseWriter, r *http.Request) {
+func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
 		common.Suggar.Error(err.Error())
@@ -27,7 +28,9 @@ func ServeIndex(w http.ResponseWriter, r *http.Request) {
 	if pi := r.Form["page_index"]; pi != nil {
 		pIndex, err = strconv.Atoi(pi[0])
 		if err != nil {
-
+			common.Suggar.Error(err.Error())
+			data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+			return
 		}
 	}
 	common.Suggar.Debugf("page_index = %d, page_size = %d", pIndex, pSize)
@@ -57,11 +60,11 @@ func ServeIndex(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func APIPage(w http.ResponseWriter, r *http.Request) {
+func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	vars := mux.Vars(r)
 	pageId := vars["id"]
-	common.Suggar.Debugf("page guid : %s", pageId)
+	common.Suggar.Debugf("page id : %s", pageId)
 
 	pageIdn, err := strconv.ParseUint(pageId, 10, 64)
 	if err != nil {
@@ -93,7 +96,7 @@ func APIPage(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func PageAdd(w http.ResponseWriter, r *http.Request) {
+func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
 	if err := r.ParseForm(); err != nil {
@@ -106,12 +109,20 @@ func PageAdd(w http.ResponseWriter, r *http.Request) {
 	p.Content = r.PostFormValue("content")
 	p.Title = r.PostFormValue("title")
 
+	p.PageGuid = uuid.NewV4().String()
+
 	if p.Title == "" || p.Content == "" {
 		common.Suggar.Error(errors.New("title or content is nill"))
 		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
-	//todo
+	if err := p.AddPage(); err != nil {
+		common.Suggar.Error("%s", err.Error())
+		data.ResponseJson(w, common.PARAMSERR, http.StatusInternalServerError)
+		return
+	}
 
+	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
+	return
 }

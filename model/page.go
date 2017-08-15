@@ -12,18 +12,38 @@ type Page struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"-"                   sql:"index"`
 
-	PageGuid   string    `json:"page_guid"           gorm:"type:varchar(64);unique_index"`
-	Title      string    `json:"title"               gorm:"type:varchar(256)"`
-	RawContent string    `json:"-"                   gorm:"type:text"`
-	Content    string    `json:"content"             gorm:"type:text"`
-	Comments   []Comment `json:"comments"            gorm:"-"`
-	Session    Session   `json:"-"                   gorm:"-"`
+	PageGuid string     `json:"page_guid"           gorm:"type:varchar(64);unique_index"`
+	Title    string     `json:"title"               gorm:"type:varchar(256)"`
+	Content  string     `json:"content"             gorm:"type:text"`
+	Comments []*Comment `json:"comments,omitempty"            gorm:"-"`
+	Session  Session    `json:"-"                   gorm:"-"`
 }
 
 const TRUNCNUM = 20
 
+func (p *Page) AddPage() error {
+	return DB.Create(p).Error
+}
+
 func (p *Page) GetByID() error {
-	return DB.Where("id = ?", p.Id).First(p).Error
+	var err error
+
+	if err := DB.Where("id = ?", p.Id).First(p).Error; err != nil {
+		return err
+	}
+
+	c := &Comment{
+		PageId: p.Id,
+	}
+
+	p.Comments, err = c.GetComment(1, 10)
+	if err != nil {
+		return err
+	}
+
+	common.Suggar.Debugf("p.Comments %+v", p.Comments)
+
+	return nil
 }
 
 // GET page by page_guid
