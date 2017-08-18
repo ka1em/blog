@@ -1,0 +1,121 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "R97N42zfUJaNOq53PS3IaY2BAto=",
+			"path": "github.com/go-sql-driver/mysql",
+			"revision": "abfd04d323c28c5c5683c2beb877fae36491d5a8",
+			"revisionTime": "2016-11-27T07:18:00Z"
+		},
+		{
+			"checksumSHA1": "iIUYZyoanCQQTUaWsu8b+iOSPt4=",
+			"path": "github.com/gorilla/context",
+			"revision": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
+			"revisionTime": "2016-08-17T18:46:32Z"
+		},
+		{
+			"checksumSHA1": "hIbmXmNbwyP44fi1hh6zJrMcYws=",
+			"path": "github.com/gorilla/mux",
+			"revision": "ac112f7d75a0714af1bd86ab17749b31f7809640",
+			"revisionTime": "2017-07-03T15:07:09Z"
+		},
+		{
+			"checksumSHA1": "Cz6S4ejgcxlJfzRb72YlOrFoCPQ=",
+			"path": "github.com/gorilla/schema",
+			"revision": "8b1100835db5bbdae88541510f70d114b91a7e4d",
+			"revisionTime": "2017-06-12T21:54:33Z"
+		},
+		{
+			"checksumSHA1": "SGSXlSU1TFtg5aTlVA9v4Ka86lU=",
+			"path": "github.com/gorilla/securecookie",
+			"revision": "fa5329f913702981df43dcb2a380bac429c810b5",
+			"revisionTime": "2016-10-03T05:16:01Z"
+		},
+		{
+			"checksumSHA1": "MSDtXqO+UU6w4sDKueGrmVXA7qg=",
+			"path": "github.com/gorilla/sessions",
+			"revision": "52389059572b4736b2b7d899b0242ecc449c8779",
+			"revisionTime": "2016-11-28T19:20:17Z"
+		},
+		{
+			"checksumSHA1": "yo9hoT3m+7vNMNK2ibkII8jK9B8=",
+			"path": "github.com/jinzhu/gorm",
+			"revision": "066abcef408f2522f0a89952e44ab17eac176ed0",
+			"revisionTime": "2016-11-10T01:30:47Z"
+		},
+		{
+			"checksumSHA1": "w5/naAzcG0+g6aYx63/of1Wbgqw=",
+			"path": "github.com/jinzhu/gorm/dialects/mysql",
+			"revision": "066abcef408f2522f0a89952e44ab17eac176ed0",
+			"revisionTime": "2016-11-10T01:30:47Z"
+		},
+		{
+			"checksumSHA1": "aUOdLwQ5WHTQknuYP9ThnDcbK14=",
+			"path": "github.com/jinzhu/inflection",
+			"revision": "74387dc39a75e970e7a3ae6a3386b5bd2e5c5cff",
+			"revisionTime": "2016-08-17T01:46:01Z"
+		},
+		{
+			"checksumSHA1": "zmC8/3V4ls53DJlNTKDZwPSC/dA=",
+			"path": "github.com/satori/go.uuid",
+			"revision": "5bf94b69c6b68ee1b541973bb8e1144db23a194b",
+			"revisionTime": "2017-03-21T23:07:31Z"
+		},
+		{
+			"checksumSHA1": "GtGbyysLRYLXuY2vL0mUYeN6jL4=",
+			"path": "github.com/urfave/negroni",
+			"revision": "3444e69ea1ef03a77998d11fc56e7f0a34f7213c",
+			"revisionTime": "2017-08-01T19:23:17Z"
+		},
+		{
+			"checksumSHA1": "3IdEHJfBkeEE8guKA2tcA8Fv6eg=",
+			"path": "go.uber.org/atomic",
+			"revision": "70bd1261d36be490ebd22a62b385a3c5d23b6240",
+			"revisionTime": "2017-05-09T22:23:09Z"
+		},
+		{
+			"checksumSHA1": "JDGx7hehaQunZySwPs7yvdUs2m8=",
+			"path": "go.uber.org/multierr",
+			"revision": "3c4937480c32f4c13a875a1829af76c98ca3d40a",
+			"revisionTime": "2017-06-30T17:54:37Z"
+		},
+		{
+			"checksumSHA1": "z16Xy3j06/dMF6ghQSkkQD2nkW8=",
+			"path": "go.uber.org/zap",
+			"revision": "f9487279b09365389590aad0af947af4a4f41f3f",
+			"revisionTime": "2017-07-25T14:55:03Z"
+		},
+		{
+			"checksumSHA1": "HYo/9nwrY08NQA+2ItPOAH8IFW8=",
+			"path": "go.uber.org/zap/buffer",
+			"revision": "f9487279b09365389590aad0af947af4a4f41f3f",
+			"revisionTime": "2017-07-25T14:55:03Z"
+		},
+		{
+			"checksumSHA1": "MuxOAtZEsJitlWBzhmpm2vGiHok=",
+			"path": "go.uber.org/zap/internal/bufferpool",
+			"revision": "f9487279b09365389590aad0af947af4a4f41f3f",
+			"revisionTime": "2017-07-25T14:55:03Z"
+		},
+		{
+			"checksumSHA1": "uC0L9eCSAYcCWNC8udJk/t1vvIU=",
+			"path": "go.uber.org/zap/internal/color",
+			"revision": "f9487279b09365389590aad0af947af4a4f41f3f",
+			"revisionTime": "2017-07-25T14:55:03Z"
+		},
+		{
+			"checksumSHA1": "b80CJExrVpXu3SA1iCQ6uLqTn2c=",
+			"path": "go.uber.org/zap/internal/exit",
+			"revision": "f9487279b09365389590aad0af947af4a4f41f3f",
+			"revisionTime": "2017-07-25T14:55:03Z"
+		},
+		{
+			"checksumSHA1": "66VZR7l5jQfBlDLzV/b3p8+bzEo=",
+			"path": "go.uber.org/zap/zapcore",
+			"revision": "f9487279b09365389590aad0af947af4a4f41f3f",
+			"revisionTime": "2017-07-25T14:55:03Z"
+		}
+	],
+	"rootPath": "blog.ka1em.site"
+}
