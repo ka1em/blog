@@ -2,8 +2,6 @@ package model
 
 import (
 	"time"
-
-	"blog.ka1em.site/common"
 )
 
 type Comment struct {
