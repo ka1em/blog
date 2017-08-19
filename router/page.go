@@ -9,9 +9,7 @@ import (
 )
 
 func SetPageRoutes(r *mux.Router) *mux.Router {
-	//r.HandleFunc("/page/{guid:[0-9a-zA\\-]+}", controllers.ServePage).Methods("GET")
-	//r.HandleFunc("/", controllers.RedirIndex).Methods("GET")
-	//r.HandleFunc("/home", controllers.ServeIndex).Methods("GET")
+
 	r.HandleFunc("/api/pages", controllers.PageIndexGET).Methods("GET")
 	r.HandleFunc("/api/pages/{id:[0-9a-zA\\-]+}", controllers.APIPageGET).Methods("GET")
 
