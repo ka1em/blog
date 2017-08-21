@@ -68,7 +68,7 @@ func (s *Session) GenerateSessionId() (string, error) {
 	if _, err := io.ReadFull(rand.Reader, sid); err != nil {
 		return "", err
 	}
-	common.Suggar.Debugf("base 64 session id %s", base64.URLEncoding.EncodeToString(sid))
+	common.Suggar.Debugf("generate session id  %s", base64.URLEncoding.EncodeToString(sid))
 	return base64.StdEncoding.EncodeToString(sid), nil
 }
 
