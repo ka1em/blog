@@ -11,11 +11,16 @@ import (
 
 func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	data := model.GetBaseData()
-	session, _ := model.SessionStore.Get(r, "app-session")
+	sessionStore := model.GetSessionStore()
+
+	session, _ := sessionStore.Get(r, "app-session")
 	s := &model.Session{}
+
 	if sid, valid := session.Values["sid"]; valid {
 		s.SessionId = sid.(string)
+
 		common.Suggar.Debugf("validate session session id  = %s", s.SessionId)
+
 		if err := s.GetSessionUID(); err != nil {
 			if err.Error() == "record not found" {
 				common.Suggar.Error(err.Error())

@@ -18,16 +18,22 @@ type Comment struct {
 }
 
 func (c *Comment) AddComment() error {
-	return DB.Create(c).Error
+	db := GetDB()
+
+	return db.Create(c).Error
 }
 
 func (c *Comment) GetComment(pIndex, pSize int) (comments []*Comment, err error) {
-	if err := DB.Order("created_at desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&comments).Error; err != nil {
+	db := GetDB()
+
+	if err := db.Order("created_at desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&comments).Error; err != nil {
 		return nil, err
 	}
 	return comments, nil
 }
 
 func (c *Comment) UpdateComment() error {
-	return DB.Exec("update comments set comment_text = ? where id = ?", c.CommentText, c.Id).Error
+	db := GetDB()
+
+	return db.Exec("update comments set comment_text = ? where id = ?", c.CommentText, c.Id).Error
 }

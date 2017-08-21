@@ -44,16 +44,19 @@ func (u *User) TabelName() string {
 
 func (u *User) CreateUser() error {
 	//判断用户名是否存在
-	if !DB.Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
+	db := GetDB()
+
+	if !db.Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
 		return errors.New("exists")
 	}
 
-	if err := DB.Create(u).Error; err != nil {
+	if err := db.Create(u).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (u *User) Login() bool {
-	return DB.Where("user_name = ? and user_passwd = ?", u.UserName, u.UserPasswd).Find(u).RecordNotFound()
+	db := GetDB()
+	return db.Where("user_name = ? and user_passwd = ?", u.UserName, u.UserPasswd).Find(u).RecordNotFound()
 }

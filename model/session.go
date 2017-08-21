@@ -38,14 +38,27 @@ type Session struct {
 	User            User `json:"user"                      gorm:"-"`
 }
 
-var SessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))
+var sessionStore *sessions.CookieStore
+
+//= sessions.NewCookieStore([]byte("our-social-network-application"))
+//*CookieStore
+func GetSessionStore() *sessions.CookieStore {
+	if sessionStore == nil {
+		sessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))
+	}
+	return sessionStore
+}
 
 func (s *Session) GetSessionUID() error {
-	return DB.Where("session_id = ? and session_active = 1", s.SessionId).Order("session_update desc").First(s).Error
+	db := GetDB()
+
+	return db.Where("session_id = ? and session_active = 1", s.SessionId).Order("session_update desc").First(s).Error
 }
 
 func (s *Session) UpdateSession() error {
-	return DB.Exec("INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)"+
+	db := GetDB()
+
+	return db.Exec("INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)"+
 		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?,session_active=?", s.SessionId, s.UserId, time.Now().Format(time.RFC3339), 1,
 		s.UserId, time.Now().Format(time.RFC3339), 1).Error
 }
@@ -60,7 +73,8 @@ func (s *Session) GenerateSessionId() (string, error) {
 }
 
 func (s *Session) CreateSeesion(w http.ResponseWriter, r *http.Request) error {
-	session, err := SessionStore.Get(r, "app-session")
+	sessionStore := GetSessionStore()
+	session, err := sessionStore.Get(r, "app-session")
 	if err != nil {
 		return err
 	}
@@ -84,5 +98,7 @@ func (s *Session) CreateSeesion(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (s *Session) CloseSession() error {
-	return DB.Exec("update sessions set session_active = 0 where user_id = ?", s.UserId).Error
+	db := GetDB()
+
+	return db.Exec("update sessions set session_active = 0 where user_id = ?", s.UserId).Error
 }
