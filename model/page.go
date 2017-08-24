@@ -15,7 +15,7 @@ type Page struct {
 	PageGuid string     `json:"page_guid"           gorm:"type:varchar(64);unique_index"`
 	Title    string     `json:"title"               gorm:"type:varchar(256)"`
 	Content  string     `json:"content"             gorm:"type:text"`
-	Comments []*Comment `json:"comments,omitempty"            gorm:"-"`
+	Comments []*Comment `json:"comments,omitempty"  gorm:"-"`
 	Session  Session    `json:"-"                   gorm:"-"`
 }
 
@@ -35,9 +35,7 @@ func (p *Page) GetByID() error {
 		return err
 	}
 
-	c := &Comment{
-		PageId: p.Id,
-	}
+	c := &Comment{PageId: p.Id}
 
 	p.Comments, err = c.GetComment(1, 10)
 	if err != nil {
@@ -68,7 +66,7 @@ func (p *Page) GetAllPage(pIndex, pSize int) (pages []*Page, err error) {
 
 func (p *Page) TruncatedText() string {
 	chars := 0
-	for i, _ := range p.Content {
+	for i := range p.Content {
 		chars++
 		if chars > TRUNCNUM {
 			return p.Content[:i] + ` ...`

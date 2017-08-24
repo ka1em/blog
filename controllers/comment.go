@@ -6,6 +6,8 @@ import (
 
 	"errors"
 
+	"fmt"
+
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
 	"github.com/gorilla/mux"
@@ -20,7 +22,7 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 
 	if userIds = r.Context().Value("user_id"); userIds == nil {
 		common.Suggar.Error("need login ")
-		data.ResponseJson(w, common.NEEDLOGIN, http.StatusUnauthorized)
+		data.ResponseJson(w, model.NEEDLOGIN, http.StatusUnauthorized)
 		return
 	}
 
@@ -30,7 +32,7 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 
 	if err = r.ParseForm(); err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -41,31 +43,26 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 
 	if name == "" || email == "" || comment == "" || pageId == "" {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
 	pageIdn, err := strconv.ParseUint(pageId, 10, 64)
 	if err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
-	cm := &model.Comment{
-		CommentName:  name,
-		CommentEmail: email,
-		CommentText:  comment,
-		PageId:       pageIdn,
-	}
+	cm := &model.Comment{CommentName: name, CommentEmail: email, CommentText: comment, PageId: pageIdn}
 
 	if err := cm.AddComment(); err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.DATABASEERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
 
-	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
 }
 
@@ -81,7 +78,7 @@ func APICommentGET(w http.ResponseWriter, r *http.Request) {
 	//}
 	//
 	//common.Suggar.Debug("api comment post user_id = %d", uid)
-	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
 }
 
@@ -93,7 +90,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 
 	if userIds = r.Context().Value("user_id"); userIds == nil {
 		common.Suggar.Error("need login ")
-		data.ResponseJson(w, common.NEEDLOGIN, http.StatusUnauthorized)
+		data.ResponseJson(w, model.NEEDLOGIN, http.StatusUnauthorized)
 		return
 	}
 
@@ -101,7 +98,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseForm(); err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -110,7 +107,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	idn, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -122,7 +119,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 
 	if userIdn != uid {
 		common.Suggar.Error(errors.New("not self comment"))
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -134,6 +131,11 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.UpdateComment(); err != nil {
-
+		common.Suggar.Error(errors.New(fmt.Sprintf("update comment err : %s", err.Error())))
+		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
+		return
 	}
+
+	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	return
 }

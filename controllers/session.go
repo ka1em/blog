@@ -24,11 +24,11 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		if err := s.GetSessionUID(); err != nil {
 			if err.Error() == "record not found" {
 				common.Suggar.Error(err.Error())
-				data.ResponseJson(w, common.NEEDLOGIN, http.StatusOK)
+				data.ResponseJson(w, model.NEEDLOGIN, http.StatusOK)
 				return
 			}
 			common.Suggar.Error(err.Error())
-			data.ResponseJson(w, common.MIDDLEWAREERR, http.StatusOK)
+			data.ResponseJson(w, model.MIDDLEWAREERR, http.StatusOK)
 			return
 		}
 

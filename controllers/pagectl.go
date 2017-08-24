@@ -16,7 +16,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -29,7 +29,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 		pIndex, err = strconv.Atoi(pi[0])
 		if err != nil {
 			common.Suggar.Error(err.Error())
-			data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+			data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 			return
 		}
 	}
@@ -39,7 +39,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	pages, err := p.GetAllPage(pIndex, pSize)
 	if err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -56,7 +56,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 		data.Data["page_index"] = fmt.Sprintf("%d", -1)
 	}
 
-	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
 }
 
@@ -69,7 +69,7 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	pageIdn, err := strconv.ParseUint(pageId, 10, 64)
 	if err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -79,7 +79,7 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 
 	if err := p.GetByID(); err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -92,7 +92,7 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	data.Data["page"] = *p
 	data.Data["comments"] = *c
 
-	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
 }
 
@@ -101,7 +101,7 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseForm(); err != nil {
 		common.Suggar.Error(err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
@@ -113,16 +113,16 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 
 	if p.Title == "" || p.Content == "" {
 		common.Suggar.Error(errors.New("title or content is nill"))
-		data.ResponseJson(w, common.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
 	if err := p.AddPage(); err != nil {
 		common.Suggar.Error("%s", err.Error())
-		data.ResponseJson(w, common.PARAMSERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusInternalServerError)
 		return
 	}
 
-	data.ResponseJson(w, common.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
 }

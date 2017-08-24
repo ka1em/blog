@@ -40,8 +40,6 @@ type Session struct {
 
 var sessionStore *sessions.CookieStore
 
-//= sessions.NewCookieStore([]byte("our-social-network-application"))
-//*CookieStore
 func GetSessionStore() *sessions.CookieStore {
 	if sessionStore == nil {
 		sessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))

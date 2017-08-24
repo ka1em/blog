@@ -7,6 +7,29 @@ import (
 	"blog.ka1em.site/common"
 )
 
+const (
+	SUCCESS = 0
+
+	USERNAMEEXIST = (iota * -1) - 10000 // -10000
+	PARAMSERR
+
+	DATABASEERR = (iota * -1) - 20000 // -20000
+
+	MIDDLEWAREERR = (iota * -1) - 30000 // -30000
+
+	NEEDLOGIN
+)
+
+var errMap = map[int]string{
+	SUCCESS: "success",
+
+	USERNAMEEXIST: "user name was exist",
+	PARAMSERR:     "params error",
+	DATABASEERR:   "database create user error",
+	MIDDLEWAREERR: "middler ware error",
+	NEEDLOGIN:     "not login",
+}
+
 type Data struct {
 	Code int                    `json:"code,string"`
 	Msg  string                 `json:"msg"`
@@ -17,7 +40,7 @@ func GetBaseData() *Data {
 	d := &Data{}
 
 	d.Code = 0
-	d.Msg = "sucess"
+	d.Msg = "success"
 	d.Data = map[string]interface{}{}
 
 	return d
@@ -25,7 +48,7 @@ func GetBaseData() *Data {
 
 func (d *Data) ResponseJson(w http.ResponseWriter, datacode int, httpStateCode int) {
 	d.Code = datacode
-	d.Msg = common.ERRMAP[datacode]
+	d.Msg = errMap[datacode]
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpStateCode)

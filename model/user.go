@@ -43,9 +43,9 @@ func (u *User) TabelName() string {
 }
 
 func (u *User) CreateUser() error {
-	//判断用户名是否存在
 	db := GetDB()
 
+	//判断用户名是否存在
 	if !db.Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
 		return errors.New("exists")
 	}
