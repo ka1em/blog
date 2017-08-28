@@ -8,8 +8,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
-var database *gorm.DB
-
 const (
 	DBHost = "47.93.11.105"
 	DBPort = "3306"
@@ -19,7 +17,9 @@ const (
 	DBParm = "charset=utf8mb4&parseTime=True&loc=Local"
 )
 
-func GetDB() *gorm.DB {
+var database *gorm.DB
+
+func DataBase() *gorm.DB {
 	var err error
 	if database == nil {
 		database, err = connDatabase()

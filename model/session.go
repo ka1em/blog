@@ -48,15 +48,11 @@ func GetSessionStore() *sessions.CookieStore {
 }
 
 func (s *Session) GetSessionUID() error {
-	db := GetDB()
-
-	return db.Where("session_id = ? and session_active = 1", s.SessionId).Order("session_update desc").First(s).Error
+	return DataBase().Where("session_id = ? and session_active = 1", s.SessionId).Order("session_update desc").First(s).Error
 }
 
 func (s *Session) UpdateSession() error {
-	db := GetDB()
-
-	return db.Exec("INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)"+
+	return DataBase().Exec("INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)"+
 		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?,session_active=?", s.SessionId, s.UserId, time.Now().Format(time.RFC3339), 1,
 		s.UserId, time.Now().Format(time.RFC3339), 1).Error
 }
@@ -96,7 +92,5 @@ func (s *Session) CreateSeesion(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (s *Session) CloseSession() error {
-	db := GetDB()
-
-	return db.Exec("update sessions set session_active = 0 where user_id = ?", s.UserId).Error
+	return DataBase().Exec("update sessions set session_active = 0 where user_id = ?", s.UserId).Error
 }

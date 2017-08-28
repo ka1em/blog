@@ -43,20 +43,17 @@ func (u *User) TabelName() string {
 }
 
 func (u *User) CreateUser() error {
-	db := GetDB()
-
 	//判断用户名是否存在
-	if !db.Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
+	if !DataBase().Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
 		return errors.New("exists")
 	}
 
-	if err := db.Create(u).Error; err != nil {
+	if err := DataBase().Create(u).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (u *User) Login() bool {
-	db := GetDB()
-	return db.Where("user_name = ? and user_passwd = ?", u.UserName, u.UserPasswd).Find(u).RecordNotFound()
+	return DataBase().Where("user_name = ? and user_passwd = ?", u.UserName, u.UserPasswd).Find(u).RecordNotFound()
 }

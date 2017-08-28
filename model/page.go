@@ -22,23 +22,19 @@ type Page struct {
 const TRUNCNUM = 20
 
 func (p *Page) AddPage() error {
-	db := GetDB()
-
-	return db.Create(p).Error
+	return DataBase().Create(p).Error
 }
 
 func (p *Page) GetByID() error {
-	var err error
-	db := GetDB()
-
-	if err := db.Where("id = ?", p.Id).First(p).Error; err != nil {
+	if err := DataBase().Where("id = ?", p.Id).First(p).Error; err != nil {
 		return err
 	}
 
 	c := &Comment{PageId: p.Id}
 
-	p.Comments, err = c.GetComment(1, 10)
-	if err != nil {
+	var err error
+
+	if p.Comments, err = c.GetComment(1, 10); err != nil {
 		return err
 	}
 
@@ -49,15 +45,11 @@ func (p *Page) GetByID() error {
 
 // GET page by page_guid
 func (p *Page) GetByPageGUID(pageGUID string) error {
-	db := GetDB()
-
-	return db.Where("page_guid = ?", pageGUID).First(p).Error
+	return DataBase().Where("page_guid = ?", pageGUID).First(p).Error
 }
 
 func (p *Page) GetAllPage(pIndex, pSize int) (pages []*Page, err error) {
-	db := GetDB()
-
-	if err := db.Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
+	if err := DataBase().Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
 		common.Suggar.Error(err.Error())
 		return nil, err
 	}
