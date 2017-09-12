@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"blog.ka1em.site/common"
+	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
@@ -17,7 +18,15 @@ const (
 	DBParm = "charset=utf8mb4&parseTime=True&loc=Local"
 )
 
+var decoder *schema.Decoder
 var database *gorm.DB
+
+func SchemaDecoder() *schema.Decoder {
+	if decoder == nil {
+		decoder = schema.NewDecoder()
+	}
+	return decoder
+}
 
 func DataBase() *gorm.DB {
 	var err error

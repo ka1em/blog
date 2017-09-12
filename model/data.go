@@ -12,6 +12,8 @@ const (
 
 	USERNAMEEXIST = (iota * -1) - 10000 // -10000
 	PARAMSERR
+	PASSWDERROR
+	NOUSERNAME
 
 	DATABASEERR = (iota * -1) - 20000 // -20000
 
@@ -28,6 +30,8 @@ var errMap = map[int]string{
 	DATABASEERR:   "database create user error",
 	MIDDLEWAREERR: "middler ware error",
 	NEEDLOGIN:     "not login",
+	PASSWDERROR:   "password error",
+	NOUSERNAME:    "no user name",
 }
 
 type Data struct {

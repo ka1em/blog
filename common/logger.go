@@ -11,7 +11,7 @@ var Suggar *zap.SugaredLogger
 
 func init() {
 	// zap log config
-	b, err := ioutil.ReadFile("config/zap.json")
+	b, err := ioutil.ReadFile("/Users/ka1em/go/src/blog.ka1em.site/config/zap.json")
 	if err != nil {
 		panic(err)
 	}

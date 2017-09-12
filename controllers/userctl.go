@@ -1,18 +1,20 @@
 package controllers
 
 import (
-	"net/http"
-	"regexp"
-
 	"crypto/sha256"
 	"encoding/hex"
-
+	"errors"
+	"net/http"
 	"strconv"
+
+	"log"
 
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
+	"github.com/satori/go.uuid"
 )
 
+//用户注册
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
@@ -21,48 +23,64 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := r.PostFormValue("user_name")
-	email := r.PostFormValue("user_email")
-	passwd := r.PostFormValue("user_passwd")
-
-	if name == "" || email == "" || passwd == "" {
+	param := new(userRegistParam)
+	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
+		common.Suggar.Errorf("%s", err)
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
-		common.Suggar.Error("register params is null")
 		return
 	}
 
-	common.Suggar.Debugf("%+v", passwd)
+	if err := param.valid(); err != nil {
+		common.Suggar.Errorf("%+v", err)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		return
+	}
 
-	gure := regexp.MustCompile("[^A-Za-z0-9]+")
-	guid := gure.ReplaceAllString(name, "")
+	solt := uuid.NewV4().String()
 
-	u := &model.User{}
-	u.UserName = name
-	u.UserEmail = email
-	u.UserGuid = guid
-
-	u.UserSalt = guid + "QWERdsfawer2314=="
-	pass := passwordHash(passwd, u.UserSalt)
-
-	u.UserPasswd = pass
-
-	common.Suggar.Debug("%+v", u)
+	u := &model.User{
+		UserName:   param.Name,
+		UserEmail:  param.Email,
+		UserSalt:   solt,
+		UserPasswd: passwordHash(param.Passwd, solt),
+	}
 
 	//创建用户
 	if err := u.CreateUser(); err != nil {
+		common.Suggar.Error(err.Error())
 		if err.Error() == "exists" {
-			common.Suggar.Error(err.Error())
 			data.ResponseJson(w, model.USERNAMEEXIST, http.StatusBadRequest)
 			return
 		}
-
-		common.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
+}
+
+type userRegistParam struct {
+	Name   string `schema:"name"`
+	Email  string `schema:"email"`
+	Passwd string `schema:"passwd"`
+}
+
+func (p *userRegistParam) valid() []error {
+	var err []error
+	if p.Name == "" {
+		err = append(err, errors.New("name is nil"))
+	}
+
+	if p.Email == "" {
+		err = append(err, errors.New("mail is nil"))
+	}
+
+	if p.Passwd == "" {
+		err = append(err, errors.New("passwd is nil"))
+	}
+
+	return err
 }
 
 func passwordHash(p, solt string) string {
@@ -74,9 +92,8 @@ func passwordHash(p, solt string) string {
 
 //
 func LoginPost(w http.ResponseWriter, r *http.Request) {
-	u := &model.User{}
 	data := model.GetBaseData()
-
+	//TODO 重复登录？
 	s := &model.Session{}
 	s.CreateSeesion(w, r)
 
@@ -86,20 +103,32 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := r.PostFormValue("user_name")
-	passwd := r.PostFormValue("user_passwd")
+	param := new(loginParams)
+	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
+		common.Suggar.Errorf("%s", err)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		return
+	}
 
-	gure := regexp.MustCompile("[^A-Za-z0-9]+")
-	guid := gure.ReplaceAllString(name, "")
+	if err := param.valid(); err != nil {
+		common.Suggar.Errorf("%+v", err)
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		return
+	}
 
-	salt := guid + "QWERdsfawer2314=="
+	u := &model.User{}
+	u.UserName = param.Name
+	log.Println(param.Name)
 
-	u.UserName = name
-	u.UserPasswd = passwordHash(passwd, salt)
+	if ok := u.GetSalt(); !ok {
+		common.Suggar.Error("No user")
+		data.ResponseJson(w, model.NOUSERNAME, http.StatusBadRequest)
+		return
+	}
 
-	if notfound := u.Login(); notfound {
-		common.Suggar.Error("login err")
-		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
+	if u.UserPasswd != passwordHash(param.Passwd, u.UserSalt) {
+		common.Suggar.Error("password wrong")
+		data.ResponseJson(w, model.PASSWDERROR, http.StatusBadRequest)
 		return
 	}
 
@@ -114,6 +143,22 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
+}
+
+type loginParams struct {
+	Name   string `schema:"name"`
+	Passwd string `schema:"passwd"`
+}
+
+func (p *loginParams) valid() []error {
+	var err []error
+	if p.Name == "" {
+		err = append(err, errors.New("name is nil "))
+	}
+	if p.Passwd == "" {
+		err = append(err, errors.New("passwd is nil "))
+	}
+	return err
 }
 
 func LogoutGET(w http.ResponseWriter, r *http.Request) {
@@ -131,8 +176,7 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 
 	uid, _ = strconv.ParseUint(userIds.(string), 10, 64)
 
-	s := &model.Session{}
-	s.UserId = uid
+	s := &model.Session{UserId: uid}
 
 	if err := s.CloseSession(); err != nil {
 		common.Suggar.Error(err.Error())

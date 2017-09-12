@@ -1,9 +1,8 @@
 package model
 
 import (
-	"time"
-
 	"errors"
+	"time"
 )
 
 /*
@@ -35,11 +34,7 @@ type User struct {
 }
 
 func (u *User) TabelName() string {
-	if u.Role == "admin" {
-		return "admin_users"
-	} else {
-		return "users"
-	}
+	return "users"
 }
 
 func (u *User) CreateUser() error {
@@ -48,10 +43,11 @@ func (u *User) CreateUser() error {
 		return errors.New("exists")
 	}
 
-	if err := DataBase().Create(u).Error; err != nil {
-		return err
-	}
-	return nil
+	return DataBase().Create(u).Error
+}
+
+func (u *User) GetSalt() bool {
+	return !DataBase().Where("user_name = ?", u.UserName).First(u).RecordNotFound()
 }
 
 func (u *User) Login() bool {
