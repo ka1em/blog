@@ -7,14 +7,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"log"
-
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
 	"github.com/satori/go.uuid"
 )
 
-//用户注册
+//注册
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
@@ -36,13 +34,13 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	solt := uuid.NewV4().String()
+	salt := uuid.NewV4().String()
 
 	u := &model.User{
 		UserName:   param.Name,
 		UserEmail:  param.Email,
-		UserSalt:   solt,
-		UserPasswd: passwordHash(param.Passwd, solt),
+		UserSalt:   salt,
+		UserPasswd: passwordHash(param.Passwd, salt),
 	}
 
 	//创建用户
@@ -83,19 +81,25 @@ func (p *userRegistParam) valid() []error {
 	return err
 }
 
-func passwordHash(p, solt string) string {
+func passwordHash(p, salt string) string {
 	hash := sha256.New()
-	s := p + solt
+	s := p + salt
 	hash.Write([]byte(s))
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-//
+//登录
 func LoginPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	//TODO 重复登录？
-	s := &model.Session{}
-	s.CreateSeesion(w, r)
+
+	//创建session_id
+	sid, err := model.CreateSession(w, r)
+	if err != nil {
+		common.Suggar.Error("log err %s", err.Error())
+		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
+		return
+	}
 
 	if err := r.ParseForm(); err != nil {
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
@@ -117,10 +121,10 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u := &model.User{}
-	u.UserName = param.Name
-	log.Println(param.Name)
+	var ok bool
 
-	if ok := u.GetSalt(); !ok {
+	//用户密码salt
+	if u, ok = model.GetValidInfo(param.Name); !ok {
 		common.Suggar.Error("No user")
 		data.ResponseJson(w, model.NOUSERNAME, http.StatusBadRequest)
 		return
@@ -132,14 +136,12 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.UserId = u.ID
-	if err := s.UpdateSession(); err != nil {
+	//登录成功，更新session，关联userid和sessionid
+	if err := model.UpdateSession(u.ID, sid); err != nil {
 		common.Suggar.Error("log err %s", err.Error())
 		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
-
-	common.Suggar.Debugf("login user id = %d", u.ID)
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
@@ -161,6 +163,7 @@ func (p *loginParams) valid() []error {
 	return err
 }
 
+//登出
 func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 

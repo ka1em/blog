@@ -46,8 +46,13 @@ func (u *User) CreateUser() error {
 	return DataBase().Create(u).Error
 }
 
-func (u *User) GetSalt() bool {
-	return !DataBase().Where("user_name = ?", u.UserName).First(u).RecordNotFound()
+func GetValidInfo(userName string) (*User, bool) {
+	u := &User{}
+	info := []string{"user_name", "user_salt", "user_passwd"}
+	if DataBase().Select(info).Where("user_name = ?", userName).First(u).RecordNotFound() {
+		return nil, false
+	}
+	return u, true
 }
 
 func (u *User) Login() bool {

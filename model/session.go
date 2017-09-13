@@ -1,13 +1,11 @@
 package model
 
 import (
-	"time"
-
 	"crypto/rand"
 	"encoding/base64"
 	"io"
-
 	"net/http"
+	"time"
 
 	"blog.ka1em.site/common"
 	"github.com/gorilla/sessions"
@@ -47,17 +45,23 @@ func GetSessionStore() *sessions.CookieStore {
 	return sessionStore
 }
 
-func (s *Session) GetSessionUID() error {
-	return DataBase().Where("session_id = ? and session_active = 1", s.SessionId).Order("session_update desc").First(s).Error
+func GetUserID(sessionId string) (uint64, error) {
+	s := Session{}
+	if err := DataBase().Select("user_id").Where("session_id = ? and session_active = 1", sessionId).First(&s).Error; err != nil {
+		return 0, err
+	}
+	return s.UserId, nil
 }
 
-func (s *Session) UpdateSession() error {
-	return DataBase().Exec("INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)"+
-		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?,session_active=?", s.SessionId, s.UserId, time.Now().Format(time.RFC3339), 1,
-		s.UserId, time.Now().Format(time.RFC3339), 1).Error
+func UpdateSession(userId uint64, sessionId string) error {
+	sql := "INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)" +
+		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?,session_active=?"
+
+	return DataBase().Exec(sql, sessionId, userId, time.Now().Format(time.RFC3339), 1,
+		userId, time.Now().Format(time.RFC3339), 1).Error
 }
 
-func (s *Session) GenerateSessionId() (string, error) {
+func generateSessionId() (string, error) {
 	sid := make([]byte, 24)
 	if _, err := io.ReadFull(rand.Reader, sid); err != nil {
 		return "", err
@@ -66,29 +70,29 @@ func (s *Session) GenerateSessionId() (string, error) {
 	return base64.StdEncoding.EncodeToString(sid), nil
 }
 
-func (s *Session) CreateSeesion(w http.ResponseWriter, r *http.Request) error {
+func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	sessionStore := GetSessionStore()
 	session, err := sessionStore.Get(r, "app-session")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if sid, valid := session.Values["sid"]; valid {
-		s.SessionId = sid.(string)
-		err := s.GetSessionUID()
+		userId, err := GetUserID(sid.(string))
 		if err != nil {
-			return err
+			return "", err
 		}
-		s.UpdateSession()
+		UpdateSession(userId, sid.(string))
 		common.Suggar.Debugf("sid = %s", sid)
+		return sid.(string), nil
 	} else {
-		s.SessionId, _ = s.GenerateSessionId()
-		session.Values["sid"] = s.SessionId
+		sessionId, _ := generateSessionId()
+		session.Values["sid"] = sessionId
 		session.Save(r, w)
-		s.UpdateSession()
-		common.Suggar.Debugf("newSid = %s", s.SessionId)
+		UpdateSession(0, sessionId)
+		return sessionId, nil
 	}
-	return nil
+
 }
 
 func (s *Session) CloseSession() error {

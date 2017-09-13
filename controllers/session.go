@@ -13,15 +13,15 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	data := model.GetBaseData()
 	sessionStore := model.GetSessionStore()
 
-	session, _ := sessionStore.Get(r, "app-session")
-	s := &model.Session{}
+	session, err := sessionStore.Get(r, "app-session")
+	if err != nil {
+		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, model.MIDDLEWAREERR, http.StatusBadRequest)
+		return
+	}
 
-	if sid, valid := session.Values["sid"]; valid {
-		s.SessionId = sid.(string)
-
-		common.Suggar.Debugf("validate session session id  = %s", s.SessionId)
-
-		if err := s.GetSessionUID(); err != nil {
+	if sid, ok := session.Values["sid"]; ok {
+		if uid, err := model.GetUserID(sid.(string)); err != nil {
 			if err.Error() == "record not found" {
 				common.Suggar.Error(err.Error())
 				data.ResponseJson(w, model.NEEDLOGIN, http.StatusOK)
@@ -30,15 +30,15 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 			common.Suggar.Error(err.Error())
 			data.ResponseJson(w, model.MIDDLEWAREERR, http.StatusOK)
 			return
+		} else {
+			ctx := context.WithValue(r.Context(), "user_id", fmt.Sprintf("%d", uid))
+			next(w, r.WithContext(ctx))
 		}
 
-		ctx := context.WithValue(r.Context(), "user_id", fmt.Sprintf("%d", s.UserId))
-
-		common.Suggar.Debugf("validate session user_id = %d", s.UserId)
-		next(w, r.WithContext(ctx))
-
 	} else {
-		next(w, r)
+		common.Suggar.Error("middleware need login")
+
+		//next(w, r)
 	}
 	return
 }
