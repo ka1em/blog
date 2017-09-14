@@ -94,7 +94,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	//TODO 重复登录？
 
 	//创建session_id
-	sid, err := model.CreateSession(w, r)
+	sid, err := model.PreCreateSession(w, r)
 	if err != nil {
 		common.Suggar.Error("log err %s", err.Error())
 		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
@@ -143,6 +143,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	data.Data["redirct_url"] = "/index"
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
 }

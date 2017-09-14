@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"log"
 	"time"
 )
 
@@ -48,8 +49,9 @@ func (u *User) CreateUser() error {
 
 func GetValidInfo(userName string) (*User, bool) {
 	u := &User{}
-	info := []string{"user_name", "user_salt", "user_passwd"}
+	info := []string{"id", "user_name", "user_salt", "user_passwd"}
 	if DataBase().Select(info).Where("user_name = ?", userName).First(u).RecordNotFound() {
+		log.Printf("%+v", *u)
 		return nil, false
 	}
 	return u, true

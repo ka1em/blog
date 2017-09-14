@@ -45,20 +45,32 @@ func GetSessionStore() *sessions.CookieStore {
 	return sessionStore
 }
 
-func GetUserID(sessionId string) (uint64, error) {
+func GetUserID(sessionId string, active int) (uint64, error) {
 	s := Session{}
-	if err := DataBase().Select("user_id").Where("session_id = ? and session_active = 1", sessionId).First(&s).Error; err != nil {
+	if err := DataBase().Select("user_id").Where("session_id = ? and session_active = ?", sessionId, active).First(&s).Error; err != nil {
 		return 0, err
 	}
 	return s.UserId, nil
 }
 
 func UpdateSession(userId uint64, sessionId string) error {
+	sess := DataBase().Begin()
+
+	if err := sess.Exec("update sessions set session_active = 0 where user_id = ?", userId).Error; err != nil {
+		sess.Rollback()
+		return err
+	}
+
 	sql := "INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)" +
 		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?,session_active=?"
 
-	return DataBase().Exec(sql, sessionId, userId, time.Now().Format(time.RFC3339), 1,
-		userId, time.Now().Format(time.RFC3339), 1).Error
+	if err := sess.Exec(sql, sessionId, userId, time.Now().Format(time.RFC3339), 0,
+		userId, time.Now().Format(time.RFC3339), 1).Error; err != nil {
+		sess.Rollback()
+		return err
+	}
+
+	return sess.Commit().Error
 }
 
 func generateSessionId() (string, error) {
@@ -70,6 +82,7 @@ func generateSessionId() (string, error) {
 	return base64.StdEncoding.EncodeToString(sid), nil
 }
 
+//创建session, 如果没有忽略
 func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	sessionStore := GetSessionStore()
 	session, err := sessionStore.Get(r, "app-session")
@@ -78,7 +91,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	}
 
 	if sid, valid := session.Values["sid"]; valid {
-		userId, err := GetUserID(sid.(string))
+		userId, err := GetUserID(sid.(string), 0)
 		if err != nil {
 			return "", err
 		}
@@ -92,7 +105,25 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 		UpdateSession(0, sessionId)
 		return sessionId, nil
 	}
+}
 
+func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
+	sessionStore := GetSessionStore()
+	session, err := sessionStore.Get(r, "app-session")
+	if err != nil {
+
+	}
+	sessionId, _ := generateSessionId()
+	session.Values["sid"] = sessionId
+	session.Options = &sessions.Options{
+		MaxAge:   60 * 60 * 24,
+		HttpOnly: true,
+		//Secure:   true,
+	}
+
+	session.Save(r, w)
+	UpdateSession(0, sessionId)
+	return sessionId, nil
 }
 
 func (s *Session) CloseSession() error {

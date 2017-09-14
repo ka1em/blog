@@ -50,7 +50,7 @@ func GetBaseData() *Data {
 	return d
 }
 
-func (d *Data) ResponseJson(w http.ResponseWriter, datacode int, httpStateCode int) {
+func (d *Data) ResponseJson(w http.ResponseWriter, datacode, httpStateCode int) {
 	d.Code = datacode
 	d.Msg = errMap[datacode]
 

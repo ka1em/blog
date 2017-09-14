@@ -21,7 +21,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	}
 
 	if sid, ok := session.Values["sid"]; ok {
-		if uid, err := model.GetUserID(sid.(string)); err != nil {
+		if uid, err := model.GetUserID(sid.(string), 1); err != nil {
 			if err.Error() == "record not found" {
 				common.Suggar.Error(err.Error())
 				data.ResponseJson(w, model.NEEDLOGIN, http.StatusOK)
@@ -37,8 +37,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 	} else {
 		common.Suggar.Error("middleware need login")
-
-		//next(w, r)
+		next(w, r)
 	}
 	return
 }
