@@ -11,6 +11,7 @@ func InitRouters() *mux.Router {
 	r = SetPageRoutes(r)
 	r = SetUserRoutes(r)
 	r = SetCommentRoutes(r)
+	r = SetTestRoutes(r)
 
 	common.Suggar.Info("set route ok ")
 	return r

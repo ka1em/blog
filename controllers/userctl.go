@@ -3,12 +3,12 @@ package controllers
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"net/http"
 	"strconv"
 
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
+	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 )
 
@@ -29,7 +29,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := param.valid(); err != nil {
-		common.Suggar.Errorf("%+v", err)
+		common.Suggar.Errorf("%s", err)
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
@@ -64,21 +64,17 @@ type userRegistParam struct {
 	Passwd string `schema:"passwd"`
 }
 
-func (p *userRegistParam) valid() []error {
-	var err []error
+func (p *userRegistParam) valid() error {
 	if p.Name == "" {
-		err = append(err, errors.New("name is nil"))
+		return errors.New("regist name is nil")
 	}
-
 	if p.Email == "" {
-		err = append(err, errors.New("mail is nil"))
+		return errors.New("regist mail is nil")
 	}
-
 	if p.Passwd == "" {
-		err = append(err, errors.New("passwd is nil"))
+		return errors.New("regist passwd is nil")
 	}
-
-	return err
+	return nil
 }
 
 func passwordHash(p, salt string) string {
@@ -153,15 +149,14 @@ type loginParams struct {
 	Passwd string `schema:"passwd"`
 }
 
-func (p *loginParams) valid() []error {
-	var err []error
+func (p *loginParams) valid() error {
 	if p.Name == "" {
-		err = append(err, errors.New("name is nil "))
+		return errors.New("login param name is nil ")
 	}
 	if p.Passwd == "" {
-		err = append(err, errors.New("passwd is nil "))
+		return errors.New("login param passwd is nil ")
 	}
-	return err
+	return nil
 }
 
 //登出

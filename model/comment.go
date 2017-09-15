@@ -11,6 +11,7 @@ type Comment struct {
 	DeletedAt *time.Time `json:"-"               sql:"index"`
 
 	PageId uint64 `json:"page_id,string"    gorm:"type:bigint(20)"`
+	UserId uint64 `json:"user_id,string"    gorm:"type:bigint(20)"`
 	//CommentGuid  string `json:"comment_guid"      gorm:"type:varchar(256)"`
 	CommentName  string `json:"comment_name"      gorm:"type:varchar(64)"`
 	CommentEmail string `json:"comment_email"     gorm:"type:varchar(256)"`
@@ -29,5 +30,5 @@ func (c *Comment) GetComment(pIndex, pSize int) (comments []*Comment, err error)
 }
 
 func (c *Comment) UpdateComment() error {
-	return DataBase().Exec("update comments set comment_text = ? where id = ?", c.CommentText, c.Id).Error
+	return DataBase().Exec("update comments set comment_text = ? where id = ? and user_id = ?", c.CommentText, c.Id, ).Error
 }

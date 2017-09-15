@@ -99,7 +99,10 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 		common.Suggar.Debugf("sid = %s", sid)
 		return sid.(string), nil
 	} else {
-		sessionId, _ := generateSessionId()
+		sessionId, err := generateSessionId()
+		if err != nil {
+			return "", err
+		}
 		session.Values["sid"] = sessionId
 		session.Save(r, w)
 		UpdateSession(0, sessionId)

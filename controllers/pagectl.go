@@ -7,10 +7,12 @@ import (
 
 	"blog.ka1em.site/common"
 	"blog.ka1em.site/model"
-	"errors"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 )
+
+const DEFAULTPAGESIZE = 20
 
 func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
@@ -20,23 +22,21 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		pIndex int = 1
-		pSize  int = 10
-		err    error
-	)
-	if pi := r.Form["page_index"]; pi != nil {
-		pIndex, err = strconv.Atoi(pi[0])
-		if err != nil {
-			common.Suggar.Error(err.Error())
-			data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
-			return
-		}
-	}
-	common.Suggar.Debugf("page_index = %d, page_size = %d", pIndex, pSize)
-	p := &model.Page{}
+	param := new(pageIndexParam)
 
-	pages, err := p.GetAllPage(pIndex, pSize)
+	if err := model.SchemaDecoder().Decode(param, r.Form); err != nil {
+		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		return
+	}
+
+	if err := param.valid(); err != nil {
+		common.Suggar.Error(err.Error())
+		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		return
+	}
+
+	pages, err := model.GetAllPage(param.PageIndex, param.PageSize)
 	if err != nil {
 		common.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
@@ -45,53 +45,64 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 
 	//截取正文 前150字符
 	for _, v := range pages {
-		v.Content = v.TruncatedText()
+		v.Content = model.TruncatedText(v.Content)
 	}
 
-	data.Data["pages_list"] = pages
-
-	data.Data["page_index"] = fmt.Sprintf("%d", pIndex+1)
-	data.Data["page_size"] = fmt.Sprintf("%d", pSize)
-	if len(pages) < pSize {
+	if len(pages) < param.PageSize {
 		data.Data["page_index"] = fmt.Sprintf("%d", -1)
+	} else {
+		data.Data["page_index"] = fmt.Sprintf("%d", param.PageIndex+1)
 	}
+
+	data.Data["page_size"] = fmt.Sprintf("%d", param.PageSize)
+	data.Data["pages_list"] = pages
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
 }
 
+type pageIndexParam struct {
+	PageIndex int `schema:"page_index"`
+	PageSize  int `schema:"page_size"`
+}
+
+func (p *pageIndexParam) valid() error {
+	var err error
+	if p.PageIndex < 0 {
+		return errors.New("page_index < 0")
+	}
+	if p.PageSize < 0 {
+		return errors.New("page_size < 0")
+	}
+	if p.PageIndex == 0 {
+		p.PageIndex = 1
+	}
+	if p.PageSize == 0 {
+		p.PageSize = DEFAULTPAGESIZE
+	}
+	return err
+}
+
 func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
-	vars := mux.Vars(r)
-	pageId := vars["id"]
-	common.Suggar.Debugf("page id : %s", pageId)
 
-	pageIdn, err := strconv.ParseUint(pageId, 10, 64)
+	vars := mux.Vars(r)
+
+	pageId, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		common.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
-	p := &model.Page{
-		Id: pageIdn,
-	}
-
-	if err := p.GetByID(); err != nil {
+	page, err := model.GetByID(pageId)
+	if err != nil {
 		common.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
-	c := &model.Comment{
-		PageId: p.Id,
-	}
-
-	c.GetComment(1, 10)
-
-	data.Data["page"] = *p
-	data.Data["comments"] = *c
-
+	data.Data["page"] = page
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
 }
@@ -105,19 +116,20 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := &model.Page{}
-	p.Content = r.PostFormValue("content")
-	p.Title = r.PostFormValue("title")
-
-	p.PageGuid = uuid.NewV4().String()
-
-	if p.Title == "" || p.Content == "" {
-		common.Suggar.Error(errors.New("title or content is nill"))
+	param := new(pagePostParam)
+	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
+		common.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
-	if err := p.AddPage(); err != nil {
+	p := &model.Page{
+		Content:  param.Content,
+		Title:    param.Title,
+		PageGuid: uuid.NewV4().String(),
+	}
+
+	if err := p.Add(); err != nil {
 		common.Suggar.Error("%s", err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusInternalServerError)
 		return
@@ -125,4 +137,9 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
 	return
+}
+
+type pagePostParam struct {
+	Content string `schema:"content,required"`
+	Title   string `schema:"title,required"`
 }
