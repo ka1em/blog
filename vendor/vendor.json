@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "87LEfpY9cOk9CP7pWyIbmQ/6enU=",
+			"path": "github.com/go-ini/ini",
+			"revision": "c787282c39ac1fc618827141a1f762240def08a3",
+			"revisionTime": "2017-08-13T05:22:30Z"
+		},
+		{
 			"checksumSHA1": "R97N42zfUJaNOq53PS3IaY2BAto=",
 			"path": "github.com/go-sql-driver/mysql",
 			"revision": "abfd04d323c28c5c5683c2beb877fae36491d5a8",
@@ -69,6 +75,12 @@
 			"revisionTime": "2017-03-21T23:07:31Z"
 		},
 		{
+			"checksumSHA1": "7Qm/EUxEnhQgbMPWUsKrVswLUsc=",
+			"path": "github.com/urfave/cli",
+			"revision": "7fb9c86b14e6a702a4157ccb5a863f07d844a207",
+			"revisionTime": "2017-09-11T04:08:19Z"
+		},
+		{
 			"checksumSHA1": "GtGbyysLRYLXuY2vL0mUYeN6jL4=",
 			"path": "github.com/urfave/negroni",
 			"revision": "3444e69ea1ef03a77998d11fc56e7f0a34f7213c",
@@ -123,5 +135,5 @@
 			"revisionTime": "2017-07-25T14:55:03Z"
 		}
 	],
-	"rootPath": "blog.ka1em.site"
+	"rootPath": "blog"
 }

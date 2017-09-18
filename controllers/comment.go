@@ -1,15 +1,13 @@
 package controllers
 
 import (
+	"blog/common"
+	"blog/model"
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
-	"errors"
-
-	"fmt"
-
-	"blog/common"
-	"blog/model"
 	"github.com/gorilla/mux"
 )
 
@@ -85,16 +83,14 @@ func APICommentGET(w http.ResponseWriter, r *http.Request) {
 func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
-	var uid uint64
-	var userIds interface{}
-
-	if userIds = r.Context().Value("user_id"); userIds == nil {
+	userIds := r.Context().Value("user_id")
+	if userIds == nil {
 		common.Suggar.Error("need login ")
 		data.ResponseJson(w, model.NEEDLOGIN, http.StatusUnauthorized)
 		return
 	}
 
-	uid, _ = strconv.ParseUint(userIds.(string), 10, 64)
+	uid, _ := strconv.ParseUint(userIds.(string), 10, 64)
 
 	if err := r.ParseForm(); err != nil {
 		common.Suggar.Error(err.Error())
@@ -125,10 +121,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 
 	comment := r.PostFormValue("comment")
 
-	c := &model.Comment{
-		Id:          idn,
-		CommentText: comment,
-	}
+	c := &model.Comment{Id: idn, CommentText: comment}
 
 	if err := c.UpdateComment(); err != nil {
 		common.Suggar.Error(errors.New(fmt.Sprintf("update comment err : %s", err.Error())))

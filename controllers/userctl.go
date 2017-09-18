@@ -1,14 +1,14 @@
 package controllers
 
 import (
+	"blog/common"
+	"blog/model"
 	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
 	"strconv"
 
 	"github.com/pkg/errors"
-	"blog/common"
-	"blog/model"
 	"github.com/satori/go.uuid"
 )
 
