@@ -1,8 +1,8 @@
 package router
 
 import (
-	"blog.ka1em.site/common"
-	"blog.ka1em.site/controllers"
+	"blog/common"
+	"blog/controllers"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )

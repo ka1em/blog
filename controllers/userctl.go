@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"blog.ka1em.site/common"
-	"blog.ka1em.site/model"
 	"github.com/pkg/errors"
+	"blog/common"
+	"blog/model"
 	"github.com/satori/go.uuid"
 )
 

@@ -1,7 +1,7 @@
 package router
 
 import (
-	"blog.ka1em.site/common"
+	"blog/common"
 	"github.com/gorilla/mux"
 )
 

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"blog.ka1em.site/common"
+	"blog/common"
 	"github.com/gorilla/sessions"
 )
 

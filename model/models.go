@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 
-	"blog.ka1em.site/common"
+	"blog/common"
 	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"

@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"blog.ka1em.site/common"
+	"blog/common"
 )
 
 func TestHandler(w http.ResponseWriter, r *http.Request) {

@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"blog.ka1em.site/common"
+	"blog/common"
 )
 
 type Page struct {

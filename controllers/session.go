@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"blog.ka1em.site/common"
-	"blog.ka1em.site/model"
+	"blog/common"
+	"blog/model"
 )
 
 func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {

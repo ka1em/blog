@@ -8,8 +8,8 @@ import (
 
 	"fmt"
 
-	"blog.ka1em.site/common"
-	"blog.ka1em.site/model"
+	"blog/common"
+	"blog/model"
 	"github.com/gorilla/mux"
 )
 

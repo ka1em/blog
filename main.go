@@ -1,36 +1,23 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	"os"
 
-	"time"
-
-	"blog.ka1em.site/router"
-	"github.com/urfave/negroni"
+	"blog/cmd"
+	"github.com/urfave/cli"
 )
 
-const PORT = ":8443"
+const APP_VER = "0.0.1"
 
 func main() {
-	r := router.InitRouters()
+	app := cli.NewApp()
+	app.Name = "blog"
+	app.Usage = "blog backend"
+	app.Version = APP_VER
 
-	n := negroni.Classic() // 导入一些预设的中间件
-	n.UseHandler(r)
-
-	s := &http.Server{
-		Addr:           PORT,
-		Handler:        n,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+	app.Commands = []cli.Command{
+		cmd.Web,
 	}
-	log.Fatal(s.ListenAndServe())
-
-	//http.ListenAndServeTLS(PORT, "keys/blog.ka1em.site/214098123750645.pem",
-	//	"keys/blog.ka1em.site/214098123750645.key", r)
-
-	//common.Suggar.Debug("Listening...")
-	//
-	//http.ListenAndServe(PORT, r)
+	app.Flags = append(app.Flags, []cli.Flag{}...)
+	app.Run(os.Args)
 }

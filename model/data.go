@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"blog.ka1em.site/common"
+	"blog/common"
 )
 
 const (

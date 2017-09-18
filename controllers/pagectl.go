@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"blog.ka1em.site/common"
-	"blog.ka1em.site/model"
+	"blog/common"
+	"blog/model"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
