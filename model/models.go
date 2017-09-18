@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 
-	"blog/common"
+	"blog/common/log"
 	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -33,7 +33,7 @@ func DataBase() *gorm.DB {
 	if database == nil {
 		database, err = connDatabase()
 		if err != nil {
-			common.Suggar.Error(err.Error())
+			log.Suggar.Error(err.Error())
 			return nil
 		}
 	}
@@ -46,7 +46,7 @@ func connDatabase() (*gorm.DB, error) {
 	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", DBUser, DBPass, DBHost, DBPort, DBBase, DBParm)
 
 	if database, err = gorm.Open("mysql", dbConn); err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		panic(err.Error())
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func connDatabase() (*gorm.DB, error) {
 		&Page{},
 		&Comment{},
 	).Error; err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		return nil, err
 	}
 

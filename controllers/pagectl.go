@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"blog/common"
+	"blog/common/log"
 	"blog/model"
+
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
@@ -17,7 +18,7 @@ const DEFAULTPAGESIZE = 20
 func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
@@ -25,20 +26,20 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	param := new(pageIndexParam)
 
 	if err := model.SchemaDecoder().Decode(param, r.Form); err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
 	if err := param.valid(); err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
 	pages, err := model.GetAllPage(param.PageIndex, param.PageSize)
 	if err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
@@ -90,14 +91,14 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 
 	pageId, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
 	page, err := model.GetByID(pageId)
 	if err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
@@ -111,14 +112,14 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
 	if err := r.ParseForm(); err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
 	param := new(pagePostParam)
 	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
@@ -130,7 +131,7 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := p.Add(); err != nil {
-		common.Suggar.Error("%s", err.Error())
+		log.Suggar.Error("%s", err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusInternalServerError)
 		return
 	}

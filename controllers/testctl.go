@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	"blog/common"
+	"blog/common/log"
 )
 
 func TestHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	common.Suggar.Info("%+v", r.Form)
+	log.Suggar.Info("%+v", r.Form)
 	return
 }

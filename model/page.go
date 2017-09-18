@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"blog/common"
+	"blog/common/log"
 )
 
 type Page struct {
@@ -41,7 +41,7 @@ func GetByID(pageId uint64) (Page, error) {
 
 func GetAllPage(pIndex, pSize int) (pages []*Page, err error) {
 	if err := DataBase().Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		return nil, err
 	}
 	return pages, nil

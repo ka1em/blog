@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"blog/common"
-	"blog/model"
 	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
 	"strconv"
+	"blog/common/log"
+	"blog/model"
 
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
@@ -17,19 +17,19 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		return
 	}
 
 	param := new(userRegistParam)
 	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
-		common.Suggar.Errorf("%s", err)
+		log.Suggar.Errorf("%s", err)
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
 	if err := param.valid(); err != nil {
-		common.Suggar.Errorf("%s", err)
+		log.Suggar.Errorf("%s", err)
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
@@ -45,7 +45,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	//创建用户
 	if err := u.CreateUser(); err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		if err.Error() == "exists" {
 			data.ResponseJson(w, model.USERNAMEEXIST, http.StatusBadRequest)
 			return
@@ -92,26 +92,26 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	//创建session_id
 	sid, err := model.PreCreateSession(w, r)
 	if err != nil {
-		common.Suggar.Error("log err %s", err.Error())
+		log.Suggar.Error("log err %s", err.Error())
 		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
-		common.Suggar.Error("user log in ", err.Error())
+		log.Suggar.Error("user log in ", err.Error())
 		return
 	}
 
 	param := new(loginParams)
 	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
-		common.Suggar.Errorf("%s", err)
+		log.Suggar.Errorf("%s", err)
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
 
 	if err := param.valid(); err != nil {
-		common.Suggar.Errorf("%+v", err)
+		log.Suggar.Errorf("%+v", err)
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
 		return
 	}
@@ -121,20 +121,20 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 
 	//用户密码salt
 	if u, ok = model.GetValidInfo(param.Name); !ok {
-		common.Suggar.Error("No user")
+		log.Suggar.Error("No user")
 		data.ResponseJson(w, model.NOUSERNAME, http.StatusBadRequest)
 		return
 	}
 
 	if u.UserPasswd != passwordHash(param.Passwd, u.UserSalt) {
-		common.Suggar.Error("password wrong")
+		log.Suggar.Error("password wrong")
 		data.ResponseJson(w, model.PASSWDERROR, http.StatusBadRequest)
 		return
 	}
 
 	//登录成功，更新session，关联userid和sessionid
 	if err := model.UpdateSession(u.ID, sid); err != nil {
-		common.Suggar.Error("log err %s", err.Error())
+		log.Suggar.Error("log err %s", err.Error())
 		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
@@ -167,18 +167,18 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	var userIds interface{}
 
 	if userIds = r.Context().Value("user_id"); userIds == nil {
-		common.Suggar.Error("need login ")
+		log.Suggar.Error("need login ")
 		data.ResponseJson(w, model.NEEDLOGIN, http.StatusUnauthorized)
 		return
 	}
-	common.Suggar.Debugf("user_id in logout get : %s", userIds)
+	log.Suggar.Debugf("user_id in logout get : %s", userIds)
 
 	uid, _ = strconv.ParseUint(userIds.(string), 10, 64)
 
 	s := &model.Session{UserId: uid}
 
 	if err := s.CloseSession(); err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.PARAMSERR, http.StatusInternalServerError)
 		return
 	}

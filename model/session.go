@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"blog/common"
+	"blog/common/log"
 	"github.com/gorilla/sessions"
 )
 
@@ -78,7 +78,7 @@ func generateSessionId() (string, error) {
 	if _, err := io.ReadFull(rand.Reader, sid); err != nil {
 		return "", err
 	}
-	common.Suggar.Debugf("generate session id  %s", base64.URLEncoding.EncodeToString(sid))
+	log.Suggar.Debugf("generate session id  %s", base64.URLEncoding.EncodeToString(sid))
 	return base64.StdEncoding.EncodeToString(sid), nil
 }
 
@@ -96,7 +96,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 			return "", err
 		}
 		UpdateSession(userId, sid.(string))
-		common.Suggar.Debugf("sid = %s", sid)
+		log.Suggar.Debugf("sid = %s", sid)
 		return sid.(string), nil
 	} else {
 		sessionId, err := generateSessionId()

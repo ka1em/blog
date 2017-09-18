@@ -1,7 +1,7 @@
 package router
 
 import (
-	"blog/common"
+	"blog/common/log"
 	"github.com/gorilla/mux"
 )
 
@@ -13,6 +13,6 @@ func InitRouters() *mux.Router {
 	r = SetCommentRoutes(r)
 	r = SetTestRoutes(r)
 
-	common.Suggar.Info("set route ok ")
+	log.Suggar.Info("set route ok ")
 	return r
 }

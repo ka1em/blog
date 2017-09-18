@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"blog/common"
+	"blog/common/log"
 	"blog/model"
 )
 
@@ -15,7 +15,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 	session, err := sessionStore.Get(r, "app-session")
 	if err != nil {
-		common.Suggar.Error(err.Error())
+		log.Suggar.Error(err.Error())
 		data.ResponseJson(w, model.MIDDLEWAREERR, http.StatusBadRequest)
 		return
 	}
@@ -23,11 +23,11 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	if sid, ok := session.Values["sid"]; ok {
 		if uid, err := model.GetUserID(sid.(string), 1); err != nil {
 			if err.Error() == "record not found" {
-				common.Suggar.Error(err.Error())
+				log.Suggar.Error(err.Error())
 				data.ResponseJson(w, model.NEEDLOGIN, http.StatusOK)
 				return
 			}
-			common.Suggar.Error(err.Error())
+			log.Suggar.Error(err.Error())
 			data.ResponseJson(w, model.MIDDLEWAREERR, http.StatusOK)
 			return
 		} else {
@@ -36,7 +36,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		}
 
 	} else {
-		common.Suggar.Error("middleware need login")
+		log.Suggar.Error("middleware need login")
 		next(w, r)
 	}
 	return

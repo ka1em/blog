@@ -3,7 +3,7 @@ package router
 import (
 	"blog/controllers"
 
-	"blog/common"
+	"blog/common/log"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )
@@ -21,6 +21,6 @@ func SetPageRoutes(r *mux.Router) *mux.Router {
 		negroni.Wrap(newRouter),
 	))
 
-	common.Suggar.Info("set page routes ok")
+	log.Suggar.Info("set page routes ok")
 	return r
 }
