@@ -1,32 +1,58 @@
 package log
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"blog/common/setting"
+
+	"log"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-var Suggar *zap.SugaredLogger
+var ZapLog *zap.SugaredLogger
 
 func init() {
-	// zap log config
-	b, err := ioutil.ReadFile("config/zap.json")
-	if err != nil {
-		panic(err)
+	zapCfg := zap.Config{
+		Level:       zap.NewAtomicLevelAt(zapLogLevel(setting.RUN_MODE)),
+		Development: true,
+		Encoding:    "console",
+		EncoderConfig: zapcore.EncoderConfig{
+			TimeKey:        "T",
+			LevelKey:       "L",
+			NameKey:        "N",
+			CallerKey:      "C",
+			MessageKey:     "M",
+			StacktraceKey:  "S",
+			LineEnding:     zapcore.DefaultLineEnding,
+			EncodeLevel:    zapcore.CapitalColorLevelEncoder,
+			EncodeTime:     zapcore.ISO8601TimeEncoder,
+			EncodeDuration: zapcore.StringDurationEncoder,
+			EncodeCaller:   zapcore.ShortCallerEncoder,
+		},
+		OutputPaths:      []string{setting.LOG_OUTPUT},
+		ErrorOutputPaths: []string{setting.LOG_OUTPUT},
 	}
 
-	var cfg zap.Config
-	if err := json.Unmarshal(b, &cfg); err != nil {
-		panic(err)
-	}
-
-	logger, err := cfg.Build()
+	zaplog, err := zapCfg.Build()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer logger.Sync()
+	defer zaplog.Sync()
 
-	Suggar = logger.Sugar()
-	defer Suggar.Sync()
+	ZapLog = zaplog.Sugar()
+	defer ZapLog.Sync()
+}
+
+func zapLogLevel(runMode string) zapcore.Level {
+	switch runMode {
+	case setting.DEV_MODE:
+		return zapcore.DebugLevel
+	case setting.TEST_MODE:
+		return zapcore.DebugLevel
+	case setting.PROD_MODE:
+		return zapcore.WarnLevel
+	default:
+		log.Fatal("error run mode")
+	}
+	return -1
 }

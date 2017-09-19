@@ -26,8 +26,16 @@ var (
 	DB_BASE string
 	DB_PARM string
 
+	LOG_OUTPUT string
+
 	IsWindows bool
 	AppPath   string
+)
+
+const (
+	DEV_MODE  = "dev"
+	TEST_MODE = "test"
+	PROD_MODE = "prod"
 )
 
 // execPath returns the executable path.
@@ -96,4 +104,10 @@ func NewContext(file string) {
 	DB_BASE = secSql.Key("DB_BASE").MustString("lgwd")
 	DB_PARM = secSql.Key("DB_PARM").MustString("charset=utf8mb4&parseTime=True&loc=Local")
 
+	secZap, err := cfg.GetSection("zap_log")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	LOG_OUTPUT = secZap.Key("LOG_OUTPUT").MustString("stdout")
 }
