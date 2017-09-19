@@ -122,7 +122,7 @@ However, it's easy to integrate a log rotation package like
 // lumberjack.Logger is already safe for concurrent use, so we don't need to
 // lock it.
 w := zapcore.AddSync(&lumberjack.Logger{
-  Filename:   "/var/log/myapp/foo.log",
+  Filename:   zlog,
   MaxSize:    500, // megabytes
   MaxBackups: 3,
   MaxAge:     28, // days

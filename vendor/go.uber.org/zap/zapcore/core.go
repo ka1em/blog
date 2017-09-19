@@ -34,10 +34,10 @@ type Core interface {
 	//
 	// Callers must use Check before calling Write.
 	Check(Entry, *CheckedEntry) *CheckedEntry
-	// Write serializes the Entry and any Fields supplied at the log site and
+	// Write serializes the Entry and any Fields supplied at the zlog site and
 	// writes them to their destination.
 	//
-	// If called, Write should always log the Entry and Fields; it should not
+	// If called, Write should always zlog the Entry and Fields; it should not
 	// replicate the logic of Check.
 	Write(Entry, []Field) error
 	// Sync flushes buffered logs (if any).

@@ -20,7 +20,7 @@ type logger interface {
 	Print(v ...interface{})
 }
 
-// LogWriter log writer interface
+// LogWriter zlog writer interface
 type LogWriter interface {
 	Println(v ...interface{})
 }
@@ -30,7 +30,7 @@ type Logger struct {
 	LogWriter
 }
 
-// Print format & print log
+// Print format & print zlog
 func (logger Logger) Print(values ...interface{}) {
 	if len(values) > 1 {
 		level := values[0]

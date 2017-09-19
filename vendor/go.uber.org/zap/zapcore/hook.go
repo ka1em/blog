@@ -41,7 +41,7 @@ func RegisterHooks(core Core, hooks ...func(Entry) error) Core {
 }
 
 func (h *hooked) Check(ent Entry, ce *CheckedEntry) *CheckedEntry {
-	// Let the wrapped Core decide whether to log this message or not. This
+	// Let the wrapped Core decide whether to zlog this message or not. This
 	// also gives the downstream a chance to register itself directly with the
 	// CheckedEntry.
 	if downstream := h.Core.Check(ent, ce); downstream != nil {

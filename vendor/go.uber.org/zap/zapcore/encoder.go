@@ -220,7 +220,7 @@ func (e *NameEncoder) UnmarshalText(text []byte) error {
 // An EncoderConfig allows users to configure the concrete encoders supplied by
 // zapcore.
 type EncoderConfig struct {
-	// Set the keys used for each log entry. If any key is empty, that portion
+	// Set the keys used for each zlog entry. If any key is empty, that portion
 	// of the entry is omitted.
 	MessageKey    string `json:"messageKey" yaml:"messageKey"`
 	LevelKey      string `json:"levelKey" yaml:"levelKey"`
@@ -327,8 +327,8 @@ type PrimitiveArrayEncoder interface {
 	AppendUintptr(uintptr)
 }
 
-// Encoder is a format-agnostic interface for all log entry marshalers. Since
-// log encoders don't need to support the same wide range of use cases as
+// Encoder is a format-agnostic interface for all zlog entry marshalers. Since
+// zlog encoders don't need to support the same wide range of use cases as
 // general-purpose marshalers, it's possible to make them faster and
 // lower-allocation.
 //

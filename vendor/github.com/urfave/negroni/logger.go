@@ -38,7 +38,7 @@ type ALogger interface {
 
 // Logger is a middleware handler that logs the request as it goes in and the response as it goes out.
 type Logger struct {
-	// ALogger implements just enough log.Logger interface to be compatible with other implementations
+	// ALogger implements just enough zlog.Logger interface to be compatible with other implementations
 	ALogger
 	dateFormat string
 	template   *template.Template

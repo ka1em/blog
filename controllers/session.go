@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	zlog "blog/common/log"
+	zlog "blog/common/zlog"
 	"blog/model"
 )
 

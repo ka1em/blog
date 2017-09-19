@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	zlog "blog/common/log"
+	zlog "blog/common/zlog"
 	"github.com/gorilla/sessions"
 )
 

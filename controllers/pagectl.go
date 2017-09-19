@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	zlog "blog/common/log"
+	zlog "blog/common/zlog"
 	"blog/model"
 
 	"github.com/gorilla/mux"

@@ -24,7 +24,7 @@ import "go.uber.org/multierr"
 
 type multiCore []Core
 
-// NewTee creates a Core that duplicates log entries into two or more
+// NewTee creates a Core that duplicates zlog entries into two or more
 // underlying Cores.
 //
 // Calling it with a single Core returns the input unchanged, and calling

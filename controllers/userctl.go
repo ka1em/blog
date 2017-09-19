@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"net/http"
 	"strconv"
-	zlog "blog/common/log"
+	zlog "blog/common/zlog"
 	"blog/model"
 
 	"github.com/pkg/errors"
@@ -92,14 +92,14 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	//创建session_id
 	sid, err := model.PreCreateSession(w, r)
 	if err != nil {
-		zlog.ZapLog.Error("log err %s", err.Error())
+		zlog.ZapLog.Error("zlog err %s", err.Error())
 		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
 		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
-		zlog.ZapLog.Error("user log in ", err.Error())
+		zlog.ZapLog.Error("user zlog in ", err.Error())
 		return
 	}
 
@@ -134,7 +134,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 
 	//登录成功，更新session，关联userid和sessionid
 	if err := model.UpdateSession(u.ID, sid); err != nil {
-		zlog.ZapLog.Error("log err %s", err.Error())
+		zlog.ZapLog.Error("zlog err %s", err.Error())
 		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
 		return
 	}

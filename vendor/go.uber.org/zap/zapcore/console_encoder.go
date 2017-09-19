@@ -48,7 +48,7 @@ type consoleEncoder struct {
 }
 
 // NewConsoleEncoder creates an encoder whose output is designed for human -
-// rather than machine - consumption. It serializes the core log entry data
+// rather than machine - consumption. It serializes the core zlog entry data
 // (message, level, timestamp, etc.) in a plain-text format and leaves the
 // structured context as JSON.
 //

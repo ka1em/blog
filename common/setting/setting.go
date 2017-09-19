@@ -80,6 +80,8 @@ func NewContext(file string) {
 		log.Fatal(err.Error())
 	}
 
+	RUN_MODE = secServer.Key("RUN_MODE").MustString("dev")
+
 	SSL_ON = secServer.Key("ssl_on").MustBool(true)
 	CERT_FILE = secServer.Key("cert_file").MustString("")
 	KEY_FILE = secServer.Key("key_file").MustString("")

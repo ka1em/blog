@@ -55,7 +55,7 @@ const (
 	_maxLevel = FatalLevel
 )
 
-// String returns a lower-case ASCII representation of the log level.
+// String returns a lower-case ASCII representation of the zlog level.
 func (l Level) String() string {
 	switch l {
 	case DebugLevel:
@@ -77,7 +77,7 @@ func (l Level) String() string {
 	}
 }
 
-// CapitalString returns an all-caps ASCII representation of the log level.
+// CapitalString returns an all-caps ASCII representation of the zlog level.
 func (l Level) CapitalString() string {
 	// Printing levels in all-caps is common enough that we should export this
 	// functionality.

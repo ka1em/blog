@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	zlog "blog/common/log"
+	zlog "blog/common/zlog"
 	"blog/model"
 	"errors"
 	"fmt"

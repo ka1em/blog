@@ -173,7 +173,7 @@ func (log *Logger) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
 }
 
 // Debug logs a message at DebugLevel. The message includes any fields passed
-// at the log site, as well as any fields accumulated on the logger.
+// at the zlog site, as well as any fields accumulated on the logger.
 func (log *Logger) Debug(msg string, fields ...zapcore.Field) {
 	if ce := log.check(DebugLevel, msg); ce != nil {
 		ce.Write(fields...)
@@ -181,7 +181,7 @@ func (log *Logger) Debug(msg string, fields ...zapcore.Field) {
 }
 
 // Info logs a message at InfoLevel. The message includes any fields passed
-// at the log site, as well as any fields accumulated on the logger.
+// at the zlog site, as well as any fields accumulated on the logger.
 func (log *Logger) Info(msg string, fields ...zapcore.Field) {
 	if ce := log.check(InfoLevel, msg); ce != nil {
 		ce.Write(fields...)
@@ -189,7 +189,7 @@ func (log *Logger) Info(msg string, fields ...zapcore.Field) {
 }
 
 // Warn logs a message at WarnLevel. The message includes any fields passed
-// at the log site, as well as any fields accumulated on the logger.
+// at the zlog site, as well as any fields accumulated on the logger.
 func (log *Logger) Warn(msg string, fields ...zapcore.Field) {
 	if ce := log.check(WarnLevel, msg); ce != nil {
 		ce.Write(fields...)
@@ -197,7 +197,7 @@ func (log *Logger) Warn(msg string, fields ...zapcore.Field) {
 }
 
 // Error logs a message at ErrorLevel. The message includes any fields passed
-// at the log site, as well as any fields accumulated on the logger.
+// at the zlog site, as well as any fields accumulated on the logger.
 func (log *Logger) Error(msg string, fields ...zapcore.Field) {
 	if ce := log.check(ErrorLevel, msg); ce != nil {
 		ce.Write(fields...)
@@ -205,7 +205,7 @@ func (log *Logger) Error(msg string, fields ...zapcore.Field) {
 }
 
 // DPanic logs a message at DPanicLevel. The message includes any fields
-// passed at the log site, as well as any fields accumulated on the logger.
+// passed at the zlog site, as well as any fields accumulated on the logger.
 //
 // If the logger is in development mode, it then panics (DPanic means
 // "development panic"). This is useful for catching errors that are
@@ -217,7 +217,7 @@ func (log *Logger) DPanic(msg string, fields ...zapcore.Field) {
 }
 
 // Panic logs a message at PanicLevel. The message includes any fields passed
-// at the log site, as well as any fields accumulated on the logger.
+// at the zlog site, as well as any fields accumulated on the logger.
 //
 // The logger then panics, even if logging at PanicLevel is disabled.
 func (log *Logger) Panic(msg string, fields ...zapcore.Field) {
@@ -227,7 +227,7 @@ func (log *Logger) Panic(msg string, fields ...zapcore.Field) {
 }
 
 // Fatal logs a message at FatalLevel. The message includes any fields passed
-// at the log site, as well as any fields accumulated on the logger.
+// at the zlog site, as well as any fields accumulated on the logger.
 //
 // The logger then calls os.Exit(1), even if logging at FatalLevel is
 // disabled.
@@ -237,7 +237,7 @@ func (log *Logger) Fatal(msg string, fields ...zapcore.Field) {
 	}
 }
 
-// Sync calls the underlying Core's Sync method, flushing any buffered log
+// Sync calls the underlying Core's Sync method, flushing any buffered zlog
 // entries. Applications should take care to call Sync before exiting.
 func (log *Logger) Sync() error {
 	return log.core.Sync()
@@ -259,7 +259,7 @@ func (log *Logger) check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
 	const callerSkipOffset = 2
 
 	// Create basic checked entry thru the core; this will be non-nil if the
-	// log message will actually be written somewhere.
+	// zlog message will actually be written somewhere.
 	ent := zapcore.Entry{
 		LoggerName: log.name,
 		Time:       time.Now(),

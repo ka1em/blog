@@ -133,7 +133,7 @@ func (s *DB) SetLogger(log logger) {
 	s.logger = log
 }
 
-// LogMode set log mode, `true` for detailed logs, `false` for no log, default, will only print error logs
+// LogMode set zlog mode, `true` for detailed logs, `false` for no zlog, default, will only print error logs
 func (s *DB) LogMode(enable bool) *DB {
 	if enable {
 		s.logMode = 2
@@ -726,7 +726,7 @@ func (s *DB) print(v ...interface{}) {
 
 func (s *DB) log(v ...interface{}) {
 	if s != nil && s.logMode == 2 {
-		s.print(append([]interface{}{"log", fileWithLineNum()}, v...)...)
+		s.print(append([]interface{}{"zlog", fileWithLineNum()}, v...)...)
 	}
 }
 

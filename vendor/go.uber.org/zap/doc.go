@@ -20,10 +20,10 @@
 
 // Package zap provides fast, structured, leveled logging.
 //
-// For applications that log in the hot path, reflection-based serialization
+// For applications that zlog in the hot path, reflection-based serialization
 // and string formatting are prohibitively expensive - they're CPU-intensive
 // and make many small allocations. Put differently, using json.Marshal and
-// fmt.Fprintf to log tons of interface{} makes your application slow.
+// fmt.Fprintf to zlog tons of interface{} makes your application slow.
 //
 // Zap takes a different approach. It includes a reflection-free,
 // zero-allocation JSON encoder, and the base Logger strives to avoid
@@ -80,7 +80,7 @@
 // with a single function call:
 //  logger, err := zap.NewProduction()
 //  if err != nil {
-//    log.Fatalf("can't initialize zap logger: %v", err)
+//    zlog.Fatalf("can't initialize zap logger: %v", err)
 //  }
 //  defer logger.Sync()
 //
@@ -98,7 +98,7 @@
 //
 // The zap package itself is a relatively thin wrapper around the interfaces
 // in go.uber.org/zap/zapcore. Extending zap to support a new encoding (e.g.,
-// BSON), a new log sink (e.g., Kafka), or something more exotic (perhaps an
+// BSON), a new zlog sink (e.g., Kafka), or something more exotic (perhaps an
 // exception aggregation service, like Sentry or Rollbar) typically requires
 // implementing the zapcore.Encoder, zapcore.WriteSyncer, or zapcore.Core
 // interfaces. See the zapcore documentation for details.

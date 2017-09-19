@@ -134,8 +134,8 @@ func (ec EntryCaller) TrimmedPath() string {
 	return caller
 }
 
-// An Entry represents a complete log message. The entry's structured context
-// is already serialized, but the log level, time, message, and call site
+// An Entry represents a complete zlog message. The entry's structured context
+// is already serialized, but the zlog level, time, message, and call site
 // information are available for inspection and modification.
 //
 // Entries are pooled, so any functions that accept them MUST be careful not to
@@ -149,7 +149,7 @@ type Entry struct {
 	Stack      string
 }
 
-// CheckWriteAction indicates what action to take after a log entry is
+// CheckWriteAction indicates what action to take after a zlog entry is
 // processed. Actions are ordered in increasing severity.
 type CheckWriteAction uint8
 
@@ -164,7 +164,7 @@ const (
 )
 
 // CheckedEntry is an Entry together with a collection of Cores that have
-// already agreed to log it.
+// already agreed to zlog it.
 //
 // CheckedEntry references should be created by calling AddCore or Should on a
 // nil *CheckedEntry. References are returned to a pool after Write, and MUST
@@ -200,7 +200,7 @@ func (ce *CheckedEntry) Write(fields ...Field) {
 	if ce.dirty {
 		if ce.ErrorOutput != nil {
 			// Make a best effort to detect unsafe re-use of this CheckedEntry.
-			// If the entry is dirty, log an internal error; because the
+			// If the entry is dirty, zlog an internal error; because the
 			// CheckedEntry is being used after it was returned to the pool,
 			// the message may be an amalgamation from multiple call sites.
 			fmt.Fprintf(ce.ErrorOutput, "%v Unsafe CheckedEntry re-use near Entry %+v.\n", time.Now(), ce.Entry)
@@ -232,7 +232,7 @@ func (ce *CheckedEntry) Write(fields ...Field) {
 	}
 }
 
-// AddCore adds a Core that has agreed to log this CheckedEntry. It's intended to be
+// AddCore adds a Core that has agreed to zlog this CheckedEntry. It's intended to be
 // used by Core.Check implementations, and is safe to call on nil CheckedEntry
 // references.
 func (ce *CheckedEntry) AddCore(ent Entry, core Core) *CheckedEntry {
@@ -245,7 +245,7 @@ func (ce *CheckedEntry) AddCore(ent Entry, core Core) *CheckedEntry {
 }
 
 // Should sets this CheckedEntry's CheckWriteAction, which controls whether a
-// Core will panic or fatal after writing this log entry. Like AddCore, it's
+// Core will panic or fatal after writing this zlog entry. Like AddCore, it's
 // safe to call on nil CheckedEntry references.
 func (ce *CheckedEntry) Should(ent Entry, should CheckWriteAction) *CheckedEntry {
 	if ce == nil {

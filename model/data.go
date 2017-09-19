@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	zlog "blog/common/log"
+	zlog "blog/common/zlog"
 )
 
 const (

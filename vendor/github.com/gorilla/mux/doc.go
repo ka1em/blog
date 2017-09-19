@@ -167,7 +167,7 @@ request that matches "/static/*". This makes it easy to serve static files with 
 			ReadTimeout:  15 * time.Second,
 		}
 
-		log.Fatal(srv.ListenAndServe())
+		zlog.Fatal(srv.ListenAndServe())
 	}
 
 Now let's see how to build registered URLs.

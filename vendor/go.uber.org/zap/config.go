@@ -48,11 +48,11 @@ type SamplingConfig struct {
 // direct use of the zapcore package. For sample code, see the package-level
 // BasicConfiguration and AdvancedConfiguration examples.
 //
-// For an example showing runtime log level changes, see the documentation for
+// For an example showing runtime zlog level changes, see the documentation for
 // AtomicLevel.
 type Config struct {
 	// Level is the minimum enabled logging level. Note that this is a dynamic
-	// level, so calling Config.Level.SetLevel will atomically change the log
+	// level, so calling Config.Level.SetLevel will atomically change the zlog
 	// level of all loggers descended from this config.
 	Level AtomicLevel `json:"level" yaml:"level"`
 	// Development puts the logger in development mode, which changes the

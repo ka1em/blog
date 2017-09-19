@@ -37,7 +37,7 @@ func Skip() zapcore.Field {
 // Binary constructs a field that carries an opaque binary blob.
 //
 // Binary data is serialized in an encoding-appropriate format. For example,
-// zap's JSON encoder base64-encodes binary blobs. To log UTF-8 encoded text,
+// zap's JSON encoder base64-encodes binary blobs. To zlog UTF-8 encoded text,
 // use ByteString.
 func Binary(key string, val []byte) zapcore.Field {
 	return zapcore.Field{Key: key, Type: zapcore.BinaryType, Interface: val}
@@ -53,7 +53,7 @@ func Bool(key string, val bool) zapcore.Field {
 }
 
 // ByteString constructs a field that carries UTF-8 encoded text as a []byte.
-// To log opaque binary blobs (which aren't necessarily valid UTF-8), use
+// To zlog opaque binary blobs (which aren't necessarily valid UTF-8), use
 // Binary.
 func ByteString(key string, val []byte) zapcore.Field {
 	return zapcore.Field{Key: key, Type: zapcore.ByteStringType, Interface: val}
@@ -153,7 +153,7 @@ func Uintptr(key string, val uintptr) zapcore.Field {
 // allocation-heavy. Outside tests, Any is always a better choice.
 //
 // If encoding fails (e.g., trying to serialize a map[int]string to JSON), Reflect
-// includes the error message in the final log output.
+// includes the error message in the final zlog output.
 func Reflect(key string, val interface{}) zapcore.Field {
 	return zapcore.Field{Key: key, Type: zapcore.ReflectType, Interface: val}
 }

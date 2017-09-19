@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	zlog "blog/common/zlog"
 	"blog/common/setting"
 	"blog/router"
 
@@ -40,6 +41,8 @@ func runWeb(c *cli.Context) {
 	}
 
 	setting.NewContext(confFile)
+
+	zlog.ZapLogInit()
 
 	r := router.InitRouters()
 

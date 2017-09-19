@@ -67,7 +67,7 @@ func ReplaceGlobals(logger *Logger) func() {
 	return func() { ReplaceGlobals(prev) }
 }
 
-// NewStdLog returns a *log.Logger which writes to the supplied zap Logger at
+// NewStdLog returns a *zlog.Logger which writes to the supplied zap Logger at
 // InfoLevel. To redirect the standard library's package-global logging
 // functions, use RedirectStdLog instead.
 func NewStdLog(l *Logger) *log.Logger {

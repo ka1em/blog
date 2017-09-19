@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 
-	zlog "blog/common/log"
+	zlog "blog/common/zlog"
 	"blog/common/setting"
 
 	"github.com/gorilla/schema"

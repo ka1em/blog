@@ -1,4 +1,4 @@
-package log
+package logger
 
 import (
 	"blog/common/setting"
@@ -10,7 +10,7 @@ import (
 
 var ZapLog *zap.SugaredLogger
 
-func init() {
+func ZapLogInit() {
 	zapCfg := zap.Config{
 		Level:       zap.NewAtomicLevelAt(zapLogLevel(setting.RUN_MODE)),
 		Development: true,
@@ -52,6 +52,6 @@ func zapLogLevel(runMode string) zapcore.Level {
 		return zapcore.WarnLevel
 	default:
 		log.Fatal("error run mode")
+		return 0
 	}
-	return -1
 }

@@ -93,7 +93,7 @@ const (
 
 // A Field is a marshaling operation used to add a key-value pair to a logger's
 // context. Most fields are lazily marshaled, so it's inexpensive to add fields
-// to disabled debug-level log statements.
+// to disabled debug-level zlog statements.
 type Field struct {
 	Key       string
 	Type      FieldType
