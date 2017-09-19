@@ -4,27 +4,22 @@ import (
 	"encoding/json"
 	"net/http"
 
-	zlog "blog/common/zlog"
+	"blog/common/zlog"
 )
 
 const (
-	SUCCESS = 0
-
+	SUCCESS       = 0
 	USERNAMEEXIST = (iota * -1) - 10000 // -10000
 	PARAMSERR
 	PASSWDERROR
 	NOUSERNAME
-
-	DATABASEERR = (iota * -1) - 20000 // -20000
-
+	DATABASEERR   = (iota * -1) - 20000 // -20000
 	MIDDLEWAREERR = (iota * -1) - 30000 // -30000
-
 	NEEDLOGIN
 )
 
 var errMap = map[int]string{
-	SUCCESS: "success",
-
+	SUCCESS:       "success",
 	USERNAMEEXIST: "user name was exist",
 	PARAMSERR:     "params error",
 	DATABASEERR:   "database create user error",
@@ -41,13 +36,7 @@ type Data struct {
 }
 
 func GetBaseData() *Data {
-	d := &Data{}
-
-	d.Code = 0
-	d.Msg = "success"
-	d.Data = map[string]interface{}{}
-
-	return d
+	return &Data{Code: 0, Msg: "success", Data: map[string]interface{}{}}
 }
 
 func (d *Data) ResponseJson(w http.ResponseWriter, datacode, httpStateCode int) {

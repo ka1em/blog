@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	zlog "blog/common/zlog"
+	"blog/common/zlog"
 )
 
 type Page struct {

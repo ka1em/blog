@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	zlog "blog/common/zlog"
+	"blog/common/zlog"
 )
 
 func TestHandler(w http.ResponseWriter, r *http.Request) {

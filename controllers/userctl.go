@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"blog/common/zlog"
+	"blog/model"
 	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
 	"strconv"
-	zlog "blog/common/zlog"
-	"blog/model"
 
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"

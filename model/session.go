@@ -8,6 +8,9 @@ import (
 	"time"
 
 	zlog "blog/common/zlog"
+
+	"blog/common/setting"
+
 	"github.com/gorilla/sessions"
 )
 
@@ -114,14 +117,19 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	sessionStore := GetSessionStore()
 	session, err := sessionStore.Get(r, "app-session")
 	if err != nil {
-
+		zlog.ZapLog.Error(err.Error())
+		return "", err
 	}
-	sessionId, _ := generateSessionId()
+	sessionId, err := generateSessionId()
+	if err != nil {
+		zlog.ZapLog.Error(err.Error())
+		return "", err
+	}
 	session.Values["sid"] = sessionId
 	session.Options = &sessions.Options{
 		MaxAge:   60 * 60 * 24,
 		HttpOnly: true,
-		//Secure:   true,
+		Secure:   setting.SSL_ON,
 	}
 
 	session.Save(r, w)

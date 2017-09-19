@@ -12,23 +12,19 @@ import (
 )
 
 var (
-	RUN_MODE string
-
-	SSL_ON    bool
-	CERT_FILE string
-	KEY_FILE  string
-
-	DB_HOST string //mysql
-	DB_PORT string
-	DB_USER string
-	DB_PASS string
-	DB_BASE string
-	DB_PARM string
-
+	RUN_MODE   string
+	SSL_ON     bool
+	CERT_FILE  string
+	KEY_FILE   string
+	DB_HOST    string //mysql
+	DB_PORT    string
+	DB_USER    string
+	DB_PASS    string
+	DB_BASE    string
+	DB_PARM    string
 	LOG_OUTPUT string
-
-	IsWindows bool
-	AppPath   string
+	IsWindows  bool
+	AppPath    string
 )
 
 const (

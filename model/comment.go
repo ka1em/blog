@@ -30,5 +30,5 @@ func (c *Comment) GetComment(pIndex, pSize int) (comments []*Comment, err error)
 }
 
 func (c *Comment) UpdateComment() error {
-	return DataBase().Exec("update comments set comment_text = ? where id = ? and user_id = ?", c.CommentText, c.Id, ).Error
+	return DataBase().Exec("update comments set comment_text = ? where id = ? and user_id = ?", c.CommentText, c.Id).Error
 }

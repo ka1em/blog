@@ -3,8 +3,8 @@ package model
 import (
 	"fmt"
 
-	zlog "blog/common/zlog"
 	"blog/common/setting"
+	"blog/common/zlog"
 
 	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"

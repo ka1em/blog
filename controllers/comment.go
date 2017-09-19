@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	zlog "blog/common/zlog"
+	"blog/common/zlog"
 	"blog/model"
 	"errors"
 	"fmt"
@@ -20,6 +20,7 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 
 	if userIds = r.Context().Value("user_id"); userIds == nil {
 		zlog.ZapLog.Error("need login ")
+
 		data.ResponseJson(w, model.NEEDLOGIN, http.StatusUnauthorized)
 		return
 	}

@@ -1,8 +1,8 @@
 package router
 
 import (
+	"blog/common/zlog"
 	"blog/controllers"
-	zlog "blog/common/zlog"
 
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"

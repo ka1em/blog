@@ -1,4 +1,4 @@
-package logger
+package zlog
 
 import (
 	"blog/common/setting"

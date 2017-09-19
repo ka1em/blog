@@ -1,7 +1,7 @@
 package router
 
 import (
-	zlog "blog/common/zlog"
+	"blog/common/zlog"
 
 	"github.com/gorilla/mux"
 )
