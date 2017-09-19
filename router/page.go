@@ -1,9 +1,9 @@
 package router
 
 import (
+	"blog/common/log"
 	"blog/controllers"
 
-	"blog/common/log"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )

@@ -4,23 +4,17 @@ import (
 	"fmt"
 
 	"blog/common/log"
+	"blog/common/setting"
+
 	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
-const (
-	DBHost = "47.93.11.105"
-	DBPort = "3306"
-	DBUser = "lgwd"
-	DBPass = "queeheeChiegiusheeD4"
-	DBBase = "lgwd"
-	DBParm = "charset=utf8mb4&parseTime=True&loc=Local"
-)
-
 var decoder *schema.Decoder
 var database *gorm.DB
 
+//获取decoder
 func SchemaDecoder() *schema.Decoder {
 	if decoder == nil {
 		decoder = schema.NewDecoder()
@@ -28,6 +22,7 @@ func SchemaDecoder() *schema.Decoder {
 	return decoder
 }
 
+//获取 数据库
 func DataBase() *gorm.DB {
 	var err error
 	if database == nil {
@@ -43,7 +38,8 @@ func DataBase() *gorm.DB {
 func connDatabase() (*gorm.DB, error) {
 	var err error
 
-	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", DBUser, DBPass, DBHost, DBPort, DBBase, DBParm)
+	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
+		setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
 
 	if database, err = gorm.Open("mysql", dbConn); err != nil {
 		log.Suggar.Error(err.Error())

@@ -2,10 +2,14 @@ package router
 
 import (
 	"blog/common/log"
+
 	"github.com/gorilla/mux"
+	"blog/common/setting"
 )
 
 func InitRouters() *mux.Router {
+	setting.NewContext()
+
 	r := mux.NewRouter().StrictSlash(false)
 
 	r = SetPageRoutes(r)

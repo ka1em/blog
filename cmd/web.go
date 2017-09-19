@@ -21,16 +21,24 @@ var Web = cli.Command{
 and it takes care of all the other things for you`,
 	Action: runWeb,
 	Flags: []cli.Flag{
-		stringFlag("port, p", DEFALUT_PORT, "eg: :8443 Temporary port number to prevent conflict"),
+		stringFlag("port, p", DEFALUT_PORT, "Port number, eg: 8443"),
 		stringFlag("config, c", DEFAULT_CONFIG_FILEPATH, "Configuration file path"),
 	},
 }
 
 func runWeb(c *cli.Context) {
 	port := DEFALUT_PORT
+	configFile := DEFAULT_CONFIG_FILEPATH
 	if c.IsSet("port") {
 		port = c.String("port")
 	}
+
+	if c.IsSet("config") {
+		configFile = c.String("config")
+	}
+
+
+
 
 	r := router.InitRouters()
 
