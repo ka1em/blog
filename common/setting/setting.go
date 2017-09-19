@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"path/filepath"
@@ -48,17 +47,10 @@ func execPath() (string, error) {
 }
 
 func init() {
-	IsWindows = runtime.GOOS == "windows"
-	//log.New(log.CONSOLE, log.ConsoleConfig{})
-
 	var err error
 	if AppPath, err = execPath(); err != nil {
 		log.Fatal(2, "Fail to get app path: %v\n", err)
 	}
-
-	// Note: we don't use path.Dir here because it does not handle case
-	//	which path starts with two "/" in Windows: "//psf/Home/..."
-	AppPath = strings.Replace(AppPath, "\\", "/", -1)
 }
 
 // WorkDir returns absolute path of work directory.
@@ -75,8 +67,8 @@ func WorkDir() (string, error) {
 	return AppPath[:i], nil
 }
 
+// NewContext  init the configure
 func NewContext(file string) {
-
 	//字段名忽略大小写
 	cfg, err := ini.InsensitiveLoad(file)
 	if err != nil {

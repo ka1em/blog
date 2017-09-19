@@ -2,7 +2,6 @@ package log
 
 import (
 	"blog/common/setting"
-
 	"log"
 
 	"go.uber.org/zap"

@@ -8,7 +8,6 @@ import (
 )
 
 func SetUserRoutes(r *mux.Router) *mux.Router {
-
 	r.HandleFunc("/user/register", controllers.RegisterPost).Methods("POST")
 	r.HandleFunc("/user/login", controllers.LoginPost).Methods("POST")
 

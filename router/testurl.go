@@ -6,7 +6,6 @@ import (
 )
 
 func SetTestRoutes(r *mux.Router) *mux.Router {
-
 	r.HandleFunc("/test", controllers.TestHandler).Methods("GET")
 	//r.HandleFunc("/user/login", controllers.LoginPost).Methods("POST")
 

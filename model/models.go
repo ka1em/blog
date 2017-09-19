@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 
-	"blog/common/log"
+	zlog "blog/common/log"
 	"blog/common/setting"
 
 	"github.com/gorilla/schema"
@@ -28,7 +28,7 @@ func DataBase() *gorm.DB {
 	if database == nil {
 		database, err = connDatabase()
 		if err != nil {
-			log.Suggar.Error(err.Error())
+			zlog.ZapLog.Error(err.Error())
 			return nil
 		}
 	}
@@ -42,7 +42,7 @@ func connDatabase() (*gorm.DB, error) {
 		setting.DB_USER, setting.DB_PASS, setting.DB_HOST, setting.DB_PORT, setting.DB_BASE, setting.DB_PARM)
 
 	if database, err = gorm.Open("mysql", dbConn); err != nil {
-		log.Suggar.Error(err.Error())
+		zlog.ZapLog.Error(err.Error())
 		panic(err.Error())
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func connDatabase() (*gorm.DB, error) {
 		&Page{},
 		&Comment{},
 	).Error; err != nil {
-		log.Suggar.Error(err.Error())
+		zlog.ZapLog.Error(err.Error())
 		return nil, err
 	}
 

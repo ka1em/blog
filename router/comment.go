@@ -1,7 +1,7 @@
 package router
 
 import (
-	"blog/common/log"
+	zlog "blog/common/log"
 	"blog/controllers"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
@@ -19,6 +19,6 @@ func SetCommentRoutes(r *mux.Router) *mux.Router {
 		negroni.Wrap(newRouter),
 	))
 
-	log.Suggar.Info("set comment routes ok")
+	zlog.ZapLog.Info("set comment routes ok")
 	return r
 }

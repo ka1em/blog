@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"blog/common/log"
+	zlog "blog/common/log"
 )
 
 const (
@@ -58,7 +58,7 @@ func (d *Data) ResponseJson(w http.ResponseWriter, datacode, httpStateCode int) 
 	w.WriteHeader(httpStateCode)
 	err := json.NewEncoder(w).Encode(d)
 	if err != nil {
-		log.Suggar.Error(err.Error())
+		zlog.ZapLog.Error(err.Error())
 		panic(err)
 	}
 
