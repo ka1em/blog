@@ -19,12 +19,12 @@ var (
 	CERT_FILE string
 	KEY_FILE  string
 
-	DBHost string //mysql
-	DBPort string
-	DBUser string
-	DBPass string
-	DBBase string
-	DBParm string
+	DB_HOST string //mysql
+	DB_PORT string
+	DB_USER string
+	DB_PASS string
+	DB_BASE string
+	DB_PARM string
 
 	IsWindows bool
 	AppPath   string
@@ -84,11 +84,16 @@ func NewContext(file string) {
 	CERT_FILE = secServer.Key("cert_file").MustString("")
 	KEY_FILE = secServer.Key("key_file").MustString("")
 
-	DBHost = secServer.Key("DBHost").MustString("127.0.0.1")
-	DBPort = secServer.Key("DBPort").MustString("3306")
-	DBUser = secServer.Key("DBUser").MustString("root")
-	DBPass = secServer.Key("DBPass").MustString("passwd")
-	DBBase = secServer.Key("DBBase").MustString("lgwd")
-	DBParm = secServer.Key("DBParm").MustString("charset=utf8mb4&parseTime=True&loc=Local")
+	secSql, err := cfg.GetSection("mysql")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	DB_HOST = secSql.Key("DB_HOST").MustString("127.0.0.1")
+	DB_PORT = secSql.Key("DB_PORT").MustString("3306")
+	DB_USER = secSql.Key("DB_USER").MustString("root")
+	DB_PASS = secSql.Key("DB_PASS").MustString("passwd")
+	DB_BASE = secSql.Key("DB_BASE").MustString("lgwd")
+	DB_PARM = secSql.Key("DB_PARM").MustString("charset=utf8mb4&parseTime=True&loc=Local")
 
 }

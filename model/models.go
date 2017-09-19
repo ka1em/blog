@@ -39,7 +39,7 @@ func connDatabase() (*gorm.DB, error) {
 	var err error
 
 	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
-		setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
+		setting.DB_USER, setting.DB_PASS, setting.DB_HOST, setting.DB_PORT, setting.DB_BASE, setting.DB_PARM)
 
 	if database, err = gorm.Open("mysql", dbConn); err != nil {
 		log.Suggar.Error(err.Error())
