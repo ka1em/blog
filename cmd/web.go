@@ -5,14 +5,17 @@ import (
 	"net/http"
 	"time"
 
+	"blog/common/setting"
 	"blog/router"
 
 	"github.com/urfave/cli"
 	"github.com/urfave/negroni"
 )
 
-const DEFALUT_PORT = "8443"
-const DEFAULT_CONFIG_FILEPATH = "conf/dev.ini"
+const (
+	DEFALUT_PORT            = "8443"
+	DEFAULT_CONFIG_FILEPATH = "config/dev.ini"
+)
 
 var Web = cli.Command{
 	Name:  "web",
@@ -28,17 +31,15 @@ and it takes care of all the other things for you`,
 
 func runWeb(c *cli.Context) {
 	port := DEFALUT_PORT
-	configFile := DEFAULT_CONFIG_FILEPATH
+	confFile := DEFAULT_CONFIG_FILEPATH
 	if c.IsSet("port") {
 		port = c.String("port")
 	}
-
 	if c.IsSet("config") {
-		configFile = c.String("config")
+		confFile = c.String("config")
 	}
 
-
-
+	setting.NewContext(confFile)
 
 	r := router.InitRouters()
 
@@ -53,14 +54,9 @@ func runWeb(c *cli.Context) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	log.Println("Listeng port", port)
-	log.Fatal(s.ListenAndServe())
-
-	//s.ListenAndServeTLS()
-	//http.ListenAndServeTLS(PORT, "keys/blog/214098123750645.pem",
-	//	"keys/blog/214098123750645.key", r)
-
-	//common.Suggar.Debug("Listening...")
-	//
-	//http.ListenAndServe(PORT, r)
+	if setting.SSL_ON && setting.RUN_MODE == "prod" {
+		log.Fatal(s.ListenAndServe())
+	} else {
+		log.Fatal(s.ListenAndServeTLS(setting.CERT_FILE, setting.KEY_FILE))
+	}
 }

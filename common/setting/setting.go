@@ -15,6 +15,7 @@ import (
 var (
 	RUN_MODE string
 
+	SSL_ON    bool
 	CERT_FILE string
 	KEY_FILE  string
 
@@ -66,10 +67,10 @@ func WorkDir() (string, error) {
 	return AppPath[:i], nil
 }
 
-func NewContext() {
+func NewContext(file string) {
 
 	//字段名忽略大小写
-	cfg, err := ini.InsensitiveLoad("conf/dev.ini")
+	cfg, err := ini.InsensitiveLoad(file)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -78,6 +79,10 @@ func NewContext() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	SSL_ON = secServer.Key("ssl_on").MustBool(true)
+	CERT_FILE = secServer.Key("cert_file").MustString("")
+	KEY_FILE = secServer.Key("key_file").MustString("")
 
 	DBHost = secServer.Key("DBHost").MustString("127.0.0.1")
 	DBPort = secServer.Key("DBPort").MustString("3306")
