@@ -1,1 +1,7 @@
 * INIT
+
+* env
+
+#+BEGIN_SRC shell
+    $BLOG_WORK_DIR
+#+END_SRC

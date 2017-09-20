@@ -1,10 +1,10 @@
 package model
 
 import (
-	"encoding/json"
+	"blog/common/zlog"
 	"net/http"
 
-	"blog/common/zlog"
+	jsoniter "github.com/json-iterator/go"
 )
 
 const (
@@ -45,7 +45,7 @@ func (d *Data) ResponseJson(w http.ResponseWriter, datacode, httpStateCode int) 
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpStateCode)
-	err := json.NewEncoder(w).Encode(d)
+	err := jsoniter.NewEncoder(w).Encode(d)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		panic(err)

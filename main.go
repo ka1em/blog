@@ -15,10 +15,10 @@ func main() {
 	app.Name = "blog"
 	app.Usage = "blog backend"
 	app.Version = APP_VER
-
 	app.Commands = []cli.Command{
 		cmd.Web,
+		cmd.WebAdmin,
 	}
-	app.Flags = append(app.Flags, []cli.Flag{}...)
+	//app.Flags = append(app.Flags, cmd.Web.Flags...)
 	app.Run(os.Args)
 }

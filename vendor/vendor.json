@@ -63,6 +63,12 @@
 			"revisionTime": "2016-08-17T01:46:01Z"
 		},
 		{
+			"checksumSHA1": "qe1mxK8jyU8o6X6V2xFUc4EA298=",
+			"path": "github.com/json-iterator/go",
+			"revision": "fdfe0b9a69118ff692d6e1005e9de7e0cffb7d6b",
+			"revisionTime": "2017-09-19T02:06:59Z"
+		},
+		{
 			"checksumSHA1": "rJab1YdNhQooDiBWNnt7TLWPyBU=",
 			"path": "github.com/pkg/errors",
 			"revision": "c605e284fe17294bda444b34710735b29d1a9d90",
