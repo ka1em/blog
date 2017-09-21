@@ -19,6 +19,8 @@ CREATE TABLE `users` (
        PRIMARY KEY (`id`)
        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 */
+
+// User 用户
 type User struct {
 	ID         uint64 `json:"id,string"          gorm:"primary_key"`
 	UserName   string `json:"user_name"          gorm:"not null; type:varchar(256)"`
@@ -34,10 +36,7 @@ type User struct {
 	DeletedAt *time.Time `sql:"index"`
 }
 
-func (u *User) TabelName() string {
-	return "users"
-}
-
+// CreateUser 创建用户
 func (u *User) CreateUser() error {
 	//判断用户名是否存在
 	if !db.Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
@@ -47,6 +46,7 @@ func (u *User) CreateUser() error {
 	return db.Create(u).Error
 }
 
+// GetValidInfo 获取需要确认用户的信息
 func GetValidInfo(userName string) (*User, bool) {
 	u := &User{}
 	info := []string{"id", "user_name", "user_salt", "user_passwd"}
@@ -55,8 +55,4 @@ func GetValidInfo(userName string) (*User, bool) {
 		return nil, false
 	}
 	return u, true
-}
-
-func (u *User) Login() bool {
-	return db.Where("user_name = ? and user_passwd = ?", u.UserName, u.UserPasswd).Find(u).RecordNotFound()
 }

@@ -20,6 +20,6 @@ func SetCommentRoutes(r *mux.Router) *mux.Router {
 		negroni.Wrap(newRouter),
 	))
 
-	zlog.ZapLog.Info("set comment routes ok")
+	zlog.ZapLog.Info("set router comment")
 	return r
 }

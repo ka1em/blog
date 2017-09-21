@@ -21,6 +21,6 @@ func SetPageRoutes(r *mux.Router) *mux.Router {
 		negroni.Wrap(newRouter),
 	))
 
-	zlog.ZapLog.Info("set page routes ok")
+	zlog.ZapLog.Info("set router page")
 	return r
 }

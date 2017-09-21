@@ -3,6 +3,8 @@ package router
 import (
 	"blog/controllers"
 
+	"blog/common/zlog"
+
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )
@@ -18,5 +20,6 @@ func SetUserRoutes(r *mux.Router) *mux.Router {
 		negroni.HandlerFunc(controllers.ValidateSession),
 		negroni.Wrap(newRouer),
 	))
+	zlog.ZapLog.Info("set router user")
 	return r
 }

@@ -17,14 +17,15 @@ var (
 
 func init() {
 	SchemaDecoder = schema.NewDecoder()
-
-	err := initDB()
+}
+func DBInit() {
+	err := updateDB()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func initDB() error {
+func updateDB() error {
 	var err error
 
 	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",

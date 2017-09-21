@@ -3,6 +3,8 @@ package router
 import (
 	"blog/controllers"
 
+	"blog/common/zlog"
+
 	"github.com/gorilla/mux"
 )
 
@@ -17,5 +19,6 @@ func SetTestRoutes(r *mux.Router) *mux.Router {
 	//	negroni.HandlerFunc(controllers.ValidateSession),
 	//	negroni.Wrap(newRouer),
 	//))
+	zlog.ZapLog.Info("set router test")
 	return r
 }

@@ -58,8 +58,9 @@ func GetUserID(sessionId string, active int) (uint64, error) {
 	return s.UserId, nil
 }
 
+// UpdateSession 更新session为活跃状态
 func UpdateSession(userId uint64, sessionId string) error {
-	sess :=db.Begin()
+	sess := db.Begin()
 
 	if err := sess.Exec("update sessions set session_active = 0 where user_id = ?", userId).Error; err != nil {
 		sess.Rollback()

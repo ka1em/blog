@@ -1,9 +1,8 @@
 package main
 
 import (
-	"os"
-
 	"blog/cmd"
+	"os"
 
 	"github.com/urfave/cli"
 )

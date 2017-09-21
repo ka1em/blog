@@ -7,6 +7,7 @@ import (
 
 	"blog/common/setting"
 	"blog/common/zlog"
+	"blog/model"
 	"blog/router"
 
 	"github.com/urfave/cli"
@@ -41,7 +42,7 @@ func runWeb(c *cli.Context) {
 	}
 
 	setting.NewContext(confFile)
-
+	model.DBInit()
 	zlog.ZapLogInit()
 
 	r := router.InitRouters()

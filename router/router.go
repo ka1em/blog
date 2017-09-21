@@ -14,6 +14,6 @@ func InitRouters() *mux.Router {
 	r = SetCommentRoutes(r)
 	r = SetTestRoutes(r)
 
-	zlog.ZapLog.Info("set route ok")
+	zlog.ZapLog.Info("set router ok")
 	return r
 }
