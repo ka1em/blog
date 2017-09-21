@@ -14,7 +14,7 @@ import (
 var decoder *schema.Decoder
 var database *gorm.DB
 
-//获取decoder
+//SchemaDecoder 获取decoder
 func SchemaDecoder() *schema.Decoder {
 	if decoder == nil {
 		decoder = schema.NewDecoder()
@@ -22,7 +22,7 @@ func SchemaDecoder() *schema.Decoder {
 	return decoder
 }
 
-//获取 数据库
+//DataBase 数据库
 func DataBase() *gorm.DB {
 	var err error
 	if database == nil {

@@ -11,6 +11,8 @@ import (
 
 	"blog/common/setting"
 
+	"strconv"
+
 	"github.com/gorilla/sessions"
 )
 
@@ -85,7 +87,7 @@ func generateSessionId() (string, error) {
 	return base64.StdEncoding.EncodeToString(sid), nil
 }
 
-//创建session, 如果没有忽略
+// CreateSession 创建session
 func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	sessionStore := GetSessionStore()
 	session, err := sessionStore.Get(r, "app-session")
@@ -113,6 +115,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	}
 }
 
+// PreCreateSession 验证用户名之前，先行创建session
 func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	sessionStore := GetSessionStore()
 	session, err := sessionStore.Get(r, "app-session")
@@ -137,6 +140,23 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	return sessionId, nil
 }
 
-func (s *Session) CloseSession() error {
-	return DataBase().Exec("update sessions set session_active = 0 where user_id = ?", s.UserId).Error
+func (s *Session) Close() error {
+	s.SessionActive = 0
+	return DataBase().Model(s).Where("user_id = ?", s.UserId).Update("session_active").Error
+}
+
+func SessionGetUserID(r *http.Request) (uint64, error) {
+	var err error
+	var uid uint64
+	var userIds interface{}
+
+	if userIds = r.Context().Value("user_id"); userIds == nil {
+		return 0, err
+	}
+
+	uid, err = strconv.ParseUint(userIds.(string), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return uid, nil
 }

@@ -16,7 +16,7 @@ import (
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
-		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		zlog.ZapLog.Error(err.Error())
 		return
 	}
@@ -24,13 +24,13 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	param := new(userRegistParam)
 	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Errorf("%s", err)
-		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return
 	}
 
 	if err := param.valid(); err != nil {
 		zlog.ZapLog.Errorf("%s", err)
-		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return
 	}
 
@@ -47,10 +47,10 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	if err := u.CreateUser(); err != nil {
 		zlog.ZapLog.Error(err.Error())
 		if err.Error() == "exists" {
-			data.ResponseJson(w, model.USERNAMEEXIST, http.StatusBadRequest)
+			data.ResponseJson(w, model.USER_NAME_EXIST, http.StatusBadRequest)
 			return
 		}
-		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.DATABASE_ERR, http.StatusInternalServerError)
 		return
 	}
 
@@ -87,18 +87,16 @@ func passwordHash(p, salt string) string {
 //登录
 func LoginPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
-	//TODO 重复登录？
-
 	//创建session_id
 	sid, err := model.PreCreateSession(w, r)
 	if err != nil {
-		zlog.ZapLog.Error("zlog err %s", err.Error())
-		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
+		zlog.ZapLog.Errorf("%s", err.Error())
+		data.ResponseJson(w, model.DATABASE_ERR, http.StatusInternalServerError)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		zlog.ZapLog.Error("user zlog in ", err.Error())
 		return
 	}
@@ -106,13 +104,13 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	param := new(loginParams)
 	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Errorf("%s", err)
-		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return
 	}
 
 	if err := param.valid(); err != nil {
 		zlog.ZapLog.Errorf("%+v", err)
-		data.ResponseJson(w, model.PARAMSERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return
 	}
 
@@ -122,20 +120,20 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	//用户密码salt
 	if u, ok = model.GetValidInfo(param.Name); !ok {
 		zlog.ZapLog.Error("No user")
-		data.ResponseJson(w, model.NOUSERNAME, http.StatusBadRequest)
+		data.ResponseJson(w, model.NO_USER_NAME, http.StatusBadRequest)
 		return
 	}
 
 	if u.UserPasswd != passwordHash(param.Passwd, u.UserSalt) {
 		zlog.ZapLog.Error("password wrong")
-		data.ResponseJson(w, model.PASSWDERROR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PASSWD_ERR, http.StatusBadRequest)
 		return
 	}
 
 	//登录成功，更新session，关联userid和sessionid
 	if err := model.UpdateSession(u.ID, sid); err != nil {
 		zlog.ZapLog.Error("zlog err %s", err.Error())
-		data.ResponseJson(w, model.DATABASEERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.DATABASE_ERR, http.StatusInternalServerError)
 		return
 	}
 
@@ -168,18 +166,20 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 
 	if userIds = r.Context().Value("user_id"); userIds == nil {
 		zlog.ZapLog.Error("need login ")
-		data.ResponseJson(w, model.NEEDLOGIN, http.StatusUnauthorized)
+		data.ResponseJson(w, model.NEED_LOGIN, http.StatusUnauthorized)
 		return
 	}
 	zlog.ZapLog.Debugf("user_id in logout get : %s", userIds)
 
 	uid, _ = strconv.ParseUint(userIds.(string), 10, 64)
 
-	s := &model.Session{UserId: uid}
+	s := &model.Session{
+		UserId: uid,
+	}
 
-	if err := s.CloseSession(); err != nil {
+	if err := s.Close(); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMSERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.PARAMS_ERR, http.StatusInternalServerError)
 		return
 	}
 

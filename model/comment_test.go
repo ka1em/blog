@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"blog/common/setting"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -12,7 +14,8 @@ var db *gorm.DB
 var err error
 
 func TestMain(m *testing.M) {
-	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", DBUser, DBPass, DBHost, DBPort, DBBase, DBParm)
+	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
+		setting.DB_USER, setting.DB_PASS, setting.DB_HOST, setting.DB_PORT, setting.DB_BASE, setting.DB_PARM)
 
 	if db, err = gorm.Open("mysql", dbConn); err != nil {
 		panic(err.Error())

@@ -21,10 +21,12 @@ type Page struct {
 
 const TRUNCNUM = 20
 
+// Add 添加page
 func (p *Page) Add() error {
 	return DataBase().Create(p).Error
 }
 
+// GetByID 获取
 func GetByID(pageId uint64) (Page, error) {
 	p := Page{}
 	if err := DataBase().Where("id = ?", pageId).First(&p).Error; err != nil {
@@ -34,11 +36,7 @@ func GetByID(pageId uint64) (Page, error) {
 	return p, nil
 }
 
-//// GET page by page_guid
-//func (p *Page) GetByPageGUID(pageGUID string) error {
-//	return DataBase().Where("page_guid = ?", pageGUID).First(p).Error
-//}
-
+// GetAllPage 获取page
 func GetAllPage(pIndex, pSize int) (pages []*Page, err error) {
 	if err := DataBase().Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
 		zlog.ZapLog.Error(err.Error())
@@ -47,6 +45,7 @@ func GetAllPage(pIndex, pSize int) (pages []*Page, err error) {
 	return pages, nil
 }
 
+// TruncatedText 截短字符串
 func TruncatedText(s string) string {
 	chars := 0
 	for i := range s {

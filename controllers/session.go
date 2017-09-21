@@ -16,7 +16,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	session, err := sessionStore.Get(r, "app-session")
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.MIDDLEWAREERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.MIDDLEWARE_ERR, http.StatusBadRequest)
 		return
 	}
 
@@ -24,11 +24,11 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		if uid, err := model.GetUserID(sid.(string), 1); err != nil {
 			if err.Error() == "record not found" {
 				zlog.ZapLog.Error(err.Error())
-				data.ResponseJson(w, model.NEEDLOGIN, http.StatusOK)
+				data.ResponseJson(w, model.MIDDLEWARE_ERR, http.StatusBadRequest)
 				return
 			}
 			zlog.ZapLog.Error(err.Error())
-			data.ResponseJson(w, model.MIDDLEWAREERR, http.StatusOK)
+			data.ResponseJson(w, model.MIDDLEWARE_ERR, http.StatusInternalServerError)
 			return
 		} else {
 			ctx := context.WithValue(r.Context(), "user_id", fmt.Sprintf("%d", uid))
