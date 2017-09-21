@@ -20,12 +20,12 @@ type Comment struct {
 
 // Add 添加评论
 func (c *Comment) Add() error {
-	return DataBase().Create(c).Error
+	return db.Create(c).Error
 }
 
 // Get 获取评论
 func (c *Comment) Get(pIndex, pSize int) (comments []*Comment, err error) {
-	if err := DataBase().Order("created_at desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&comments).Error; err != nil {
+	if err := db.Order("created_at desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&comments).Error; err != nil {
 		return nil, err
 	}
 	return comments, nil
@@ -33,5 +33,5 @@ func (c *Comment) Get(pIndex, pSize int) (comments []*Comment, err error) {
 
 // UpdateComment 更新评论
 func (c *Comment) Update() error {
-	return DataBase().Model(c).Where("id = ? and user_id = ?", c.Id, c.UserId).Update("comment_text").Error
+	return db.Model(c).Where("id = ? and user_id = ?", c.Id, c.UserId).Update("comment_text").Error
 }

@@ -22,7 +22,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	param := new(userRegistParam)
-	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
+	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Errorf("%s", err)
 		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return
@@ -102,7 +102,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	param := new(loginParams)
-	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
+	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Errorf("%s", err)
 		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return

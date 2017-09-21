@@ -4,7 +4,7 @@ import (
 	"blog/common/zlog"
 	"net/http"
 
-	jsoniter "github.com/json-iterator/go"
+	"github.com/json-iterator/go"
 )
 
 const (
@@ -23,7 +23,6 @@ var errMap = map[int]string{
 	SUCCESS:         "success",
 	USER_NAME_EXIST: "user name was exist",
 	PARAMS_ERR:      "params error",
-	//NO_USER_NAME:    "database create user error",
 	MIDDLEWARE_ERR:  "middler ware error",
 	NEED_LOGIN:      "not login",
 	PASSWD_ERR:      "password error",
@@ -39,21 +38,24 @@ type data struct {
 
 // GetBaseData return the base data
 func GetBaseData() *data {
-	return &data{Code: 0, Msg: "success", Data: map[string]interface{}{}}
+	return &data{
+		Code: 0,
+		Msg:  "success",
+		Data: map[string]interface{}{},
+	}
 }
 
 // ResponseJson write json data to response
-func (d *data) ResponseJson(w http.ResponseWriter, datacode, httpStateCode int) {
-	d.Code = datacode
-	d.Msg = errMap[datacode]
+func (d *data) ResponseJson(w http.ResponseWriter, code, httpState int) {
+	d.Code = code
+	d.Msg = errMap[code]
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(httpStateCode)
-	err := jsoniter.NewEncoder(w).Encode(d)
-	if err != nil {
+	w.WriteHeader(httpState)
+
+	if err := jsoniter.NewEncoder(w).Encode(d); err != nil {
 		zlog.ZapLog.Error(err.Error())
 		panic(err)
 	}
-
 	return
 }

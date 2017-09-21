@@ -23,13 +23,13 @@ const TRUNCNUM = 20
 
 // Add 添加page
 func (p *Page) Add() error {
-	return DataBase().Create(p).Error
+	return db.Create(p).Error
 }
 
 // GetByID 获取
 func GetByID(pageId uint64) (Page, error) {
 	p := Page{}
-	if err := DataBase().Where("id = ?", pageId).First(&p).Error; err != nil {
+	if err := db.Where("id = ?", pageId).First(&p).Error; err != nil {
 		return Page{}, err
 	}
 
@@ -38,7 +38,7 @@ func GetByID(pageId uint64) (Page, error) {
 
 // GetAllPage 获取page
 func GetAllPage(pIndex, pSize int) (pages []*Page, err error) {
-	if err := DataBase().Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
+	if err := db.Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
 		zlog.ZapLog.Error(err.Error())
 		return nil, err
 	}

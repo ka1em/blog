@@ -25,7 +25,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 
 	param := new(pageIndexParam)
 
-	if err := model.SchemaDecoder().Decode(param, r.Form); err != nil {
+	if err := model.SchemaDecoder.Decode(param, r.Form); err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return
@@ -118,7 +118,7 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	param := new(pagePostParam)
-	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
+	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return

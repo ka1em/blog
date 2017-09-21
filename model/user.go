@@ -40,17 +40,17 @@ func (u *User) TabelName() string {
 
 func (u *User) CreateUser() error {
 	//判断用户名是否存在
-	if !DataBase().Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
+	if !db.Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
 		return errors.New("exists")
 	}
 
-	return DataBase().Create(u).Error
+	return db.Create(u).Error
 }
 
 func GetValidInfo(userName string) (*User, bool) {
 	u := &User{}
 	info := []string{"id", "user_name", "user_salt", "user_passwd"}
-	if DataBase().Select(info).Where("user_name = ?", userName).First(u).RecordNotFound() {
+	if db.Select(info).Where("user_name = ?", userName).First(u).RecordNotFound() {
 		log.Printf("%+v", *u)
 		return nil, false
 	}
@@ -58,5 +58,5 @@ func GetValidInfo(userName string) (*User, bool) {
 }
 
 func (u *User) Login() bool {
-	return DataBase().Where("user_name = ? and user_passwd = ?", u.UserName, u.UserPasswd).Find(u).RecordNotFound()
+	return db.Where("user_name = ? and user_passwd = ?", u.UserName, u.UserPasswd).Find(u).RecordNotFound()
 }

@@ -52,14 +52,14 @@ func GetSessionStore() *sessions.CookieStore {
 
 func GetUserID(sessionId string, active int) (uint64, error) {
 	s := Session{}
-	if err := DataBase().Select("user_id").Where("session_id = ? and session_active = ?", sessionId, active).First(&s).Error; err != nil {
+	if err := db.Select("user_id").Where("session_id = ? and session_active = ?", sessionId, active).First(&s).Error; err != nil {
 		return 0, err
 	}
 	return s.UserId, nil
 }
 
 func UpdateSession(userId uint64, sessionId string) error {
-	sess := DataBase().Begin()
+	sess :=db.Begin()
 
 	if err := sess.Exec("update sessions set session_active = 0 where user_id = ?", userId).Error; err != nil {
 		sess.Rollback()
@@ -142,7 +142,7 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 
 func (s *Session) Close() error {
 	s.SessionActive = 0
-	return DataBase().Model(s).Where("user_id = ?", s.UserId).Update("session_active").Error
+	return db.Model(s).Where("user_id = ?", s.UserId).Update("session_active").Error
 }
 
 func SessionGetUserID(r *http.Request) (uint64, error) {

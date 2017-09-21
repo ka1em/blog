@@ -10,10 +10,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-var db *gorm.DB
-var err error
-
 func TestMain(m *testing.M) {
+	var err error
 	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
 		setting.DB_USER, setting.DB_PASS, setting.DB_HOST, setting.DB_PORT, setting.DB_BASE, setting.DB_PARM)
 

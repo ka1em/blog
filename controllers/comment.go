@@ -31,7 +31,7 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	param := new(commentPostParam)
-	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
+	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return
@@ -97,7 +97,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	param := new(commentPutParam)
-	if err := model.SchemaDecoder().Decode(param, r.PostForm); err != nil {
+	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
 		return
