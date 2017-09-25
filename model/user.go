@@ -41,12 +41,14 @@ type User struct {
 
 // CreateUser 创建用户
 func (u *User) CreateUser() error {
-	//判断用户名是否存在
-	if !db.Where("name = ?", u.Name).First(&User{}).RecordNotFound() {
+	if nameIsExist(u.Name) {
 		return errors.New("exists")
 	}
-
 	return db.Create(u).Error
+}
+
+func nameIsExist(name string) bool {
+	return !db.Where("name = ?", name).First(&User{}).RecordNotFound()
 }
 
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
