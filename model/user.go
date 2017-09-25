@@ -42,7 +42,7 @@ type User struct {
 // CreateUser 创建用户
 func (u *User) CreateUser() error {
 	if nameIsExist(u.Name) {
-		return errors.New("exists")
+		return errors.New(ErrMap[USER_NAME_EXIST])
 	}
 	return db.Create(u).Error
 }

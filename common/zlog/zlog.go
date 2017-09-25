@@ -21,7 +21,7 @@ func ZapLogInit() {
 			NameKey:        "N",
 			CallerKey:      "C",
 			MessageKey:     "M",
-			StacktraceKey:  "S",
+			StacktraceKey:  "",
 			LineEnding:     zapcore.DefaultLineEnding,
 			EncodeLevel:    zapcore.CapitalColorLevelEncoder,
 			EncodeTime:     zapcore.ISO8601TimeEncoder,

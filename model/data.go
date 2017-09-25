@@ -21,7 +21,7 @@ const (
 
 const DEFAULT_PAGE_SIZE = 20
 
-var errMap = map[int]string{
+var ErrMap = map[int]string{
 	SUCCESS:         "success",
 	USER_NAME_EXIST: "user name was exist",
 	PARAMS_ERR:      "params error",
@@ -50,7 +50,7 @@ func GetBaseData() *data {
 // ResponseJson write json data to response
 func (d *data) ResponseJson(w http.ResponseWriter, code, httpState int) {
 	d.Code = code
-	d.Msg = errMap[code]
+	d.Msg = ErrMap[code]
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpState)
