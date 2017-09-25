@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//注册
+// RegisterPost 注册
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
@@ -71,7 +71,7 @@ func (p *userRegistParam) valid() error {
 	return nil
 }
 
-//登录
+// LoginPost 登录
 func LoginPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	//创建session_id
@@ -142,7 +142,7 @@ func (p *loginParams) valid() error {
 	return nil
 }
 
-//登出
+// LogoutGET 登出
 func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
