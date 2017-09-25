@@ -110,7 +110,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := &model.Comment{
-		Id:     idn,
+		ID:     idn,
 		Text:   param.Comment,
 		UserId: uid,
 	}

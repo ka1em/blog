@@ -35,8 +35,8 @@ type User struct {
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 	DeletedAt   *time.Time `sql:"index"`
-	CreatedUnix uint64     `json:"created_unix" gorm:"type:bigint(20)"`
-	UpdatedUnix uint64     `json:"updated_unix" gorm:"type:bigint(20)"`
+	CreatedUnix int64      `json:"created_unix" gorm:"type:bigint(20)"`
+	UpdatedUnix int64      `json:"updated_unix" gorm:"type:bigint(20)"`
 }
 
 // CreateUser 创建用户
@@ -58,10 +58,8 @@ func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	u.ID = id
 	u.Salt = uuid.NewV4().String()
 	u.Passwd = PasswordHash(u.Passwd, u.Salt)
-
-	if err := scope.SetColumn("id", u.ID); err != nil {
-		return err
-	}
+	u.CreatedUnix = time.Now().Unix()
+	u.UpdatedUnix = time.Now().Unix()
 
 	return nil
 }

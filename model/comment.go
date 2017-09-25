@@ -53,5 +53,5 @@ func (c *Comment) Get(pIndex, pSize int) (comments []*Comment, err error) {
 
 // UpdateComment 更新评论
 func (c *Comment) Update() error {
-	return db.Model(c).Where("id = ? and user_id = ?", c.Id, c.UserId).Update("text").Error
+	return db.Model(c).Where("id = ? and user_id = ?", c.ID, c.UserId).Update("text").Error
 }
