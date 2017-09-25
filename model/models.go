@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	SchemaDecoder *schema.Decoder
+	SchemaDecoder *schema.Decoder // schema decoder
 	db            *gorm.DB
 )
 
@@ -19,20 +19,20 @@ func init() {
 	SchemaDecoder = schema.NewDecoder()
 }
 func DBInit() {
-	err := updateDB()
+	err := connDB()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func updateDB() error {
+func connDB() error {
 	var err error
 
 	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
 		setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
 
 	if db, err = gorm.Open("mysql", dbConn); err != nil {
-		return err
+		panic(err.Error())
 	}
 
 	//update  tabel
@@ -42,7 +42,7 @@ func updateDB() error {
 		&Page{},
 		&Comment{},
 	).Error; err != nil {
-		return err
+		panic(err.Error())
 	}
 	return nil
 }
