@@ -12,7 +12,7 @@ var ZapLog *zap.SugaredLogger
 
 func ZapLogInit() {
 	zapCfg := zap.Config{
-		Level:       zap.NewAtomicLevelAt(zapLogLevel(setting.RUN_MODE)),
+		Level:       zap.NewAtomicLevelAt(zapLogLevel(setting.RunMode)),
 		Development: true,
 		Encoding:    "console",
 		EncoderConfig: zapcore.EncoderConfig{
@@ -28,8 +28,8 @@ func ZapLogInit() {
 			EncodeDuration: zapcore.StringDurationEncoder,
 			EncodeCaller:   zapcore.ShortCallerEncoder,
 		},
-		OutputPaths:      []string{setting.LOG_OUTPUT},
-		ErrorOutputPaths: []string{setting.LOG_OUTPUT},
+		OutputPaths:      []string{setting.LogPath},
+		ErrorOutputPaths: []string{setting.LogPath},
 	}
 
 	zaplog, err := zapCfg.Build()

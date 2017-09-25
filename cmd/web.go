@@ -15,10 +15,13 @@ import (
 )
 
 const (
-	DEFALUT_PORT            = "8443"
+	// DEFALUT_PORT 默认端口
+	DEFALUT_PORT = "8443"
+	// DEFAULT_CONFIG_FILEPATH 默认配置文件
 	DEFAULT_CONFIG_FILEPATH = "config/dev.ini"
 )
 
+// Web blog后端启动命令
 var Web = cli.Command{
 	Name:  "web",
 	Usage: "Start web server",
@@ -58,8 +61,8 @@ func runWeb(c *cli.Context) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	if setting.SSL_ON == true && setting.RUN_MODE == setting.PROD_MODE {
-		log.Fatal(s.ListenAndServeTLS(setting.CERT_FILE, setting.KEY_FILE))
+	if setting.SSLMode == true && setting.RunMode == setting.PROD_MODE {
+		log.Fatal(s.ListenAndServeTLS(setting.CertFile, setting.KeyFile))
 	} else {
 		log.Fatal(s.ListenAndServe())
 	}

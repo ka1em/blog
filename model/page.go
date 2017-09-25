@@ -7,7 +7,7 @@ import (
 )
 
 type Page struct {
-	Id        uint64     `json:"id,string"           gorm:"primary_key"`
+	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"-"                   sql:"index"`

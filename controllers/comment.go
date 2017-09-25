@@ -15,7 +15,7 @@ import (
 func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
-	uid, err := model.SessionGetUserID(r)
+	uid, err := model.ValidSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.NO_USER_ID, http.StatusUnauthorized)
@@ -38,11 +38,11 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cm := &model.Comment{
-		CommentName:  param.Name,
-		CommentEmail: param.Email,
-		CommentText:  param.Comment,
-		PageId:       param.PageID,
-		UserId:       uid,
+		//CommentName:  param.Name,
+		//CommentEmail: param.Email,
+		Text:   param.Comment,
+		PageId: param.PageID,
+		UserId: uid,
 	}
 
 	if err := cm.Add(); err != nil {
@@ -74,7 +74,7 @@ func APICommentGET(w http.ResponseWriter, r *http.Request) {
 func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
-	uid, err := model.SessionGetUserID(r)
+	uid, err := model.ValidSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.NO_USER_ID, http.StatusUnauthorized)
@@ -110,9 +110,9 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := &model.Comment{
-		Id:          idn,
-		CommentText: param.Comment,
-		UserId:      uid,
+		Id:     idn,
+		Text:   param.Comment,
+		UserId: uid,
 	}
 
 	if err := c.Update(); err != nil {

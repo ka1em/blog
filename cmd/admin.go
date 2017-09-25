@@ -2,8 +2,10 @@ package cmd
 
 import "github.com/urfave/cli"
 
+// DEFAULT_ADMIN_PORT 默认后台端口
 const DEFAULT_ADMIN_PORT = "9000"
 
+// WebAdmin 管理后台启动命令
 var WebAdmin = cli.Command{
 	Name:  "webadmin",
 	Usage: "Start web admin server",

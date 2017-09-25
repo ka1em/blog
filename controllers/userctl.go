@@ -3,13 +3,9 @@ package controllers
 import (
 	"blog/common/zlog"
 	"blog/model"
-	"crypto/sha256"
-	"encoding/hex"
 	"net/http"
-	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
 )
 
 //注册
@@ -34,13 +30,10 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	salt := uuid.NewV4().String()
-
 	u := &model.User{
-		UserName:   param.Name,
-		UserEmail:  param.Email,
-		UserSalt:   salt,
-		UserPasswd: passwordHash(param.Passwd, salt),
+		Name:   param.Name,
+		Email:  param.Email,
+		Passwd: param.Passwd,
 	}
 
 	//创建用户
@@ -77,13 +70,6 @@ func (p *userRegistParam) valid() error {
 	return nil
 }
 
-func passwordHash(p, salt string) string {
-	hash := sha256.New()
-	s := p + salt
-	hash.Write([]byte(s))
-	return hex.EncodeToString(hash.Sum(nil))
-}
-
 //登录
 func LoginPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
@@ -114,17 +100,15 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := &model.User{}
-	var ok bool
-
 	//用户密码salt
-	if u, ok = model.GetValidInfo(param.Name); !ok {
+	u, ok := model.GetValidInfo(param.Name)
+	if !ok {
 		zlog.ZapLog.Error("No user")
 		data.ResponseJson(w, model.NO_USER_NAME, http.StatusBadRequest)
 		return
 	}
 
-	if u.UserPasswd != passwordHash(param.Passwd, u.UserSalt) {
+	if u.Passwd != model.PasswordHash(param.Passwd, u.Salt) {
 		zlog.ZapLog.Error("password wrong")
 		data.ResponseJson(w, model.PASSWD_ERR, http.StatusBadRequest)
 		return
@@ -162,16 +146,14 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
 	var uid uint64
-	var userIds interface{}
+	var err error
 
-	if userIds = r.Context().Value("user_id"); userIds == nil {
-		zlog.ZapLog.Error("need login ")
-		data.ResponseJson(w, model.NEED_LOGIN, http.StatusUnauthorized)
+	uid, err = model.ValidSessionUID(r)
+	if err != nil {
+		zlog.ZapLog.Error(err.Error())
+		data.ResponseJson(w, model.NO_USER_ID, http.StatusBadRequest)
 		return
 	}
-	zlog.ZapLog.Debugf("user_id in logout get : %s", userIds)
-
-	uid, _ = strconv.ParseUint(userIds.(string), 10, 64)
 
 	s := &model.Session{
 		UserId: uid,

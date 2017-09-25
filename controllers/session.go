@@ -11,9 +11,8 @@ import (
 
 func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	data := model.GetBaseData()
-	sessionStore := model.GetSessionStore()
 
-	session, err := sessionStore.Get(r, "app-session")
+	session, err := model.SessionStore.Get(r, model.COOKIE_NAME)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.MIDDLEWARE_ERR, http.StatusBadRequest)
@@ -21,7 +20,8 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	}
 
 	if sid, ok := session.Values["sid"]; ok {
-		if uid, err := model.GetUserID(sid.(string), 1); err != nil {
+		s := &model.Session{}
+		if uid, err := s.GetUserID(sid.(string), 1); err != nil {
 			if err.Error() == "record not found" {
 				zlog.ZapLog.Error(err.Error())
 				data.ResponseJson(w, model.MIDDLEWARE_ERR, http.StatusBadRequest)

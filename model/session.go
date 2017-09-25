@@ -13,6 +13,7 @@ import (
 
 	"strconv"
 
+	"github.com/go-errors/errors"
 	"github.com/gorilla/sessions"
 )
 
@@ -27,48 +28,53 @@ CREATE TABLE `sessions` (
      PRIMARY KEY (`id`),
      UNIQUE KEY `session_id` (`session_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 */
+const COOKIE_NAME = "app-session"
+const COOKIE_SEC_KEY = "our-social-network-application"
+
+var SessionStore *sessions.CookieStore
 
 type Session struct {
-	Id            uint64    `json:"id,string"              gorm:"not null;primary_key; AUTO_INCREMENT"`
-	SessionId     string    `json:"session_id"             gorm:"type:varchar(191); unique_index;not null;default '' "`
-	UserId        uint64    `json:"user_id,string"         gorm:"not null"`
-	SessionStart  time.Time `json:"session_start,string"   sql:"DEFAULT:current_timestamp"`
-	SessionUpdate time.Time `json:"session_update,string"`
-	SessionActive uint      `json:"session_active,string"  gorm:"type:tinyint(1); not null; default 0"`
+	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	CreatedAt time.Time  `json:"created_at"  sql:"DEFAULT:current_timestamp"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `sql:"index"`
 
-	Authenticated   bool `json:"authenticated,string"      gorm:"-"`
-	Unauthenticated bool `json:"unauthenticated,string"    gorm:"-"`
-	User            User `json:"user"                      gorm:"-"`
+	SessionId   string `json:"session_id" gorm:"type:varchar(191); unique_index;not null;default '' "`
+	UserId      uint64 `json:"user_id,string" gorm:"not null"`
+	Active      uint   `json:"session_active,string" gorm:"type:tinyint(1); not null; default 0"`
+	CreatedUnix uint64 `json:"created_unix" gorm:""`
+	UpdatedUnix uint64 `json:"updated_unix" gorm:""`
 }
 
-var sessionStore *sessions.CookieStore
-
-func GetSessionStore() *sessions.CookieStore {
-	if sessionStore == nil {
-		sessionStore = sessions.NewCookieStore([]byte("our-social-network-application"))
-	}
-	return sessionStore
+func init() {
+	SessionStore = sessions.NewCookieStore([]byte(COOKIE_SEC_KEY))
 }
 
-func GetUserID(sessionId string, active int) (uint64, error) {
-	s := Session{}
-	if err := db.Select("user_id").Where("session_id = ? and session_active = ?", sessionId, active).First(&s).Error; err != nil {
+// GetUserID 通过sessionId从数据库查询userid
+func (s *Session) GetUserID(sessionId string, active int) (uint64, error) {
+	if err := db.Select("user_id").Where("session_id = ? and active = ?", sessionId, active).First(&s).Error; err != nil {
 		return 0, err
 	}
 	return s.UserId, nil
+}
+
+// Close session
+func (s *Session) Close() error {
+	s.Active = 0
+	return db.Model(s).Where("user_id = ?", s.UserId).Update("active").Error
 }
 
 // UpdateSession 更新session为活跃状态
 func UpdateSession(userId uint64, sessionId string) error {
 	sess := db.Begin()
 
-	if err := sess.Exec("update sessions set session_active = 0 where user_id = ?", userId).Error; err != nil {
+	if err := sess.Exec("update sessions set active = 0 where user_id = ?", userId).Error; err != nil {
 		sess.Rollback()
 		return err
 	}
 
-	sql := "INSERT INTO sessions (session_id,user_id,session_update,session_active) VALUES (?,?,?,?)" +
-		"ON DUPLICATE KEY UPDATE user_id=?, session_update=?,session_active=?"
+	sql := "INSERT INTO sessions (session_id,user_id,updated_at,active) VALUES (?,?,?,?)" +
+		"ON DUPLICATE KEY UPDATE user_id=?, updated_at=?,active=?"
 
 	if err := sess.Exec(sql, sessionId, userId, time.Now().Format(time.RFC3339), 0,
 		userId, time.Now().Format(time.RFC3339), 1).Error; err != nil {
@@ -90,14 +96,14 @@ func generateSessionId() (string, error) {
 
 // CreateSession 创建session
 func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
-	sessionStore := GetSessionStore()
-	session, err := sessionStore.Get(r, "app-session")
+	session, err := SessionStore.Get(r, COOKIE_NAME)
 	if err != nil {
 		return "", err
 	}
 
 	if sid, valid := session.Values["sid"]; valid {
-		userId, err := GetUserID(sid.(string), 0)
+		s := &Session{}
+		userId, err := s.GetUserID(sid.(string), 0)
 		if err != nil {
 			return "", err
 		}
@@ -118,8 +124,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 
 // PreCreateSession 验证用户名之前，先行创建session
 func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
-	sessionStore := GetSessionStore()
-	session, err := sessionStore.Get(r, "app-session")
+	session, err := SessionStore.Get(r, COOKIE_NAME)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		return "", err
@@ -133,7 +138,7 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	session.Options = &sessions.Options{
 		MaxAge:   60 * 60 * 24,
 		HttpOnly: true,
-		Secure:   setting.SSL_ON,
+		Secure:   setting.SSLMode,
 	}
 
 	session.Save(r, w)
@@ -141,21 +146,15 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	return sessionId, nil
 }
 
-func (s *Session) Close() error {
-	s.SessionActive = 0
-	return db.Model(s).Where("user_id = ?", s.UserId).Update("session_active").Error
-}
-
-func SessionGetUserID(r *http.Request) (uint64, error) {
-	var err error
-	var uid uint64
+// ValidSessionUID 获取context中的user_id
+func ValidSessionUID(r *http.Request) (uint64, error) {
 	var userIds interface{}
 
 	if userIds = r.Context().Value("user_id"); userIds == nil {
-		return 0, err
+		return 0, errors.New("valid session user id is nil")
 	}
 
-	uid, err = strconv.ParseUint(userIds.(string), 10, 64)
+	uid, err := strconv.ParseUint(userIds.(string), 10, 64)
 	if err != nil {
 		return 0, err
 	}

@@ -13,8 +13,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-const DEFAULTPAGESIZE = 20
-
 func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
@@ -79,7 +77,7 @@ func (p *pageIndexParam) valid() error {
 		p.PageIndex = 1
 	}
 	if p.PageSize == 0 {
-		p.PageSize = DEFAULTPAGESIZE
+		p.PageSize = model.DEFAULT_PAGE_SIZE
 	}
 	return err
 }

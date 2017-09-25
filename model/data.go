@@ -19,6 +19,8 @@ const (
 	NEED_LOGIN
 )
 
+const DEFAULT_PAGE_SIZE = 20
+
 var errMap = map[int]string{
 	SUCCESS:         "success",
 	USER_NAME_EXIST: "user name was exist",

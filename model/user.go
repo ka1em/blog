@@ -1,9 +1,13 @@
 package model
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
-	"log"
 	"time"
+
+	"github.com/jinzhu/gorm"
+	uuid "github.com/satori/go.uuid"
 )
 
 /*
@@ -22,36 +26,62 @@ CREATE TABLE `users` (
 
 // User 用户
 type User struct {
-	ID         uint64 `json:"id,string"          gorm:"primary_key"`
-	UserName   string `json:"user_name"          gorm:"not null; type:varchar(256)"`
-	UserGuid   string `json:"user_guid"          gorm:"type:varchar(256)" `
-	UserEmail  string `json:"user_email"         gorm:"not null; type:varchar(256)"`
-	UserPasswd string `json:"-"                  gorm:"not null; type:varchar(256)"`
-	UserSalt   string `json:"-"                  gorm:"type:varchar(256)"`
-
-	Role string `json:"role" gorm:"not null; type:varchar(64)"` //角色 admin:管理员 users:用户
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	Name        string     `json:"name" gorm:"not null; type:varchar(256)"`
+	Email       string     `json:"email" gorm:"not null; type:varchar(256)"`
+	Passwd      string     `json:"-" gorm:"not null; type:varchar(256)"`
+	Salt        string     `json:"-" gorm:"type:varchar(256)"`
+	Role        string     `json:"role" gorm:"not null; type:varchar(64)"` //角色 admin:管理员 users:用户
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	DeletedAt   *time.Time `sql:"index"`
+	CreatedUnix uint64     `json:"created_unix" gorm:"type:bigint(20)"`
+	UpdatedUnix uint64     `json:"updated_unix" gorm:"type:bigint(20)"`
 }
 
 // CreateUser 创建用户
 func (u *User) CreateUser() error {
 	//判断用户名是否存在
-	if !db.Where("user_name = ?", u.UserName).First(&User{}).RecordNotFound() {
+	if !db.Where("name = ?", u.Name).First(&User{}).RecordNotFound() {
 		return errors.New("exists")
 	}
 
 	return db.Create(u).Error
 }
 
+func (u *User) BeforeCreate(scope *gorm.Scope) error {
+	id, err := sf.NextID()
+	if err != nil {
+		return err
+	}
+
+	u.ID = id
+	u.Salt = uuid.NewV4().String()
+	u.Passwd = PasswordHash(u.Passwd, u.Salt)
+
+	if err := scope.SetColumn("id", u.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *User) BeforeUpdate(scope *gorm.Scope) error {
+	return scope.SetColumn("updated_unix", time.Now().Unix())
+}
+
+func PasswordHash(p, salt string) string {
+	hash := sha256.New()
+	s := p + salt
+	hash.Write([]byte(s))
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
 // GetValidInfo 获取需要确认用户的信息
 func GetValidInfo(userName string) (*User, bool) {
 	u := &User{}
-	info := []string{"id", "user_name", "user_salt", "user_passwd"}
-	if db.Select(info).Where("user_name = ?", userName).First(u).RecordNotFound() {
-		log.Printf("%+v", *u)
+	info := []string{"id", "name", "salt", "passwd"}
+	if db.Select(info).Where("name = ?", userName).First(u).RecordNotFound() {
 		return nil, false
 	}
 	return u, true

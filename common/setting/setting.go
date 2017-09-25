@@ -12,28 +12,27 @@ import (
 )
 
 var (
-	RUN_MODE   string
-	SSL_ON     bool
-	CERT_FILE  string
-	KEY_FILE   string
-	DB_HOST    string //mysql
-	DB_PORT    string
-	DB_USER    string
-	DB_PASS    string
-	DB_BASE    string
-	DB_PARM    string
-	LOG_OUTPUT string
-	IsWindows  bool
-	AppPath    string
+	RunMode  string // RunMode 运行模式
+	SSLMode  bool   // SSLMode ssl模式
+	CertFile string // CertFile 证书
+	KeyFile  string // KeyFile 证书
+	DBHost   string // DBHost 数据库主机
+	DBPort   string // DBPort 数据库端口
+	DBUser   string // DBUser 数据库用户
+	DBPass   string // DBPass 数据库摩玛
+	DBBase   string // DBBase 数据库
+	DBParm   string // DBParm 数据库参数
+	LogPath  string // LogPath 日志路径
+	AppPath  string // AppPath 运行路径
 )
 
 const (
-	DEV_MODE  = "dev"
-	TEST_MODE = "test"
-	PROD_MODE = "prod"
+	DEV_MODE  = "dev"  // DEV_MODE dev model
+	TEST_MODE = "test" // TEST_MODE test model
+	PROD_MODE = "prod" // PROD_MODE prod model
 )
 
-// execPath returns the executable path.
+// execPath 返回执行的路径
 func execPath() (string, error) {
 	file, err := exec.LookPath(os.Args[0])
 	if err != nil {
@@ -49,7 +48,7 @@ func init() {
 	}
 }
 
-// WorkDir returns absolute path of work directory.
+// WorkDir 返回绝对路径
 func WorkDir() (string, error) {
 	wd := os.Getenv("BLOG_WORK_DIR")
 	if len(wd) > 0 {
@@ -65,8 +64,7 @@ func WorkDir() (string, error) {
 
 // NewContext  init the configure
 func NewContext(file string) {
-	//字段名忽略大小写
-	cfg, err := ini.InsensitiveLoad(file)
+	cfg, err := ini.InsensitiveLoad(file) //字段名忽略大小写
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -76,28 +74,28 @@ func NewContext(file string) {
 		log.Fatal(err.Error())
 	}
 
-	RUN_MODE = secServer.Key("RUN_MODE").MustString("dev")
+	RunMode = secServer.Key("RUN_MODE").MustString("dev")
 
-	SSL_ON = secServer.Key("ssl_on").MustBool(true)
-	CERT_FILE = secServer.Key("cert_file").MustString("")
-	KEY_FILE = secServer.Key("key_file").MustString("")
+	SSLMode = secServer.Key("ssl_on").MustBool(false)
+	CertFile = secServer.Key("cert_file").MustString("")
+	KeyFile = secServer.Key("key_file").MustString("")
 
-	secSql, err := cfg.GetSection("mysql")
+	secSQL, err := cfg.GetSection("mysql")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	DB_HOST = secSql.Key("DB_HOST").MustString("127.0.0.1")
-	DB_PORT = secSql.Key("DB_PORT").MustString("3306")
-	DB_USER = secSql.Key("DB_USER").MustString("root")
-	DB_PASS = secSql.Key("DB_PASS").MustString("passwd")
-	DB_BASE = secSql.Key("DB_BASE").MustString("lgwd")
-	DB_PARM = secSql.Key("DB_PARM").MustString("charset=utf8mb4&parseTime=True&loc=Local")
+	DBHost = secSQL.Key("DB_HOST").MustString("127.0.0.1")
+	DBPort = secSQL.Key("DB_PORT").MustString("3306")
+	DBUser = secSQL.Key("DB_USER").MustString("root")
+	DBPass = secSQL.Key("DB_PASS").MustString("")
+	DBBase = secSQL.Key("DB_BASE").MustString("lgwd")
+	DBParm = secSQL.Key("DB_PARM").MustString("charset=utf8mb4&parseTime=True&loc=Local")
 
 	secZap, err := cfg.GetSection("zap_log")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	LOG_OUTPUT = secZap.Key("LOG_OUTPUT").MustString("stdout")
+	LogPath = secZap.Key("LOG_OUTPUT").MustString("stdout")
 }

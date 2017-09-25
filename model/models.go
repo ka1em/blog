@@ -29,7 +29,7 @@ func updateDB() error {
 	var err error
 
 	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
-		setting.DB_USER, setting.DB_PASS, setting.DB_HOST, setting.DB_PORT, setting.DB_BASE, setting.DB_PARM)
+		setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
 
 	if db, err = gorm.Open("mysql", dbConn); err != nil {
 		return err
