@@ -56,13 +56,11 @@ func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	if err != nil {
 		return err
 	}
-
 	u.ID = id
 	u.Salt = uuid.NewV4().String()
-	u.Passwd = PasswordHash(u.Passwd, u.Salt)
+	u.Passwd = passwordHash(u.Passwd, u.Salt)
 	u.CreatedUnix = time.Now().Unix()
 	u.UpdatedUnix = time.Now().Unix()
-
 	return nil
 }
 
@@ -70,19 +68,30 @@ func (u *User) BeforeUpdate(scope *gorm.Scope) error {
 	return scope.SetColumn("updated_unix", time.Now().Unix())
 }
 
-func PasswordHash(p, salt string) string {
+func passwordHash(p, salt string) string {
 	hash := sha256.New()
 	s := p + salt
 	hash.Write([]byte(s))
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-// GetValidInfo 获取需要确认用户的信息
-func GetValidInfo(userName string) (*User, bool) {
+// getValidInfo 获取需要确认用户的信息
+func getValidInfo(userName string) (*User, bool) {
 	u := &User{}
 	info := []string{"id", "name", "salt", "passwd"}
 	if db.Select(info).Where("name = ?", userName).First(u).RecordNotFound() {
 		return nil, false
 	}
 	return u, true
+}
+
+func CheckPasswd(name, passwd string) (*User, bool, error) {
+	u, ok := getValidInfo(name)
+	if !ok {
+		return nil, false, errors.New(ErrMap[NO_USER_NAME])
+	}
+	if u.Passwd != passwordHash(passwd, u.Salt) {
+		return nil, false, errors.New(ErrMap[PASSWD_ERR])
+	}
+	return u, true, nil
 }

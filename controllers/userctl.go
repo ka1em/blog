@@ -101,16 +101,15 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//用户密码salt
-	u, ok := model.GetValidInfo(param.Name)
-	if !ok {
-		zlog.ZapLog.Error("No user")
+	u, ok, err := model.CheckPasswd(param.Name, param.Passwd)
+	if err != nil {
+		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.NO_USER_NAME, http.StatusBadRequest)
 		return
 	}
 
-	if u.Passwd != model.PasswordHash(param.Passwd, u.Salt) {
-		zlog.ZapLog.Error("password wrong")
+	if !ok {
+		zlog.ZapLog.Error("passwd error")
 		data.ResponseJson(w, model.PASSWD_ERR, http.StatusBadRequest)
 		return
 	}

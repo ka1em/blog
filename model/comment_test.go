@@ -23,14 +23,14 @@ func TestMain(m *testing.M) {
 func TestCommentAddCommentTrascation(t *testing.T) {
 	tx := tdb.Begin()
 
-	c1 := Comment{Id: 4}
+	c1 := Comment{ID: 4}
 	if err := tx.Create(&c1).Error; err != nil {
 		tx.Rollback()
-		t.Fatal( err.Error())
+		t.Fatal(err.Error())
 		return
 	}
 
-	c2 := Comment{Id: 4}
+	c2 := Comment{ID: 4}
 	if err := tx.Create(&c2).Error; err != nil {
 		tx.Rollback()
 		t.Fatal(err.Error())
