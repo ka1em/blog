@@ -4,6 +4,8 @@ import (
 	"blog/common/setting"
 	"log"
 
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -11,17 +13,25 @@ import (
 var ZapLog *zap.SugaredLogger
 
 func ZapLogInit() {
+	if setting.LogPath != "stdout" {
+		fd, err := os.OpenFile(setting.LogPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err.Error())
+		}
+		defer fd.Close()
+	}
+
 	zapCfg := zap.Config{
 		Level:       zap.NewAtomicLevelAt(zapLogLevel(setting.RunMode)),
 		Development: true,
 		Encoding:    "console",
 		EncoderConfig: zapcore.EncoderConfig{
-			TimeKey:        "T",
-			LevelKey:       "L",
-			NameKey:        "N",
-			CallerKey:      "C",
-			MessageKey:     "M",
-			StacktraceKey:  "",
+			TimeKey:    "T",
+			LevelKey:   "L",
+			NameKey:    "N",
+			CallerKey:  "C",
+			MessageKey: "M",
+			//StacktraceKey:  "S",
 			LineEnding:     zapcore.DefaultLineEnding,
 			EncodeLevel:    zapcore.CapitalColorLevelEncoder,
 			EncodeTime:     zapcore.ISO8601TimeEncoder,

@@ -10,8 +10,6 @@ import (
 	"blog/model"
 	"blog/router"
 
-	"blog/common/middleware"
-
 	"github.com/urfave/cli"
 	"github.com/urfave/negroni"
 )
@@ -20,7 +18,7 @@ const (
 	// DEFALUT_PORT 默认端口
 	DEFALUT_PORT = "8443"
 	// DEFAULT_CONFIG_FILEPATH 默认配置文件
-	DEFAULT_CONFIG_FILEPATH = "config/dev.ini"
+	DEFAULT_CONFIG_FILEPATH = "conf/dev.ini"
 )
 
 // Web blog后端启动命令
@@ -52,12 +50,10 @@ func runWeb(c *cli.Context) {
 
 	r := router.InitRouters()
 
-	//n := negroni.Classic() // 导入一些预设的中间件
 	n := negroni.New()
 	n.Use(negroni.NewStatic(http.Dir("static")))
 	n.Use(negroni.NewRecovery())
-
-	n.Use(middleware.NewLogger())
+	n.Use(negroni.NewLogger())
 
 	n.UseHandler(r)
 

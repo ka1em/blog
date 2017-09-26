@@ -34,7 +34,7 @@ const COOKIE_SEC_KEY = "our-social-network-application"
 var SessionStore *sessions.CookieStore
 
 type Session struct {
-	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	ID        uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	CreatedAt time.Time  `json:"created_at"  sql:"DEFAULT:current_timestamp"`
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `sql:"index"`
@@ -51,11 +51,9 @@ func init() {
 }
 
 // GetUserID 通过sessionId从数据库查询userid
-func (s *Session) GetUserID(sessionId string, active int) (uint64, error) {
-	if err := db.Select("user_id").Where("session_id = ? and active = ?", sessionId, active).First(&s).Error; err != nil {
-		return 0, err
-	}
-	return s.UserId, nil
+func (s *Session) GetUserID(sessionId string, active int) (uint64, bool) {
+	ok := !db.Select("user_id").Where("session_id = ? and active = ?", sessionId, active).First(&s).RecordNotFound()
+	return s.UserId, ok
 }
 
 // Close session
@@ -103,9 +101,9 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 
 	if sid, valid := session.Values["sid"]; valid {
 		s := &Session{}
-		userId, err := s.GetUserID(sid.(string), 0)
-		if err != nil {
-			return "", err
+		userId, ok := s.GetUserID(sid.(string), 0)
+		if !ok {
+			return "", errors.New("no user id in CreateSession")
 		}
 		UpdateSession(userId, sid.(string))
 		zlog.ZapLog.Debugf("sid = %s", sid)
