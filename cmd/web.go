@@ -10,6 +10,8 @@ import (
 	"blog/model"
 	"blog/router"
 
+	"blog/common/middleware"
+
 	"github.com/urfave/cli"
 	"github.com/urfave/negroni"
 )
@@ -50,7 +52,13 @@ func runWeb(c *cli.Context) {
 
 	r := router.InitRouters()
 
-	n := negroni.Classic() // 导入一些预设的中间件
+	//n := negroni.Classic() // 导入一些预设的中间件
+	n := negroni.New()
+	n.Use(negroni.NewStatic(http.Dir("static")))
+	n.Use(negroni.NewRecovery())
+
+	n.Use(middleware.NewLogger())
+
 	n.UseHandler(r)
 
 	s := &http.Server{

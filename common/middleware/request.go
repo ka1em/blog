@@ -1,29 +1,31 @@
-package negroni
+package middleware
 
 import (
 	"bytes"
-
+	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"text/template"
 	"time"
+
+	"github.com/urfave/negroni"
 )
 
 // LoggerEntry is the structure
 // passed to the template.
 type LoggerEntry struct {
-	StartTime string
-	Status    int
-	Duration  time.Duration
-	Hostname  string
-	Method    string
-	Path      string
+	StartTime  string
+	Status     int
+	Duration   time.Duration
+	Hostname   string
+	Method     string
+	Path       string
+	RemoteAddr string
 }
 
 // LoggerDefaultFormat is the format
 // logged used by the default Logger instance.
-var LoggerDefaultFormat = "{{.StartTime}} | {{.Status}} | \t {{.Duration}} | {{.Hostname}} | {{.Method}} {{.Path}} \n"
+var LoggerDefaultFormat = "{{.StartTime}} | {{.Status}} | \t {{.Duration}} | {{.Hostname}} | {{.Method}} {{.Path}} {{.RemoteAddr}} \n"
 
 // LoggerDefaultDateFormat is the
 // format used for date by the
@@ -64,14 +66,15 @@ func (l *Logger) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.Ha
 
 	next(rw, r)
 
-	res := rw.(ResponseWriter)
+	res := rw.(negroni.ResponseWriter)
 	log := LoggerEntry{
-		StartTime: start.Format(l.dateFormat),
-		Status:    res.Status(),
-		Duration:  time.Since(start),
-		Hostname:  r.Host,
-		Method:    r.Method,
-		Path:      r.URL.Path,
+		StartTime:  start.Format(l.dateFormat),
+		Status:     res.Status(),
+		Duration:   time.Since(start),
+		Hostname:   r.Host,
+		Method:     r.Method,
+		Path:       r.URL.Path,
+		RemoteAddr: r.RemoteAddr,
 	}
 
 	buff := &bytes.Buffer{}
