@@ -61,7 +61,7 @@ func runWeb(c *cli.Context) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	if setting.SSLMode == true && setting.RunMode == setting.PROD_MODE {
+	if setting.SSLMode == true {
 		log.Fatal(s.ListenAndServeTLS(setting.CertFile, setting.KeyFile))
 	} else {
 		log.Fatal(s.ListenAndServe())
