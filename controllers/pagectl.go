@@ -10,7 +10,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	uuid "github.com/satori/go.uuid"
 )
 
 func PageIndexGET(w http.ResponseWriter, r *http.Request) {
@@ -123,9 +122,8 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p := &model.Page{
-		Content:  param.Content,
-		Title:    param.Title,
-		PageGuid: uuid.NewV4().String(),
+		Content: param.Content,
+		Title:   param.Title,
 	}
 
 	if err := p.Add(); err != nil {
