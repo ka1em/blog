@@ -1,17 +1,14 @@
 package model
 
 import (
+	"blog/common/setting"
+	zlog "blog/common/zlog"
 	"crypto/rand"
 	"encoding/base64"
 	"io"
 	"net/http"
-	"time"
-
-	zlog "blog/common/zlog"
-
-	"blog/common/setting"
-
 	"strconv"
+	"time"
 
 	"github.com/go-errors/errors"
 	"github.com/gorilla/sessions"
