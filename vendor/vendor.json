@@ -93,6 +93,12 @@
 			"revisionTime": "2017-09-11T04:08:19Z"
 		},
 		{
+			"checksumSHA1": "m3LLSib5KymwNeX9/GqCkucRQb0=",
+			"path": "github.com/urfave/negroni",
+			"revision": "f764158de23f0896672ed51f40c119cc15edc12f",
+			"revisionTime": "2017-09-29T21:24:02Z"
+		},
+		{
 			"checksumSHA1": "Cb/0fJ4LaTnI/Y/haiAr03M/6NM=",
 			"path": "go.uber.org/atomic",
 			"revision": "a85b15eff9f2092b1cf20d4fb804899dd0d5e422",
