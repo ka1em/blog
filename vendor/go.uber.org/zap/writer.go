@@ -24,9 +24,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"go.uber.org/zap/internal/multierror"
 	"go.uber.org/zap/zapcore"
-
-	"go.uber.org/multierr"
 )
 
 // Open is a high-level wrapper that takes a variadic number of paths, opens or
@@ -47,7 +46,7 @@ func Open(paths ...string) (zapcore.WriteSyncer, func(), error) {
 }
 
 func open(paths []string) ([]zapcore.WriteSyncer, func(), error) {
-	var openErr error
+	var errs multierror.Error
 	writers := make([]zapcore.WriteSyncer, 0, len(paths))
 	files := make([]*os.File, 0, len(paths))
 	close := func() {
@@ -67,27 +66,23 @@ func open(paths []string) ([]zapcore.WriteSyncer, func(), error) {
 			continue
 		}
 		f, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-		openErr = multierr.Append(openErr, err)
+		errs = errs.Append(err)
 		if err == nil {
 			writers = append(writers, f)
 			files = append(files, f)
 		}
 	}
 
-	if openErr != nil {
+	if err := errs.AsError(); err != nil {
 		close()
-		return writers, nil, openErr
+		return writers, nil, err
 	}
 
 	return writers, close, nil
 }
 
-// CombineWriteSyncers is a utility that combines multiple WriteSyncers into a
-// single, locked WriteSyncer. If no inputs are supplied, it returns a no-op
+// CombineWriteSyncers combines multiple WriteSyncers into a single, locked
 // WriteSyncer.
-//
-// It's provided purely as a convenience; the result is no different from
-// using zapcore.NewMultiWriteSyncer and zapcore.Lock individually.
 func CombineWriteSyncers(writers ...zapcore.WriteSyncer) zapcore.WriteSyncer {
 	if len(writers) == 0 {
 		return zapcore.AddSync(ioutil.Discard)

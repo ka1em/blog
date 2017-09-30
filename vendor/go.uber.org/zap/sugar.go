@@ -23,9 +23,8 @@ package zap
 import (
 	"fmt"
 
+	"go.uber.org/zap/internal/multierror"
 	"go.uber.org/zap/zapcore"
-
-	"go.uber.org/multierr"
 )
 
 const (
@@ -36,20 +35,11 @@ const (
 // A SugaredLogger wraps the base Logger functionality in a slower, but less
 // verbose, API. Any Logger can be converted to a SugaredLogger with its Sugar
 // method.
-//
-// Unlike the Logger, the SugaredLogger doesn't insist on structured logging.
-// For each zlog level, it exposes three methods: one for loosely-typed
-// structured logging, one for println-style formatting, and one for
-// printf-style formatting. For example, SugaredLoggers can produce InfoLevel
-// output with Infow ("info with" structured context), Info, or Infof.
 type SugaredLogger struct {
 	base *Logger
 }
 
-// Desugar unwraps a SugaredLogger, exposing the original Logger. Desugaring
-// is quite inexpensive, so it's reasonable for a single application to use
-// both Loggers and SugaredLoggers, converting between them on the boundaries
-// of performance-sensitive code.
+// Desugar unwraps a SugaredLogger, exposing the original Logger.
 func (s *SugaredLogger) Desugar() *Logger {
 	base := s.base.clone()
 	base.callerSkip -= 2
@@ -75,7 +65,7 @@ func (s *SugaredLogger) Named(name string) *SugaredLogger {
 //     "user", User{Name: "alice"},
 //  )
 // is the equivalent of
-//   unsugared.With(
+//   baseLogger.With(
 //     String("hello", "world"),
 //     String("failure", "oh no"),
 //     Stack(),
@@ -85,81 +75,81 @@ func (s *SugaredLogger) Named(name string) *SugaredLogger {
 //
 // Note that the keys in key-value pairs should be strings. In development,
 // passing a non-string key panics. In production, the logger is more
-// forgiving: a separate error is logged, but the key-value pair is skipped
-// and execution continues. Passing an orphaned key triggers similar behavior:
+// forgiving: a separate error is logged, but the key-value pair is skipped and
+// execution continues. Passing an orphaned key triggers similar behavior:
 // panics in development and errors in production.
 func (s *SugaredLogger) With(args ...interface{}) *SugaredLogger {
 	return &SugaredLogger{base: s.base.With(s.sweetenFields(args)...)}
 }
 
-// Debug uses fmt.Sprint to construct and zlog a message.
+// Debug uses fmt.Sprint to construct and log a message.
 func (s *SugaredLogger) Debug(args ...interface{}) {
 	s.log(DebugLevel, "", args, nil)
 }
 
-// Info uses fmt.Sprint to construct and zlog a message.
+// Info uses fmt.Sprint to construct and log a message.
 func (s *SugaredLogger) Info(args ...interface{}) {
 	s.log(InfoLevel, "", args, nil)
 }
 
-// Warn uses fmt.Sprint to construct and zlog a message.
+// Warn uses fmt.Sprint to construct and log a message.
 func (s *SugaredLogger) Warn(args ...interface{}) {
 	s.log(WarnLevel, "", args, nil)
 }
 
-// Error uses fmt.Sprint to construct and zlog a message.
+// Error uses fmt.Sprint to construct and log a message.
 func (s *SugaredLogger) Error(args ...interface{}) {
 	s.log(ErrorLevel, "", args, nil)
 }
 
-// DPanic uses fmt.Sprint to construct and zlog a message. In development, the
+// DPanic uses fmt.Sprint to construct and log a message. In development, the
 // logger then panics. (See DPanicLevel for details.)
 func (s *SugaredLogger) DPanic(args ...interface{}) {
 	s.log(DPanicLevel, "", args, nil)
 }
 
-// Panic uses fmt.Sprint to construct and zlog a message, then panics.
+// Panic uses fmt.Sprint to construct and log a message, then panics.
 func (s *SugaredLogger) Panic(args ...interface{}) {
 	s.log(PanicLevel, "", args, nil)
 }
 
-// Fatal uses fmt.Sprint to construct and zlog a message, then calls os.Exit.
+// Fatal uses fmt.Sprint to construct and log a message, then calls os.Exit.
 func (s *SugaredLogger) Fatal(args ...interface{}) {
 	s.log(FatalLevel, "", args, nil)
 }
 
-// Debugf uses fmt.Sprintf to zlog a templated message.
+// Debugf uses fmt.Sprintf to log a templated message.
 func (s *SugaredLogger) Debugf(template string, args ...interface{}) {
 	s.log(DebugLevel, template, args, nil)
 }
 
-// Infof uses fmt.Sprintf to zlog a templated message.
+// Infof uses fmt.Sprintf to log a templated message.
 func (s *SugaredLogger) Infof(template string, args ...interface{}) {
 	s.log(InfoLevel, template, args, nil)
 }
 
-// Warnf uses fmt.Sprintf to zlog a templated message.
+// Warnf uses fmt.Sprintf to log a templated message.
 func (s *SugaredLogger) Warnf(template string, args ...interface{}) {
 	s.log(WarnLevel, template, args, nil)
 }
 
-// Errorf uses fmt.Sprintf to zlog a templated message.
+// Errorf uses fmt.Sprintf to log a templated message.
 func (s *SugaredLogger) Errorf(template string, args ...interface{}) {
 	s.log(ErrorLevel, template, args, nil)
 }
 
-// DPanicf uses fmt.Sprintf to zlog a templated message. In development, the
+// DPanicf uses fmt.Sprintf to log a templated message. In development, the
 // logger then panics. (See DPanicLevel for details.)
 func (s *SugaredLogger) DPanicf(template string, args ...interface{}) {
 	s.log(DPanicLevel, template, args, nil)
 }
 
-// Panicf uses fmt.Sprintf to zlog a templated message, then panics.
+// Panicf uses fmt.Sprintf to log a templated message, then panics.
 func (s *SugaredLogger) Panicf(template string, args ...interface{}) {
 	s.log(PanicLevel, template, args, nil)
 }
 
-// Fatalf uses fmt.Sprintf to zlog a templated message, then calls os.Exit.
+// Fatalf uses fmt.Sprintf to log a templated message, then calls os.Exit.
 func (s *SugaredLogger) Fatalf(template string, args ...interface{}) {
 	s.log(FatalLevel, template, args, nil)
 }
@@ -210,7 +200,7 @@ func (s *SugaredLogger) Fatalw(msg string, keysAndValues ...interface{}) {
 	s.log(FatalLevel, msg, nil, keysAndValues)
 }
 
-// Sync flushes any buffered zlog entries.
+// Sync flushes any buffered log entries.
 func (s *SugaredLogger) Sync() error {
 	return s.base.Sync()
 }
@@ -274,7 +264,7 @@ func (s *SugaredLogger) sweetenFields(args []interface{}) []zapcore.Field {
 		i += 2
 	}
 
-	// If we encountered any invalid key-value pairs, zlog an error.
+	// If we encountered any invalid key-value pairs, log an error.
 	if len(invalid) > 0 {
 		s.base.DPanic(_nonStringKeyErrMsg, Array("invalid", invalid))
 	}
@@ -296,9 +286,9 @@ func (p invalidPair) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 type invalidPairs []invalidPair
 
 func (ps invalidPairs) MarshalLogArray(enc zapcore.ArrayEncoder) error {
-	var err error
+	var errs multierror.Error
 	for i := range ps {
-		err = multierr.Append(err, enc.AppendObject(ps[i]))
+		errs = errs.Append(enc.AppendObject(ps[i]))
 	}
-	return err
+	return errs.AsError()
 }

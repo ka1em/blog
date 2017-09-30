@@ -48,7 +48,7 @@ type consoleEncoder struct {
 }
 
 // NewConsoleEncoder creates an encoder whose output is designed for human -
-// rather than machine - consumption. It serializes the core zlog entry data
+// rather than machine - consumption. It serializes the core log entry data
 // (message, level, timestamp, etc.) in a plain-text format and leaves the
 // structured context as JSON.
 //
@@ -80,14 +80,7 @@ func (c consoleEncoder) EncodeEntry(ent Entry, fields []Field) (*buffer.Buffer, 
 		c.EncodeLevel(ent.Level, arr)
 	}
 	if ent.LoggerName != "" && c.NameKey != "" {
-		nameEncoder := c.EncodeName
-
-		if nameEncoder == nil {
-			// Fall back to FullNameEncoder for backward compatibility.
-			nameEncoder = FullNameEncoder
-		}
-
-		nameEncoder(ent.LoggerName, arr)
+		arr.AppendString(ent.LoggerName)
 	}
 	if ent.Caller.Defined && c.CallerKey != "" && c.EncodeCaller != nil {
 		c.EncodeCaller(ent.Caller, arr)

@@ -35,7 +35,7 @@ var (
 
 var errLog = Logger(log.New(os.Stderr, "[mysql] ", log.Ldate|log.Ltime|log.Lshortfile))
 
-// Logger is used to zlog critical error messages.
+// Logger is used to log critical error messages.
 type Logger interface {
 	Print(v ...interface{})
 }

@@ -20,7 +20,7 @@
 
 package zapcore
 
-import "go.uber.org/multierr"
+import "go.uber.org/zap/internal/multierror"
 
 type hooked struct {
 	Core
@@ -41,7 +41,7 @@ func RegisterHooks(core Core, hooks ...func(Entry) error) Core {
 }
 
 func (h *hooked) Check(ent Entry, ce *CheckedEntry) *CheckedEntry {
-	// Let the wrapped Core decide whether to zlog this message or not. This
+	// Let the wrapped Core decide whether to log this message or not. This
 	// also gives the downstream a chance to register itself directly with the
 	// CheckedEntry.
 	if downstream := h.Core.Check(ent, ce); downstream != nil {
@@ -60,9 +60,9 @@ func (h *hooked) With(fields []Field) Core {
 func (h *hooked) Write(ent Entry, _ []Field) error {
 	// Since our downstream had a chance to register itself directly with the
 	// CheckedMessage, we don't need to call it here.
-	var err error
+	var errs multierror.Error
 	for i := range h.funcs {
-		err = multierr.Append(err, h.funcs[i](ent))
+		errs = errs.Append(h.funcs[i](ent))
 	}
-	return err
+	return errs.AsError()
 }

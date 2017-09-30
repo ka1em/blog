@@ -42,12 +42,10 @@ var (
 	_encoderMutex sync.RWMutex
 )
 
-// RegisterEncoder registers an encoder constructor, which the Config struct
-// can then reference. By default, the "json" and "console" encoders are
-// registered.
+// RegisterEncoder registers an encoder constructor for the given name.
 //
-// Attempting to register an encoder whose name is already taken returns an
-// error.
+// If an encoder with the same name already exists, this will return an error.
+// By default, the encoders "json" and "console" are registered.
 func RegisterEncoder(name string, constructor func(zapcore.EncoderConfig) (zapcore.Encoder, error)) error {
 	_encoderMutex.Lock()
 	defer _encoderMutex.Unlock()

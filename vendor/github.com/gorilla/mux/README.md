@@ -15,7 +15,7 @@ The name mux stands for "HTTP request multiplexer". Like the standard `http.Serv
 
 * It implements the `http.Handler` interface so it is compatible with the standard `http.ServeMux`.
 * Requests can be matched based on URL host, path, path prefix, schemes, header and query values, HTTP methods or using custom matchers.
-* URL hosts, paths and query values can have variables with an optional regular expression.
+* URL hosts and paths can have variables with an optional regular expression.
 * Registered URLs can be built, or "reversed", which helps maintaining references to resources.
 * Routes can be used as subrouters: nested routes are only tested if the parent route matches. This is useful to define groups of routes that share common conditions like a host, a path prefix or other repeated attributes. As a bonus, this optimizes request matching.
 
@@ -268,21 +268,19 @@ url, err := r.Get("article").URL("category", "technology", "id", "42")
 "/articles/technology/42"
 ```
 
-This also works for host and query value variables:
+This also works for host variables:
 
 ```go
 r := mux.NewRouter()
 r.Host("{subdomain}.domain.com").
   Path("/articles/{category}/{id:[0-9]+}").
-  Queries("filter", "{filter}")
   HandlerFunc(ArticleHandler).
   Name("article")
 
-// url.String() will be "http://news.domain.com/articles/technology/42?filter=gorilla"
+// url.String() will be "http://news.domain.com/articles/technology/42"
 url, err := r.Get("article").URL("subdomain", "news",
                                  "category", "technology",
-                                 "id", "42",
-                                 "filter", "gorilla")
+                                 "id", "42")
 ```
 
 All variables defined in the route are required, and their values must conform to the corresponding patterns. These requirements guarantee that a generated URL will always match a registered route -- the only exception is for explicitly defined "build-only" routes which never match.

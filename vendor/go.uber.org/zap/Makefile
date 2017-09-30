@@ -3,7 +3,9 @@ export GO15VENDOREXPERIMENT=1
 BENCH_FLAGS ?= -cpuprofile=cpu.pprof -memprofile=mem.pprof -benchmem
 PKGS ?= $(shell glide novendor)
 # Many Go tools take file globs or directories as arguments instead of packages.
-PKG_FILES ?= *.go zapcore benchmarks buffer zapgrpc zaptest zaptest/observer internal/bufferpool internal/exit internal/color
+PKG_FILES ?= *.go zapcore benchmarks buffer zapgrpc zaptest zaptest/observer internal/bufferpool internal/exit internal/multierror internal/color
+
+COVERALLS_IGNORE := internal/readme/readme.go
 
 # The linting tools evolve with each Go version, so run them only on the latest
 # stable release.
@@ -61,9 +63,9 @@ endif
 test:
 	go test -race $(PKGS)
 
-.PHONY: cover
-cover:
-	./scripts/cover.sh $(PKGS)
+.PHONY: coveralls
+coveralls:
+	goveralls -ignore=$(COVERALLS_IGNORE) -service=travis-ci
 
 .PHONY: bench
 BENCH ?= .

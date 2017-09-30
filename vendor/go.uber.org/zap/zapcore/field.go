@@ -21,10 +21,8 @@
 package zapcore
 
 import (
-	"bytes"
 	"fmt"
 	"math"
-	"reflect"
 	"time"
 )
 
@@ -93,7 +91,7 @@ const (
 
 // A Field is a marshaling operation used to add a key-value pair to a logger's
 // context. Most fields are lazily marshaled, so it's inexpensive to add fields
-// to disabled debug-level zlog statements.
+// to disabled debug-level log statements.
 type Field struct {
 	Key       string
 	Type      FieldType
@@ -162,7 +160,17 @@ func (f Field) AddTo(enc ObjectEncoder) {
 	case StringerType:
 		enc.AddString(f.Key, f.Interface.(fmt.Stringer).String())
 	case ErrorType:
-		encodeError(f.Key, f.Interface.(error), enc)
+		val := f.Interface.(error)
+		basic := val.Error()
+		enc.AddString(f.Key, basic)
+		if fancy, ok := val.(fmt.Formatter); ok {
+			verbose := fmt.Sprintf("%+v", fancy)
+			if verbose != basic {
+				// This is a rich error type, like those produced by
+				// github.com/pkg/errors.
+				enc.AddString(f.Key+"Verbose", verbose)
+			}
+		}
 	case SkipType:
 		break
 	default:
@@ -171,26 +179,6 @@ func (f Field) AddTo(enc ObjectEncoder) {
 
 	if err != nil {
 		enc.AddString(fmt.Sprintf("%sError", f.Key), err.Error())
-	}
-}
-
-// Equals returns whether two fields are equal. For non-primitive types such as
-// errors, marshalers, or reflect types, it uses reflect.DeepEqual.
-func (f Field) Equals(other Field) bool {
-	if f.Type != other.Type {
-		return false
-	}
-	if f.Key != other.Key {
-		return false
-	}
-
-	switch f.Type {
-	case BinaryType, ByteStringType:
-		return bytes.Equal(f.Interface.([]byte), other.Interface.([]byte))
-	case ArrayMarshalerType, ObjectMarshalerType, ErrorType, ReflectType:
-		return reflect.DeepEqual(f.Interface, other.Interface)
-	default:
-		return f == other
 	}
 }
 

@@ -20,11 +20,11 @@
 
 package zapcore
 
-import "go.uber.org/multierr"
+import "go.uber.org/zap/internal/multierror"
 
 type multiCore []Core
 
-// NewTee creates a Core that duplicates zlog entries into two or more
+// NewTee creates a Core that duplicates log entries into two or more
 // underlying Cores.
 //
 // Calling it with a single Core returns the input unchanged, and calling
@@ -65,17 +65,17 @@ func (mc multiCore) Check(ent Entry, ce *CheckedEntry) *CheckedEntry {
 }
 
 func (mc multiCore) Write(ent Entry, fields []Field) error {
-	var err error
+	var errs multierror.Error
 	for i := range mc {
-		err = multierr.Append(err, mc[i].Write(ent, fields))
+		errs = errs.Append(mc[i].Write(ent, fields))
 	}
-	return err
+	return errs.AsError()
 }
 
 func (mc multiCore) Sync() error {
-	var err error
+	var errs multierror.Error
 	for i := range mc {
-		err = multierr.Append(err, mc[i].Sync())
+		errs = errs.Append(mc[i].Sync())
 	}
-	return err
+	return errs.AsError()
 }

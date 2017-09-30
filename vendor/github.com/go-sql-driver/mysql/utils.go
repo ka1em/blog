@@ -29,15 +29,15 @@ var (
 //  rootCertPool := x509.NewCertPool()
 //  pem, err := ioutil.ReadFile("/path/ca-cert.pem")
 //  if err != nil {
-//      zlog.Fatal(err)
+//      log.Fatal(err)
 //  }
 //  if ok := rootCertPool.AppendCertsFromPEM(pem); !ok {
-//      zlog.Fatal("Failed to append PEM.")
+//      log.Fatal("Failed to append PEM.")
 //  }
 //  clientCert := make([]tls.Certificate, 0, 1)
 //  certs, err := tls.LoadX509KeyPair("/path/client-cert.pem", "/path/client-key.pem")
 //  if err != nil {
-//      zlog.Fatal(err)
+//      log.Fatal(err)
 //  }
 //  clientCert = append(clientCert, certs)
 //  mysql.RegisterTLSConfig("custom", &tls.Config{

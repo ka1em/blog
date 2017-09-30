@@ -48,17 +48,13 @@ const (
 
 // LevelEnablerFunc is a convenient way to implement zapcore.LevelEnabler with
 // an anonymous function.
-//
-// It's particularly useful when splitting zlog output between different
-// outputs (e.g., standard error and standard out). For sample code, see the
-// package-level AdvancedConfiguration example.
 type LevelEnablerFunc func(zapcore.Level) bool
 
 // Enabled calls the wrapped function.
 func (f LevelEnablerFunc) Enabled(lvl zapcore.Level) bool { return f(lvl) }
 
 // An AtomicLevel is an atomically changeable, dynamic logging level. It lets
-// you safely change the zlog level of a tree of loggers (the root logger and
+// you safely change the log level of a tree of loggers (the root logger and
 // any children created by adding context) at runtime.
 //
 // The AtomicLevel itself is an http.Handler that serves a JSON endpoint to
@@ -92,7 +88,7 @@ func (lvl AtomicLevel) Enabled(l zapcore.Level) bool {
 	return lvl.Level().Enabled(l)
 }
 
-// Level returns the minimum enabled zlog level.
+// Level returns the minimum enabled log level.
 func (lvl AtomicLevel) Level() zapcore.Level {
 	return zapcore.Level(int8(lvl.l.Load()))
 }

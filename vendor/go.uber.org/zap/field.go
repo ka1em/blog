@@ -28,8 +28,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// Skip constructs a no-op field, which is often useful when handling invalid
-// inputs in other Field constructors.
+// Skip constructs a no-op field.
 func Skip() zapcore.Field {
 	return zapcore.Field{Type: zapcore.SkipType}
 }
@@ -37,7 +36,7 @@ func Skip() zapcore.Field {
 // Binary constructs a field that carries an opaque binary blob.
 //
 // Binary data is serialized in an encoding-appropriate format. For example,
-// zap's JSON encoder base64-encodes binary blobs. To zlog UTF-8 encoded text,
+// zap's JSON encoder base64-encodes binary blobs. To log UTF-8 encoded text,
 // use ByteString.
 func Binary(key string, val []byte) zapcore.Field {
 	return zapcore.Field{Key: key, Type: zapcore.BinaryType, Interface: val}
@@ -53,7 +52,7 @@ func Bool(key string, val bool) zapcore.Field {
 }
 
 // ByteString constructs a field that carries UTF-8 encoded text as a []byte.
-// To zlog opaque binary blobs (which aren't necessarily valid UTF-8), use
+// To log opaque binary blobs (which aren't necessarily valid UTF-8), use
 // Binary.
 func ByteString(key string, val []byte) zapcore.Field {
 	return zapcore.Field{Key: key, Type: zapcore.ByteStringType, Interface: val}
@@ -153,7 +152,7 @@ func Uintptr(key string, val uintptr) zapcore.Field {
 // allocation-heavy. Outside tests, Any is always a better choice.
 //
 // If encoding fails (e.g., trying to serialize a map[int]string to JSON), Reflect
-// includes the error message in the final zlog output.
+// includes the error message in the final log output.
 func Reflect(key string, val interface{}) zapcore.Field {
 	return zapcore.Field{Key: key, Type: zapcore.ReflectType, Interface: val}
 }
@@ -177,6 +176,25 @@ func Stringer(key string, val fmt.Stringer) zapcore.Field {
 // controls how the time is serialized.
 func Time(key string, val time.Time) zapcore.Field {
 	return zapcore.Field{Key: key, Type: zapcore.TimeType, Integer: val.UnixNano(), Interface: val.Location()}
+}
+
+// Error is shorthand for the common idiom NamedError("error", err).
+func Error(err error) zapcore.Field {
+	return NamedError("error", err)
+}
+
+// NamedError constructs a field that lazily stores err.Error() under the
+// provided key. Errors which also implement fmt.Formatter (like those produced
+// by github.com/pkg/errors) will also have their verbose representation stored
+// under key+"Verbose". If passed a nil error, the field is a no-op.
+//
+// For the common case in which the key is simply "error", the Error function
+// is shorter and less repetitive.
+func NamedError(key string, err error) zapcore.Field {
+	if err == nil {
+		return Skip()
+	}
+	return zapcore.Field{Key: key, Type: zapcore.ErrorType, Interface: err}
 }
 
 // Stack constructs a field that stores a stacktrace of the current goroutine

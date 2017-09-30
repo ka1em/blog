@@ -27,18 +27,16 @@ func TestCommentAddCommentTrascation(t *testing.T) {
 	if err := tx.Create(&c1).Error; err != nil {
 		tx.Rollback()
 		t.Fatal(err.Error())
-		return
 	}
 
 	c2 := Comment{ID: 4}
 	if err := tx.Create(&c2).Error; err != nil {
 		tx.Rollback()
 		t.Fatal(err.Error())
-		return
 	}
 
 	err := tx.Commit().Error
-	if err == nil {
+	if err != nil {
 		t.Fatalf("test trascation error")
 		return
 	}

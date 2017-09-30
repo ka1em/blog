@@ -26,7 +26,7 @@ import "time"
 // map[string]interface{}. It's not fast enough for production use, but it's
 // helpful in tests.
 type MapObjectEncoder struct {
-	// Fields contains the entire encoded zlog context.
+	// Fields contains the entire encoded log context.
 	Fields map[string]interface{}
 	// cur is a pointer to the namespace we're currently writing to.
 	cur map[string]interface{}
