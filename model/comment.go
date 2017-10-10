@@ -8,9 +8,9 @@ import (
 
 // Comment 评论
 type Comment struct {
-	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
-	PageId      uint64     `json:"page_id,string" gorm:"type:bigint(20)"`
-	UserId      uint64     `json:"user_id,string" gorm:"type:bigint(20)"`
+	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	PageId      int64      `json:"page_id,string" gorm:"type:bigint(20)"`
+	UserId      int64      `json:"user_id,string" gorm:"type:bigint(20)"`
 	Text        string     `json:"comment_text" gorm:"type:mediumtext"`
 	CreatedUnix int64      `json:"created_unix" gorm:"type:bigint(20)"`
 	UpdatedUnix int64      `json:"updated_unix" gorm:"type:bigint(20)"`
@@ -24,7 +24,7 @@ func (c *Comment) BeforeCreate(scope *gorm.Scope) error {
 	if err != nil {
 		return err
 	}
-	c.ID = id
+	c.ID = int64(id)
 	c.CreatedUnix = time.Now().Unix()
 	c.UpdatedUnix = c.CreatedUnix
 	return nil

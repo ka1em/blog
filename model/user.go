@@ -26,7 +26,7 @@ CREATE TABLE `users` (
 
 // User 用户
 type User struct {
-	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	Name        string     `json:"name" gorm:"not null; type:varchar(256)"`
 	Email       string     `json:"email" gorm:"not null; type:varchar(256)"`
 	Passwd      string     `json:"-" gorm:"not null; type:varchar(256)"`
@@ -56,7 +56,7 @@ func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	if err != nil {
 		return err
 	}
-	u.ID = id
+	u.ID = int64(id)
 	u.Salt = uuid.NewV4().String()
 	u.Passwd = passwordHash(u.Passwd, u.Salt)
 	u.CreatedUnix = time.Now().Unix()

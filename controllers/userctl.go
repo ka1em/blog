@@ -145,7 +145,7 @@ func (p *loginParams) valid() error {
 func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
-	var uid uint64
+	var uid int64
 	var err error
 
 	uid, err = model.ValidSessionUID(r)

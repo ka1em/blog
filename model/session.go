@@ -31,16 +31,16 @@ const COOKIE_SEC_KEY = "our-social-network-application"
 var SessionStore *sessions.CookieStore
 
 type Session struct {
-	ID        uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	ID        int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	CreatedAt time.Time  `json:"created_at"  sql:"DEFAULT:current_timestamp"`
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `sql:"index"`
 
 	SessionId   string `json:"session_id" gorm:"type:varchar(191); unique_index;not null;default '' "`
-	UserId      uint64 `json:"user_id,string" gorm:"not null"`
-	Active      uint   `json:"session_active,string" gorm:"type:tinyint(1); not null; default 0"`
-	CreatedUnix uint64 `json:"created_unix" gorm:""`
-	UpdatedUnix uint64 `json:"updated_unix" gorm:""`
+	UserId      int64  `json:"user_id,string" gorm:"not null"`
+	Active      int    `json:"session_active,string" gorm:"type:tinyint(1); not null; default 0"`
+	CreatedUnix int64  `json:"created_unix" gorm:""`
+	UpdatedUnix int64  `json:"updated_unix" gorm:""`
 }
 
 func init() {
@@ -48,7 +48,7 @@ func init() {
 }
 
 // GetUserID 通过sessionId从数据库查询userid
-func (s *Session) GetUserID(sessionId string, active int) (uint64, bool) {
+func (s *Session) GetUserID(sessionId string, active int) (int64, bool) {
 	ok := !db.Select("user_id").Where("session_id = ? and active = ?", sessionId, active).First(&s).RecordNotFound()
 	return s.UserId, ok
 }
@@ -60,7 +60,7 @@ func (s *Session) Close() error {
 }
 
 // UpdateSession 更新session为活跃状态
-func UpdateSession(userId uint64, sessionId string) error {
+func UpdateSession(userId int64, sessionId string) error {
 	sess := db.Begin()
 
 	if err := sess.Exec("update sessions set active = 0 where user_id = ?", userId).Error; err != nil {
@@ -142,14 +142,14 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 }
 
 // ValidSessionUID 获取context中的user_id
-func ValidSessionUID(r *http.Request) (uint64, error) {
+func ValidSessionUID(r *http.Request) (int64, error) {
 	var userIds interface{}
 
 	if userIds = r.Context().Value("user_id"); userIds == nil {
 		return 0, errors.New("valid session user id is nil")
 	}
 
-	uid, err := strconv.ParseUint(userIds.(string), 10, 64)
+	uid, err := strconv.ParseInt(userIds.(string), 10, 64)
 	if err != nil {
 		return 0, err
 	}

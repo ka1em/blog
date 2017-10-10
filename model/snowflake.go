@@ -21,7 +21,7 @@ func stringToIp(s string) (net.IP, error) {
 // and returns its lower 16 bits.
 func machineID() (uint16, error) {
 	ip, err := stringToIp("47.93.11.105")
-	// todo ip ?
+	//todo ip ?
 	if err != nil {
 		return 0, err
 	}

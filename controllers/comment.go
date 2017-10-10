@@ -59,7 +59,7 @@ type commentPostParam struct {
 	Name    string `schema:"name"`
 	Email   string `schema:"email"`
 	Comment string `schema:"comment,required"`
-	PageID  uint64 `schema:"page_id,required"`
+	PageID  int64  `schema:"page_id,required"`
 }
 
 // APICommentGET 获取评论
@@ -89,7 +89,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	id := vars["id"]
-	idn, err := strconv.ParseUint(id, 10, 64)
+	idn, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
@@ -126,6 +126,6 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 }
 
 type commentPutParam struct {
-	UserID  uint64 `schema:"user_id,required"`
+	UserID  int64  `schema:"user_id,required"`
 	Comment string `schema:"comment,required"`
 }
