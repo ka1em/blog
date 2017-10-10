@@ -24,6 +24,8 @@ var (
 	DBParm   string // DBParm 数据库参数
 	LogPath  string // LogPath 日志路径
 	AppPath  string // AppPath 运行路径
+
+	TLSMinVersion string
 )
 
 const (
@@ -98,4 +100,6 @@ func NewContext(file string) {
 	}
 
 	LogPath = secZap.Key("LOG_OUTPUT").MustString("stdout")
+
+	TLSMinVersion = secServer.Key("TLSMinVersion").MustString("TLS12")
 }
