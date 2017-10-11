@@ -58,16 +58,16 @@ func runWeb(c *cli.Context) {
 	n.Use(negroni.NewLogger())
 
 	n.UseHandler(r)
+	s := &http.Server{
+		Addr:           ":" + port,
+		Handler:        n,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
 
 	switch setting.SSLMode {
 	case false:
-		s := &http.Server{
-			Addr:           ":" + port,
-			Handler:        n,
-			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
-			MaxHeaderBytes: 1 << 20,
-		}
 		log.Fatal(s.ListenAndServe())
 	case true:
 		var tlsMinVersion uint16
@@ -83,21 +83,19 @@ func runWeb(c *cli.Context) {
 		default:
 			tlsMinVersion = tls.VersionTLS10
 		}
-		server := &http.Server{
-			Addr: ":" + port,
-			TLSConfig: &tls.Config{
-				MinVersion:               tlsMinVersion,
-				CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-				PreferServerCipherSuites: true,
-				CipherSuites: []uint16{
-					tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-					tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, // Required for HTTP/2 support.
-					tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-					tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-				},
+
+		s.TLSConfig = &tls.Config{
+			MinVersion:               tlsMinVersion,
+			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, // Required for HTTP/2 support.
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
 			},
-			Handler: n,
 		}
-		log.Fatal(server.ListenAndServeTLS(setting.CertFile, setting.KeyFile))
+
+		log.Fatal(s.ListenAndServeTLS(setting.CertFile, setting.KeyFile))
 	}
 }
