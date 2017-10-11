@@ -2,7 +2,7 @@ package model
 
 import (
 	"blog/common/setting"
-	zlog "blog/common/zlog"
+	"blog/common/zlog"
 	"crypto/rand"
 	"encoding/base64"
 	"io"
@@ -96,13 +96,15 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 		return "", err
 	}
 
-	if sid, valid := session.Values["sid"]; valid {
+	if sid, ok := session.Values["sid"]; ok {
 		s := &Session{}
 		userId, ok := s.GetUserID(sid.(string), 0)
 		if !ok {
 			return "", errors.New("no user id in CreateSession")
 		}
-		UpdateSession(userId, sid.(string))
+		if err := UpdateSession(userId, sid.(string)); err != nil {
+			return "", err
+		}
 		zlog.ZapLog.Debugf("sid = %s", sid)
 		return sid.(string), nil
 	} else {
@@ -111,8 +113,15 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 			return "", err
 		}
 		session.Values["sid"] = sessionId
-		session.Save(r, w)
-		UpdateSession(0, sessionId)
+
+		if err := session.Save(r, w); err != nil {
+			return "", err
+		}
+
+		if err := UpdateSession(0, sessionId); err != nil {
+			return "", err
+		}
+
 		return sessionId, nil
 	}
 }
@@ -124,20 +133,29 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 		zlog.ZapLog.Error(err.Error())
 		return "", err
 	}
+
 	sessionId, err := generateSessionId()
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		return "", err
 	}
+
 	session.Values["sid"] = sessionId
+
 	session.Options = &sessions.Options{
 		MaxAge:   60 * 60 * 24,
 		HttpOnly: true,
 		Secure:   setting.SSLMode,
 	}
 
-	session.Save(r, w)
-	UpdateSession(0, sessionId)
+	if err := session.Save(r, w); err != nil {
+		return "", err
+	}
+
+	if err := UpdateSession(0, sessionId); err != nil {
+		return "", err
+	}
+
 	return sessionId, nil
 }
 
@@ -146,12 +164,13 @@ func ValidSessionUID(r *http.Request) (int64, error) {
 	var userIds interface{}
 
 	if userIds = r.Context().Value("user_id"); userIds == nil {
-		return 0, errors.New("valid session user id is nil")
+		return -1, errors.New("valid session user id is nil")
 	}
 
 	uid, err := strconv.ParseInt(userIds.(string), 10, 64)
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
+
 	return uid, nil
 }
