@@ -42,7 +42,7 @@ type User struct {
 // CreateUser 创建用户
 func (u *User) CreateUser() error {
 	if nameIsExist(u.Name) {
-		return errors.New(ErrMap[USER_NAME_EXIST])
+		return errors.New(ErrMap[UserNameExist])
 	}
 	return db.Create(u).Error
 }
@@ -51,6 +51,7 @@ func nameIsExist(name string) bool {
 	return !db.Where("name = ?", name).First(&User{}).RecordNotFound()
 }
 
+// BeforeCreate 创建之前
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	id, err := sf.NextID()
 	if err != nil {
@@ -58,21 +59,27 @@ func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	}
 	u.ID = int64(id)
 	u.Salt = uuid.NewV4().String()
-	u.Passwd = passwordHash(u.Passwd, u.Salt)
+	u.Passwd, err = passwordHash(u.Passwd, u.Salt)
+	if err != nil {
+		return err
+	}
 	u.CreatedUnix = time.Now().Unix()
 	u.UpdatedUnix = time.Now().Unix()
 	return nil
 }
 
+// BeforeUpdate 更新之前
 func (u *User) BeforeUpdate(scope *gorm.Scope) error {
 	return scope.SetColumn("updated_unix", time.Now().Unix())
 }
 
-func passwordHash(p, salt string) string {
+func passwordHash(p, salt string) (string, error) {
 	hash := sha256.New()
 	s := p + salt
-	hash.Write([]byte(s))
-	return hex.EncodeToString(hash.Sum(nil))
+	if _, err := hash.Write([]byte(s)); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
 // getValidInfo 获取需要确认用户的信息
@@ -85,13 +92,19 @@ func getValidInfo(userName string) (*User, bool) {
 	return u, true
 }
 
-func CheckPasswd(name, passwd string) (*User, bool, error) {
+// CheckPassWord 检查密码
+func CheckPassWord(name, passwd string) (*User, bool, error) {
 	u, ok := getValidInfo(name)
 	if !ok {
-		return nil, false, errors.New(ErrMap[NO_USER_NAME])
+		return nil, false, errors.New(ErrMap[NoUserName])
 	}
-	if u.Passwd != passwordHash(passwd, u.Salt) {
-		return nil, false, errors.New(ErrMap[PASSWD_ERR])
+	tmp, err := passwordHash(passwd, u.Salt)
+	if err != nil {
+		return nil, false, err
+	}
+
+	if u.Passwd != tmp {
+		return nil, false, errors.New(ErrMap[PasswordErr])
 	}
 	return u, true, nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// SetTestRoutes 配置测试路由
 func SetTestRoutes(r *mux.Router) *mux.Router {
 	r.HandleFunc("/test", controllers.TestHandler).Methods("GET")
 	//r.HandleFunc("/user/login", controllers.LoginPost).Methods("POST")

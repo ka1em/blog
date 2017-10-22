@@ -10,10 +10,11 @@ import (
 	"errors"
 )
 
+// ValidateSession 验证session
 func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	data := model.GetBaseData()
 
-	session, err := model.SessionStore.Get(r, model.COOKIE_NAME)
+	session, err := model.SessionStore.Get(r, model.cookieName)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.MIDDLEWARE_ERR, http.StatusBadRequest)
@@ -34,5 +35,4 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		zlog.ZapLog.Error("middleware need login")
 		next(w, r)
 	}
-	return
 }

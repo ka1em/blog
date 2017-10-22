@@ -11,9 +11,9 @@ import (
 
 // Page 文章
 type Page struct {
-	ID          int64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	Guid        string     `json:"guid" gorm:"type:varchar(64);unique_index"`
-	UserId      int64     `json:"user_id,string" sql:"type:bigint(20)"'`
+	UserID      int64      `json:"user_id,string" sql:"type:bigint(20)"`
 	Title       string     `json:"title" gorm:"type:varchar(256)"`
 	Content     string     `json:"content" gorm:"type:text"`
 	CreatedAt   time.Time  `json:"created_at"`
@@ -25,7 +25,7 @@ type Page struct {
 	Comments []*Comment `json:"comments,omitempty" gorm:"-"`
 }
 
-const TRUNCNUM = 20
+const contentLen = 20
 
 func (p *Page) BeforeCreate(scope *gorm.Scope) error {
 	id, err := sf.NextID()
@@ -49,9 +49,9 @@ func (p *Page) Add() error {
 }
 
 // GetByID 获取
-func GetByID(pageId uint64) (Page, error) {
+func GetByID(pageID uint64) (Page, error) {
 	p := Page{}
-	if err := db.Where("id = ?", pageId).First(&p).Error; err != nil {
+	if err := db.Where("id = ?", pageID).First(&p).Error; err != nil {
 		return Page{}, err
 	}
 
@@ -72,7 +72,7 @@ func TruncatedText(s string) string {
 	chars := 0
 	for i := range s {
 		chars++
-		if chars > TRUNCNUM {
+		if chars > contentLen {
 			return s[:i] + `...`
 		}
 	}

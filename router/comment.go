@@ -1,13 +1,13 @@
 package router
 
 import (
-	"blog/common/zlog"
 	"blog/controllers"
 
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )
 
+// SetCommentRoutes 设置评论路由
 func SetCommentRoutes(r *mux.Router) *mux.Router {
 	r.HandleFunc("/api/comments", controllers.APICommentGET).Methods("GET")
 
@@ -20,6 +20,5 @@ func SetCommentRoutes(r *mux.Router) *mux.Router {
 		negroni.Wrap(newRouter),
 	))
 
-	zlog.ZapLog.Info("set router comment")
 	return r
 }

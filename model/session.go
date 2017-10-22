@@ -25,8 +25,8 @@ CREATE TABLE `sessions` (
      PRIMARY KEY (`id`),
      UNIQUE KEY `session_id` (`session_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 */
-const COOKIE_NAME = "app-session"
-const COOKIE_SEC_KEY = "our-social-network-application"
+const cookieName = "app-session"
+const cookieSecKey = "our-social-network-application"
 
 var SessionStore *sessions.CookieStore
 
@@ -36,27 +36,27 @@ type Session struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `sql:"index"`
 
-	SessionId   string `json:"session_id" gorm:"type:varchar(191); unique_index;not null;default '' "`
-	UserId      int64  `json:"user_id,string" gorm:"not null"`
+	SessionID   string `json:"session_id" gorm:"type:varchar(191); unique_index;not null;default '' "`
+	UserID      int64  `json:"user_id,string" gorm:"not null"`
 	Active      int    `json:"session_active,string" gorm:"type:tinyint(1); not null; default 0"`
 	CreatedUnix int64  `json:"created_unix" gorm:""`
 	UpdatedUnix int64  `json:"updated_unix" gorm:""`
 }
 
 func init() {
-	SessionStore = sessions.NewCookieStore([]byte(COOKIE_SEC_KEY))
+	SessionStore = sessions.NewCookieStore([]byte(cookieSecKey))
 }
 
 // GetUserID 通过sessionId从数据库查询userid
-func (s *Session) GetUserID(sessionId string, active int) (int64, bool) {
-	ok := !db.Select("user_id").Where("session_id = ? and active = ?", sessionId, active).First(&s).RecordNotFound()
-	return s.UserId, ok
+func (s *Session) GetUserID(sessionID string, active int) (int64, bool) {
+	ok := !db.Select("user_id").Where("session_id = ? and active = ?", sessionID, active).First(&s).RecordNotFound()
+	return s.UserID, ok
 }
 
 // Close session
 func (s *Session) Close() error {
 	s.Active = 0
-	return db.Model(s).Where("user_id = ?", s.UserId).Update("active").Error
+	return db.Model(s).Where("user_id = ?", s.UserID).Update("active").Error
 }
 
 // UpdateSession 更新session为活跃状态
@@ -91,7 +91,7 @@ func generateSessionId() (string, error) {
 
 // CreateSession 创建session
 func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
-	session, err := SessionStore.Get(r, COOKIE_NAME)
+	session, err := SessionStore.Get(r, cookieName)
 	if err != nil {
 		return "", err
 	}
@@ -102,45 +102,45 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 		if !ok {
 			return "", errors.New("no user id in CreateSession")
 		}
-		if err := UpdateSession(userId, sid.(string)); err != nil {
+		if err = UpdateSession(userId, sid.(string)); err != nil {
 			return "", err
 		}
-		zlog.ZapLog.Debugf("sid = %s", sid)
 		return sid.(string), nil
-	} else {
-		sessionId, err := generateSessionId()
-		if err != nil {
-			return "", err
-		}
-		session.Values["sid"] = sessionId
-
-		if err := session.Save(r, w); err != nil {
-			return "", err
-		}
-
-		if err := UpdateSession(0, sessionId); err != nil {
-			return "", err
-		}
-
-		return sessionId, nil
 	}
+
+	sessionID, err := generateSessionId()
+	if err != nil {
+		return "", err
+	}
+	session.Values["sid"] = sessionID
+
+	if err := session.Save(r, w); err != nil {
+		return "", err
+	}
+
+	if err := UpdateSession(0, sessionID); err != nil {
+		return "", err
+	}
+
+	return sessionID, nil
+
 }
 
 // PreCreateSession 验证用户名之前，先行创建session
 func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
-	session, err := SessionStore.Get(r, COOKIE_NAME)
+	session, err := SessionStore.Get(r, cookieName)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		return "", err
 	}
 
-	sessionId, err := generateSessionId()
+	sessionID, err := generateSessionId()
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		return "", err
 	}
 
-	session.Values["sid"] = sessionId
+	session.Values["sid"] = sessionID
 
 	session.Options = &sessions.Options{
 		MaxAge:   60 * 60 * 24,
@@ -152,11 +152,11 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 		return "", err
 	}
 
-	if err := UpdateSession(0, sessionId); err != nil {
+	if err := UpdateSession(0, sessionID); err != nil {
 		return "", err
 	}
 
-	return sessionId, nil
+	return sessionID, nil
 }
 
 // ValidSessionUID 获取context中的user_id

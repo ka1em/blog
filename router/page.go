@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
+// SetPageRoutes 设置page路由
 func SetPageRoutes(r *mux.Router) *mux.Router {
 
 	r.HandleFunc("/api/pages", controllers.PageIndexGET).Methods("GET")

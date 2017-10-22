@@ -18,11 +18,9 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	uid, err := model.ValidSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NO_USER_ID, http.StatusUnauthorized)
+		data.ResponseJson(w, model.NoUserID, http.StatusUnauthorized)
 		return
 	}
-
-	zlog.ZapLog.Debug("api comment post user_id = %d", uid)
 
 	if err = r.ParseForm(); err != nil {
 		zlog.ZapLog.Error(err.Error())
@@ -52,7 +50,6 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
-	return
 }
 
 type commentPostParam struct {
@@ -68,16 +65,16 @@ func APICommentGET(w http.ResponseWriter, r *http.Request) {
 	// TODO
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
-	return
 }
 
+// APICommentPUT 更新评论
 func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
 	uid, err := model.ValidSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NO_USER_ID, http.StatusUnauthorized)
+		data.ResponseJson(w, model.NoUserID, http.StatusUnauthorized)
 		return
 	}
 
@@ -122,7 +119,6 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
-	return
 }
 
 type commentPutParam struct {

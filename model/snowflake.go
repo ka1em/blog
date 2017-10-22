@@ -9,7 +9,7 @@ import (
 
 var sf *sonyflake.Sonyflake
 
-func stringToIp(s string) (net.IP, error) {
+func stringToIP(s string) (net.IP, error) {
 	ip := net.ParseIP(s)
 	if ip == nil {
 		return nil, errors.New("invalid ip address")
@@ -20,7 +20,7 @@ func stringToIp(s string) (net.IP, error) {
 // machineID retrieves the private IP address of the Amazon EC2 instance
 // and returns its lower 16 bits.
 func machineID() (uint16, error) {
-	ip, err := stringToIp("47.93.11.105")
+	ip, err := stringToIP("47.93.11.105")
 	//todo ip ?
 	if err != nil {
 		return 0, err

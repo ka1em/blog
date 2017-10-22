@@ -35,7 +35,6 @@ func connDB() error {
 		panic(err.Error())
 	}
 
-	//update  tabel
 	if err := db.AutoMigrate(
 		&User{},
 		&Session{},

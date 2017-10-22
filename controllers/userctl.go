@@ -38,9 +38,9 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	//创建用户
 	if err := u.CreateUser(); err != nil {
-		if err.Error() == model.ErrMap[model.USER_NAME_EXIST] {
+		if err.Error() == model.ErrMap[model.userNameExist] {
 			zlog.ZapLog.Error(err.Error())
-			data.ResponseJson(w, model.USER_NAME_EXIST, http.StatusBadRequest)
+			data.ResponseJson(w, model.userNameExist, http.StatusBadRequest)
 			return
 		}
 		zlog.ZapLog.Error(err.Error())
@@ -49,7 +49,6 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
-	return
 }
 
 type userRegistParam struct {
@@ -101,16 +100,16 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, ok, err := model.CheckPasswd(param.Name, param.Passwd)
+	u, ok, err := model.CheckPassWord(param.Name, param.Passwd)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NO_USER_NAME, http.StatusBadRequest)
+		data.ResponseJson(w, model.NoUserName, http.StatusBadRequest)
 		return
 	}
 
 	if !ok {
 		zlog.ZapLog.Error("passwd error")
-		data.ResponseJson(w, model.PASSWD_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.PasswordErr, http.StatusBadRequest)
 		return
 	}
 
@@ -123,7 +122,6 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 
 	data.Data["redirct_url"] = "/index"
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
-	return
 }
 
 type loginParams struct {
@@ -151,7 +149,7 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	uid, err = model.ValidSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NO_USER_ID, http.StatusBadRequest)
+		data.ResponseJson(w, model.NoUserID, http.StatusBadRequest)
 		return
 	}
 
@@ -166,5 +164,4 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
-	return
 }
