@@ -10,8 +10,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// ZapLog log
 var ZapLog *zap.SugaredLogger
 
+// ZapLogInit 初始化
 func ZapLogInit() {
 	if setting.LogPath != "stdout" {
 		fd, err := os.OpenFile(setting.LogPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
@@ -54,11 +56,11 @@ func ZapLogInit() {
 
 func zapLogLevel(runMode string) zapcore.Level {
 	switch runMode {
-	case setting.DEV_MODE:
+	case setting.DevMode:
 		return zapcore.DebugLevel
-	case setting.TEST_MODE:
+	case setting.TestMode:
 		return zapcore.DebugLevel
-	case setting.PROD_MODE:
+	case setting.ProdMode:
 		return zapcore.WarnLevel
 	default:
 		log.Fatal("error run mode")

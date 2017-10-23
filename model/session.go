@@ -25,7 +25,7 @@ CREATE TABLE `sessions` (
      PRIMARY KEY (`id`),
      UNIQUE KEY `session_id` (`session_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 */
-const cookieName = "app-session"
+const CookieName = "app-session"
 const cookieSecKey = "our-social-network-application"
 
 var SessionStore *sessions.CookieStore
@@ -91,7 +91,7 @@ func generateSessionId() (string, error) {
 
 // CreateSession 创建session
 func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
-	session, err := SessionStore.Get(r, cookieName)
+	session, err := SessionStore.Get(r, CookieName)
 	if err != nil {
 		return "", err
 	}
@@ -128,7 +128,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 
 // PreCreateSession 验证用户名之前，先行创建session
 func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
-	session, err := SessionStore.Get(r, cookieName)
+	session, err := SessionStore.Get(r, CookieName)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		return "", err

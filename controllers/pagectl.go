@@ -16,7 +16,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
@@ -24,20 +24,20 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 
 	if err := model.SchemaDecoder.Decode(param, r.Form); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	if err := param.valid(); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	pages, err := model.GetAllPage(param.PageIndex, param.PageSize)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
@@ -85,17 +85,17 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
-	pageId, err := strconv.ParseUint(vars["id"], 10, 64)
+	pageID, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
-	page, err := model.GetByID(pageId)
+	page, err := model.GetByID(pageID)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
@@ -108,14 +108,14 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseForm(); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	param := new(pagePostParam)
 	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
@@ -126,7 +126,7 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 
 	if err := p.Add(); err != nil {
 		zlog.ZapLog.Error("%s", err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.ParamsErr, http.StatusInternalServerError)
 		return
 	}
 

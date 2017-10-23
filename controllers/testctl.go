@@ -7,7 +7,9 @@ import (
 )
 
 func TestHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		zlog.ZapLog.Error(err.Error())
+	}
 
 	zlog.ZapLog.Info("%+v %s %s", r.Form, r.RemoteAddr, r.RequestURI)
 }

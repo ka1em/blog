@@ -24,28 +24,27 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 
 	if err = r.ParseForm(); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	param := new(commentPostParam)
 	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
-
 	cm := &model.Comment{
 		//CommentName:  param.Name,
 		//CommentEmail: param.Email,
 		Text:   param.Comment,
-		PageId: param.PageID,
-		UserId: uid,
+		PageID: param.PageID,
+		UserID: uid,
 	}
 
 	if err := cm.Add(); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.DATABASE_ERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
 	}
 
@@ -80,7 +79,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseForm(); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
@@ -89,32 +88,32 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	idn, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	param := new(commentPutParam)
 	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	if param.UserID != idn {
 		zlog.ZapLog.Error(errors.New("not self comment"))
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	c := &model.Comment{
 		ID:     idn,
 		Text:   param.Comment,
-		UserId: uid,
+		UserID: uid,
 	}
 
 	if err := c.Update(); err != nil {
 		zlog.ZapLog.Error(errors.New(fmt.Sprintf("update comment err : %s", err.Error())))
-		data.ResponseJson(w, model.DATABASE_ERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
 	}
 

@@ -12,26 +12,41 @@ import (
 )
 
 var (
-	RunMode  string // RunMode 运行模式
-	SSLMode  bool   // SSLMode ssl模式
-	CertFile string // CertFile 证书
-	KeyFile  string // KeyFile 证书
-	DBHost   string // DBHost 数据库主机
-	DBPort   string // DBPort 数据库端口
-	DBUser   string // DBUser 数据库用户
-	DBPass   string // DBPass 数据库摩玛
-	DBBase   string // DBBase 数据库
-	DBParm   string // DBParm 数据库参数
-	LogPath  string // LogPath 日志路径
-	AppPath  string // AppPath 运行路径
-
+	// RunMode 运行模式
+	RunMode string
+	// SSLMode ssl模式
+	SSLMode bool
+	// CertFile 证书
+	CertFile string
+	// KeyFile 证书
+	KeyFile string
+	// DBHost 数据库主机
+	DBHost string
+	// DBPort 数据库端口
+	DBPort string
+	// DBUser 数据库用户
+	DBUser string
+	// DBPass 数据库摩玛
+	DBPass string
+	// DBBase 数据库
+	DBBase string
+	// DBParm 数据库参数
+	DBParm string
+	// LogPath 日志路径
+	LogPath string
+	// AppPath 运行路径
+	AppPath string
+	// TLSMinVersion min version
 	TLSMinVersion string
 )
 
 const (
-	DEV_MODE  = "dev"  // DEV_MODE dev model
-	TEST_MODE = "test" // TEST_MODE test model
-	PROD_MODE = "prod" // PROD_MODE prod model
+	// DevMode dev model
+	DevMode = "dev"
+	// TestMode test model
+	TestMode = "test"
+	// ProdMode prod model
+	ProdMode = "prod"
 )
 
 // execPath 返回执行的路径

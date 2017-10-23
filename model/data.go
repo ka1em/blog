@@ -16,23 +16,23 @@ const (
 	NoUserName
 	NoUserID
 
-	DATABASE_ERR   = (iota * -1) - 20000 // -20000
-	MIDDLEWARE_ERR = (iota * -1) - 30000 // -30000
-	NEED_LOGIN
+	DataBaseErr   = (iota * -1) - 20000 // -20000
+	MiddlewareErr = (iota * -1) - 30000 // -30000
+	NeedLogin
 )
 
 const DEFAULT_PAGE_SIZE = 20
 
 // ErrMap 错误map
 var ErrMap = map[int]string{
-	SUCCESS:        "success",
-	UserNameExist:  "user name was exist",
-	ParamsErr:      "params error",
-	MIDDLEWARE_ERR: "middler ware error",
-	NEED_LOGIN:     "not login",
-	PasswordErr:    "password error",
-	NoUserName:     "no user name",
-	NoUserID:       "no user id",
+	SUCCESS:       "success",
+	UserNameExist: "user name was exist",
+	ParamsErr:     "params error",
+	MiddlewareErr: "middler ware error",
+	NeedLogin:     "not login",
+	PasswordErr:   "password error",
+	NoUserName:    "no user name",
+	NoUserID:      "no user id",
 }
 
 // Data return json data

@@ -12,7 +12,7 @@ import (
 func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		zlog.ZapLog.Error(err.Error())
 		return
 	}
@@ -20,13 +20,13 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	param := new(userRegistParam)
 	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Errorf("%s", err)
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	if err := param.valid(); err != nil {
 		zlog.ZapLog.Errorf("%s", err)
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
@@ -38,13 +38,13 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	//创建用户
 	if err := u.CreateUser(); err != nil {
-		if err.Error() == model.ErrMap[model.userNameExist] {
+		if err.Error() == model.ErrMap[model.UserNameExist] {
 			zlog.ZapLog.Error(err.Error())
-			data.ResponseJson(w, model.userNameExist, http.StatusBadRequest)
+			data.ResponseJson(w, model.UserNameExist, http.StatusBadRequest)
 			return
 		}
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.DATABASE_ERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
 	}
 
@@ -77,12 +77,12 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	sid, err := model.PreCreateSession(w, r)
 	if err != nil {
 		zlog.ZapLog.Errorf("%s", err.Error())
-		data.ResponseJson(w, model.DATABASE_ERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		zlog.ZapLog.Error("user zlog in ", err.Error())
 		return
 	}
@@ -90,13 +90,13 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	param := new(loginParams)
 	if err := model.SchemaDecoder.Decode(param, r.PostForm); err != nil {
 		zlog.ZapLog.Errorf("%s", err)
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
 	if err := param.valid(); err != nil {
 		zlog.ZapLog.Errorf("%+v", err)
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusBadRequest)
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
 
@@ -116,7 +116,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	//登录成功，更新session，关联userid和sessionid
 	if err := model.UpdateSession(u.ID, sid); err != nil {
 		zlog.ZapLog.Error("zlog err %s", err.Error())
-		data.ResponseJson(w, model.DATABASE_ERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
 	}
 
@@ -143,10 +143,7 @@ func (p *loginParams) valid() error {
 func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
-	var uid int64
-	var err error
-
-	uid, err = model.ValidSessionUID(r)
+	uid, err := model.ValidSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.NoUserID, http.StatusBadRequest)
@@ -154,12 +151,12 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s := &model.Session{
-		UserId: uid,
+		UserID: uid,
 	}
 
 	if err := s.Close(); err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.PARAMS_ERR, http.StatusInternalServerError)
+		data.ResponseJson(w, model.ParamsErr, http.StatusInternalServerError)
 		return
 	}
 

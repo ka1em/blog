@@ -7,13 +7,13 @@ import (
 	"github.com/urfave/cli"
 )
 
-const APP_VER = "0.0.1"
+const appVer = "0.0.1"
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "blog"
 	app.Usage = "blog backend"
-	app.Version = APP_VER
+	app.Version = appVer
 	app.Commands = []cli.Command{
 		cmd.Web,
 		cmd.WebAdmin,
