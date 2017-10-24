@@ -27,6 +27,7 @@ type Page struct {
 
 const contentLen = 20
 
+// BeforeCreate 插入之前
 func (p *Page) BeforeCreate(scope *gorm.Scope) error {
 	id, err := sf.NextID()
 	if err != nil {
@@ -39,6 +40,7 @@ func (p *Page) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
+// BeforeUpdate 更新时间
 func (p *Page) BeforeUpdate(scope *gorm.Scope) error {
 	return scope.SetColumn("updated_unix", time.Now().Unix())
 }
@@ -54,7 +56,6 @@ func GetByID(pageID uint64) (Page, error) {
 	if err := db.Where("id = ?", pageID).First(&p).Error; err != nil {
 		return Page{}, err
 	}
-
 	return p, nil
 }
 
