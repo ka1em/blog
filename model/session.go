@@ -54,9 +54,9 @@ func (s *Session) GetUserID(sessionID string, active int) (int64, bool) {
 }
 
 // Close session
-func (s *Session) Close() error {
+func (s *Session) Close(userID int64) error {
 	s.Active = 0
-	return db.Model(s).Where("user_id = ?", s.UserID).Update("active").Error
+	return db.Model(s).Where("user_id = ?", userID).Update("active").Error
 }
 
 // UpdateSession 更新session为活跃状态
@@ -80,7 +80,7 @@ func UpdateSession(userId int64, sessionId string) error {
 	return sess.Commit().Error
 }
 
-func generateSessionId() (string, error) {
+func generateSessionID() (string, error) {
 	sid := make([]byte, 24)
 	if _, err := io.ReadFull(rand.Reader, sid); err != nil {
 		return "", err
@@ -98,17 +98,17 @@ func CreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 
 	if sid, ok := session.Values["sid"]; ok {
 		s := &Session{}
-		userId, ok := s.GetUserID(sid.(string), 0)
+		userID, ok := s.GetUserID(sid.(string), 0)
 		if !ok {
 			return "", errors.New("no user id in CreateSession")
 		}
-		if err = UpdateSession(userId, sid.(string)); err != nil {
+		if err = UpdateSession(userID, sid.(string)); err != nil {
 			return "", err
 		}
 		return sid.(string), nil
 	}
 
-	sessionID, err := generateSessionId()
+	sessionID, err := generateSessionID()
 	if err != nil {
 		return "", err
 	}
@@ -134,7 +134,7 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 		return "", err
 	}
 
-	sessionID, err := generateSessionId()
+	sessionID, err := generateSessionID()
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		return "", err

@@ -8,23 +8,21 @@ import (
 )
 
 const (
-	SUCCESS = 0
-
+	SUCCESS       = 0
 	UserNameExist = (iota * -1) - 10000 // -10000
 	ParamsErr
 	PasswordErr
 	NoUserName
 	NoUserID
-
 	DataBaseErr   = (iota * -1) - 20000 // -20000
 	MiddlewareErr = (iota * -1) - 30000 // -30000
 	NeedLogin
 )
 
-const DEFAULT_PAGE_SIZE = 20
+const DefaultPageSize = 20
 
 // ErrMap 错误map
-var ErrMap = map[int]string{
+var ErrMap = map[int64]string{
 	SUCCESS:       "success",
 	UserNameExist: "user name was exist",
 	ParamsErr:     "params error",
@@ -37,7 +35,7 @@ var ErrMap = map[int]string{
 
 // Data return json data
 type Data struct {
-	Code int                    `json:"code,string"`
+	Code int64                  `json:"code,string"`
 	Msg  string                 `json:"msg"`
 	Data map[string]interface{} `json:"data"`
 }
@@ -52,12 +50,12 @@ func GetBaseData() *Data {
 }
 
 // ResponseJson write json data to response
-func (d *Data) ResponseJson(w http.ResponseWriter, code, httpState int) {
+func (d *Data) ResponseJson(w http.ResponseWriter, code int64, httpCode int) {
 	d.Code = code
 	d.Msg = ErrMap[code]
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(httpState)
+	w.WriteHeader(httpCode)
 
 	if err := jsoniter.NewEncoder(w).Encode(d); err != nil {
 		zlog.ZapLog.Error(err.Error())

@@ -150,11 +150,9 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := &model.Session{
-		UserID: uid,
-	}
+	s := &model.Session{}
 
-	if err := s.Close(); err != nil {
+	if err := s.Close(uid); err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.ParamsErr, http.StatusInternalServerError)
 		return

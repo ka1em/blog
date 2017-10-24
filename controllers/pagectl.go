@@ -75,7 +75,7 @@ func (p *pageIndexParam) valid() error {
 		p.PageIndex = 1
 	}
 	if p.PageSize == 0 {
-		p.PageSize = model.DEFAULT_PAGE_SIZE
+		p.PageSize = model.defaultPageSize
 	}
 	return err
 }
