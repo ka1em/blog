@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// PageIndexGET
 func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
@@ -75,7 +76,7 @@ func (p *pageIndexParam) valid() error {
 		p.PageIndex = 1
 	}
 	if p.PageSize == 0 {
-		p.PageSize = model.DEFAULT_PAGE_SIZE
+		p.PageSize = model.DefaultPageSize
 	}
 	return err
 }

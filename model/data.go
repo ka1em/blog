@@ -21,18 +21,18 @@ const (
 	NeedLogin
 )
 
-const DEFAULT_PAGE_SIZE = 20
+const DefaultPageSize = 20
 
 // ErrMap 错误map
 var ErrMap = map[int]string{
 	SUCCESS:       "success",
-	UserNameExist: "user name was exist",
-	ParamsErr:     "params error",
-	MiddlewareErr: "middler ware error",
-	NeedLogin:     "not login",
-	PasswordErr:   "password error",
-	NoUserName:    "no user name",
-	NoUserID:      "no user id",
+	UserNameExist: "error: user name was exist",
+	ParamsErr:     "error: params was error",
+	MiddlewareErr: "error: middleware error",
+	NeedLogin:     "error: not login",
+	PasswordErr:   "error: password error",
+	NoUserName:    "error: no user name",
+	NoUserID:      "error: no user id",
 }
 
 // Data return json data
@@ -45,8 +45,8 @@ type Data struct {
 // GetBaseData return the base data
 func GetBaseData() *Data {
 	return &Data{
-		Code: 0,
-		Msg:  "success",
+		Code: SUCCESS,
+		Msg:  ErrMap[SUCCESS],
 		Data: map[string]interface{}{},
 	}
 }
