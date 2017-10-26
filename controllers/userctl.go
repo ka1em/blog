@@ -100,7 +100,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, ok, err := model.CheckPassWord(param.Name, param.Passwd)
+	u, ok, err := model.CheckPassWord(param.Name, param.Password)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.NoUserName, http.StatusBadRequest)
@@ -125,15 +125,15 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 }
 
 type loginParams struct {
-	Name   string `schema:"name"`
-	Passwd string `schema:"passwd"`
+	Name     string `schema:"name"`
+	Password string `schema:"password"`
 }
 
 func (p *loginParams) valid() error {
 	if p.Name == "" {
 		return errors.New("login param name is nil ")
 	}
-	if p.Passwd == "" {
+	if p.Password == "" {
 		return errors.New("login param passwd is nil ")
 	}
 	return nil

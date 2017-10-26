@@ -30,7 +30,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "user_id", fmt.Sprintf("%d", uid))
+		ctx := context.WithValue(r.Context(), "USER_ID", fmt.Sprintf("%d", uid))
 		next(w, r.WithContext(ctx))
 
 	} else {

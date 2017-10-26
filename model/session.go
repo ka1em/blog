@@ -163,7 +163,7 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 func ValidSessionUID(r *http.Request) (int64, error) {
 	var userIds interface{}
 
-	if userIds = r.Context().Value("user_id"); userIds == nil {
+	if userIds = r.Context().Value("USER_ID"); userIds == nil {
 		return -1, errors.New("valid session user id is nil")
 	}
 

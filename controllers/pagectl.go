@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// PageIndexGET
+// PageIndexGET 获取首页列表
 func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
@@ -81,6 +81,7 @@ func (p *pageIndexParam) valid() error {
 	return err
 }
 
+// APIPageGET 获取page
 func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
@@ -104,8 +105,16 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
+// APIPagePOST 添加文章
 func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
+
+	uid, err := model.ValidSessionUID(r)
+	if err != nil {
+		zlog.ZapLog.Error(err.Error())
+		data.ResponseJson(w, model.NoUserID, http.StatusBadRequest)
+		return
+	}
 
 	if err := r.ParseForm(); err != nil {
 		zlog.ZapLog.Error(err.Error())
@@ -123,6 +132,7 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	p := &model.Page{
 		Content: param.Content,
 		Title:   param.Title,
+		UserID:  uid,
 	}
 
 	if err := p.Add(); err != nil {
