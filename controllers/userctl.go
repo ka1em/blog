@@ -48,7 +48,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 type userRegistParam struct {
@@ -121,7 +121,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Data["redirct_url"] = "/index"
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 type loginParams struct {
@@ -158,5 +158,5 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }

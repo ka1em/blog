@@ -7,7 +7,6 @@ import (
 
 	"blog/common/zlog"
 	"blog/model"
-	"errors"
 )
 
 // ValidateSession 验证session
@@ -26,8 +25,8 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		var uid int64
 		var ok bool
 		if uid, ok = s.GetUserID(sid.(string), 1); !ok {
-			zlog.ZapLog.Error(errors.New("record not found"))
-			data.ResponseJson(w, model.NeedLogin, http.StatusBadRequest)
+			zlog.ZapLog.Error(model.ErrMap[model.SessionNoUserID])
+			data.ResponseJson(w, model.SessionNoUserID, http.StatusBadRequest)
 			return
 		}
 
@@ -35,7 +34,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		next(w, r.WithContext(ctx))
 
 	} else {
-		zlog.ZapLog.Error("middleware need login")
+		zlog.ZapLog.Error(model.ErrMap[model.NeedLogin])
 		next(w, r)
 	}
 }

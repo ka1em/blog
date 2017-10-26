@@ -56,7 +56,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data.Data["page_size"] = fmt.Sprintf("%d", param.PageSize)
 	data.Data["pages_list"] = pages
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 type pageIndexParam struct {
@@ -101,7 +101,7 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Data["page"] = page
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 func APIPagePOST(w http.ResponseWriter, r *http.Request) {
@@ -131,7 +131,7 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 type pagePostParam struct {
