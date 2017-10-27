@@ -14,7 +14,7 @@ and it takes care of all the other things for you`,
 	Action: runWebAdmin,
 	Flags: []cli.Flag{
 		stringFlag("port, p", DefaultAdminPort, "Port number, eg: 8443"),
-		stringFlag("config, c", DEFAULT_CONFIG_FILEPATH, "Configuration file path"),
+		stringFlag("config, c", DefaultConfigFile, "Configuration file path"),
 	},
 }
 

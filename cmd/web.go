@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	// DEFALUT_PORT 默认端口
-	DEFALUT_PORT = "8443"
-	// DEFAULT_CONFIG_FILEPATH 默认配置文件
-	DEFAULT_CONFIG_FILEPATH = "conf/dev.ini"
+	// DefaultPort 默认端口
+	DefaultPort = "8443"
+	// DefaultConfigFile 默认配置文件
+	DefaultConfigFile = "conf/dev.ini"
 )
 
 // Web blog后端启动命令
@@ -31,14 +31,14 @@ var Web = cli.Command{
 and it takes care of all the other things for you`,
 	Action: runWeb,
 	Flags: []cli.Flag{
-		stringFlag("port, p", DEFALUT_PORT, "Port number, eg: 8443"),
-		stringFlag("config, c", DEFAULT_CONFIG_FILEPATH, "Configuration file path"),
+		stringFlag("port, p", DefaultPort, "Port number, eg: 8443"),
+		stringFlag("config, c", DefaultConfigFile, "Configuration file path"),
 	},
 }
 
 func runWeb(c *cli.Context) {
-	port := DEFALUT_PORT
-	confFile := DEFAULT_CONFIG_FILEPATH
+	port := DefaultPort
+	confFile := DefaultConfigFile
 	if c.IsSet("port") {
 		port = c.String("port")
 	}
