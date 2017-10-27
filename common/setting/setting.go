@@ -4,9 +4,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strings"
-
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/ini.v1"
 )

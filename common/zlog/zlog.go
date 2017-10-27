@@ -3,7 +3,6 @@ package zlog
 import (
 	"blog/common/setting"
 	"log"
-
 	"os"
 
 	"go.uber.org/zap"

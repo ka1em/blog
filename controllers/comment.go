@@ -48,7 +48,7 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 type commentPostParam struct {
@@ -63,7 +63,7 @@ func APICommentGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	// TODO
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 // APICommentPUT 更新评论
@@ -117,7 +117,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 type commentPutParam struct {

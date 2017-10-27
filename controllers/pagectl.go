@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// PageIndexGET 获取首页列表
 func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	if err := r.ParseForm(); err != nil {
@@ -55,7 +56,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	data.Data["page_size"] = fmt.Sprintf("%d", param.PageSize)
 	data.Data["pages_list"] = pages
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 type pageIndexParam struct {
@@ -75,11 +76,12 @@ func (p *pageIndexParam) valid() error {
 		p.PageIndex = 1
 	}
 	if p.PageSize == 0 {
-		p.PageSize = model.defaultPageSize
+		p.PageSize = model.DefaultPageSize
 	}
 	return err
 }
 
+// APIPageGET 获取page
 func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
@@ -100,11 +102,19 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Data["page"] = page
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
+// APIPagePOST 添加文章
 func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
+
+	uid, err := model.ValidSessionUID(r)
+	if err != nil {
+		zlog.ZapLog.Error(err.Error())
+		data.ResponseJson(w, model.NoUserID, http.StatusBadRequest)
+		return
+	}
 
 	if err := r.ParseForm(); err != nil {
 		zlog.ZapLog.Error(err.Error())
@@ -122,6 +132,7 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	p := &model.Page{
 		Content: param.Content,
 		Title:   param.Title,
+		UserID:  uid,
 	}
 
 	if err := p.Add(); err != nil {
@@ -130,7 +141,7 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.ResponseJson(w, model.SUCCESS, http.StatusOK)
+	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 
 type pagePostParam struct {

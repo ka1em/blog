@@ -8,12 +8,13 @@ import (
 )
 
 const (
-	SUCCESS       = 0
+	Success       = 0
 	UserNameExist = (iota * -1) - 10000 // -10000
 	ParamsErr
 	PasswordErr
 	NoUserName
 	NoUserID
+	SessionNoUserID
 	DataBaseErr   = (iota * -1) - 20000 // -20000
 	MiddlewareErr = (iota * -1) - 30000 // -30000
 	NeedLogin
@@ -23,14 +24,15 @@ const DefaultPageSize = 20
 
 // ErrMap 错误map
 var ErrMap = map[int64]string{
-	SUCCESS:       "success",
-	UserNameExist: "user name was exist",
-	ParamsErr:     "params error",
-	MiddlewareErr: "middler ware error",
-	NeedLogin:     "not login",
-	PasswordErr:   "password error",
-	NoUserName:    "no user name",
-	NoUserID:      "no user id",
+	Success:         "success",
+	UserNameExist:   "error: user name was exist",
+	ParamsErr:       "error: params was error",
+	MiddlewareErr:   "error: middleware error",
+	NeedLogin:       "error: not login",
+	PasswordErr:     "error: password error",
+	NoUserName:      "error: no user name",
+	NoUserID:        "error: no user id",
+	SessionNoUserID: "error: session no user id",
 }
 
 // Data return json data
@@ -43,8 +45,8 @@ type Data struct {
 // GetBaseData return the base data
 func GetBaseData() *Data {
 	return &Data{
-		Code: 0,
-		Msg:  "success",
+		Code: Success,
+		Msg:  ErrMap[Success],
 		Data: map[string]interface{}{},
 	}
 }
