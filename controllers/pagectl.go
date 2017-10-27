@@ -34,7 +34,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pages, err := model.GetAllPage(param.PageIndex, param.PageSize)
+	pages, err := model.GetPages(param.PageIndex, param.PageSize)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
@@ -92,7 +92,7 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, err := model.GetByID(pageID)
+	page, err := model.GetPageByID(pageID)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)

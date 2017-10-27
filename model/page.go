@@ -50,8 +50,8 @@ func (p *Page) Add() error {
 	return db.Create(p).Error
 }
 
-// GetByID 获取
-func GetByID(pageID uint64) (Page, error) {
+// GetPageByID 获取
+func GetPageByID(pageID uint64) (Page, error) {
 	p := Page{}
 	if err := db.Where("id = ?", pageID).First(&p).Error; err != nil {
 		return Page{}, err
@@ -59,8 +59,8 @@ func GetByID(pageID uint64) (Page, error) {
 	return p, nil
 }
 
-// GetAllPage 获取page
-func GetAllPage(pIndex, pSize int) (pages []*Page, err error) {
+// GetPages 获取page
+func GetPages(pIndex, pSize int) (pages []*Page, err error) {
 	if err := db.Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
 		zlog.ZapLog.Error(err.Error())
 		return nil, err

@@ -24,7 +24,7 @@ CREATE TABLE `users` (
        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 */
 
-// User 用户
+// User 用户表
 type User struct {
 	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	Name        string     `json:"name" gorm:"not null; type:varchar(256)"`
