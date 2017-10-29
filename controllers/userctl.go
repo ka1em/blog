@@ -37,7 +37,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//创建用户
-	if err := u.CreateUser(); err != nil {
+	if err := u.Create(); err != nil {
 		if err.Error() == model.ErrMap[model.UserNameExist] {
 			zlog.ZapLog.Error(err.Error())
 			data.ResponseJson(w, model.UserNameExist, http.StatusBadRequest)

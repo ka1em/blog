@@ -39,8 +39,8 @@ type User struct {
 	UpdatedUnix int64      `json:"updated_unix" gorm:"type:bigint(20)"`
 }
 
-// CreateUser 创建用户
-func (u *User) CreateUser() error {
+// Create 创建用户
+func (u *User) Create() error {
 	if nameIsExist(u.Name) {
 		return errors.New(ErrMap[UserNameExist])
 	}
