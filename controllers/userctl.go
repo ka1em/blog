@@ -160,3 +160,15 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 
 	data.ResponseJson(w, model.Success, http.StatusOK)
 }
+
+// LoginWeChatPOST 微信登录
+func LoginWeChatPOST(w http.ResponseWriter, r *http.Request) {
+	data := model.GetBaseData()
+
+	data.ResponseJson(w, model.Success, http.StatusOK)
+}
+
+type loginweChatParam struct {
+	Code int64
+	//DeviceID string
+}

@@ -7,6 +7,7 @@ import (
 // InitRouters 初始化路由
 func InitRouters() *mux.Router {
 	r := mux.NewRouter().StrictSlash(false)
+	r = SetWeChatRoutes(r)
 	r = SetPageRoutes(r)
 	r = SetUserRoutes(r)
 	r = SetCommentRoutes(r)

@@ -37,6 +37,9 @@ var (
 	AppPath string
 	// TLSMinVersion min version
 	TLSMinVersion string
+
+	WxAppID     string
+	WxAppSecret string
 )
 
 const (
@@ -116,4 +119,7 @@ func NewContext(file string) {
 	LogPath = secZap.Key("LOG_OUTPUT").MustString("stdout")
 
 	TLSMinVersion = secServer.Key("TLSMinVersion").MustString("TLS12")
+
+	WxAppID = secServer.Key("WxAppID").MustString("")
+	WxAppSecret = secServer.Key("WxAppSecret").MustString("")
 }
