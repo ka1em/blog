@@ -112,7 +112,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.Update(); err != nil {
-		zlog.ZapLog.Error(errors.New(fmt.Sprintf("update comment err : %s", err.Error())))
+		zlog.ZapLog.Error(fmt.Errorf("update comment err : %s", err.Error()))
 		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
 	}

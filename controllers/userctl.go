@@ -33,7 +33,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	u := &model.User{
 		Name:   param.Name,
 		Email:  param.Email,
-		Passwd: param.Passwd,
+		Passwd: param.Password,
 	}
 
 	//创建用户
@@ -52,9 +52,9 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 }
 
 type userRegistParam struct {
-	Name   string `schema:"name"`
-	Email  string `schema:"email"`
-	Passwd string `schema:"passwd"`
+	Name     string `schema:"name"`
+	Email    string `schema:"email"`
+	Password string `schema:"password"`
 }
 
 func (p *userRegistParam) valid() error {
@@ -64,7 +64,7 @@ func (p *userRegistParam) valid() error {
 	if p.Email == "" {
 		return errors.New("regist mail is nil")
 	}
-	if p.Passwd == "" {
+	if p.Password == "" {
 		return errors.New("regist passwd is nil")
 	}
 	return nil
@@ -159,4 +159,16 @@ func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.ResponseJson(w, model.Success, http.StatusOK)
+}
+
+// LoginWeChatPOST 微信登录
+func LoginWeChatPOST(w http.ResponseWriter, r *http.Request) {
+	data := model.GetBaseData()
+
+	data.ResponseJson(w, model.Success, http.StatusOK)
+}
+
+type loginweChatParam struct {
+	Code int64
+	//DeviceID string
 }

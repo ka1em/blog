@@ -39,8 +39,8 @@ type Session struct {
 	SessionID   string `json:"session_id" gorm:"type:varchar(191); unique_index;not null;default '' "`
 	UserID      int64  `json:"user_id,string" gorm:"not null"`
 	Active      int    `json:"session_active,string" gorm:"type:tinyint(1); not null; default 0"`
-	CreatedUnix int64  `json:"created_unix" gorm:""`
-	UpdatedUnix int64  `json:"updated_unix" gorm:""`
+	CreatedUnix int64  `json:"created_unix" gorm:"bigint(20)"`
+	UpdatedUnix int64  `json:"updated_unix" gorm:"bigint(20)"`
 }
 
 func init() {
