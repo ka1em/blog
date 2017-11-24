@@ -48,11 +48,11 @@ func GetWeChatAccessToken(code string) (AccessToken, error) {
 
 	resp, body, errs := gorequest.New().Get(WXAccessTokenURL + v.Encode()).EndStruct(&at)
 	if len(errs) > 0 {
-		return AccessToken{}, fmt.Errorf("GetWeChatAccessToken errs:%+v, body : %+v", errs, string(body))
+		return at, fmt.Errorf("GetWeChatAccessToken errs:%+v, body : %+v", errs, string(body))
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return AccessToken{}, fmt.Errorf("GetWeChatAccessToken body : %s", string(body))
+		return at, fmt.Errorf("GetWeChatAccessToken body : %s", string(body))
 	}
 
 	zlog.ZapLog.Debugf("wxat: %+v", at)

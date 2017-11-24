@@ -5,6 +5,7 @@ import (
 
 	"blog/common/setting"
 
+	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -13,25 +14,24 @@ import (
 var (
 	SchemaDecoder *schema.Decoder // schema decoder
 	db            *gorm.DB
+	redisConn     redis.Conn
 )
 
 func init() {
 	SchemaDecoder = schema.NewDecoder()
 }
 func DBInit() {
-	err := connDB()
-	if err != nil {
-		panic(err)
-	}
+	connDB()
+	connRedis()
 }
 
-func connDB() error {
+func connDB() {
 	var err error
 
-	dbConn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
+	address := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
 		setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
 
-	if db, err = gorm.Open("mysql", dbConn); err != nil {
+	if db, err = gorm.Open("mysql", address); err != nil {
 		panic(err.Error())
 	}
 
@@ -43,5 +43,14 @@ func connDB() error {
 	).Error; err != nil {
 		panic(err.Error())
 	}
-	return nil
+}
+
+func connRedis() {
+	var err error
+	address := fmt.Sprintf("%s:%s", setting.RedisHost, setting.RedisPort)
+
+	redisConn, err = redis.Dial("tcp", address)
+	if err != nil {
+		panic(err.Error())
+	}
 }
