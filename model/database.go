@@ -51,10 +51,9 @@ func connDB() {
 }
 
 func connRedisPool() {
-	address := fmt.Sprintf("%s:%s", setting.RedisHost, setting.RedisPort)
 	redisPool = &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			conn, err := redis.Dial("tcp", address)
+			conn, err := redis.Dial("tcp", setting.RedisHost+":"+setting.RedisPort)
 			return conn, err
 		},
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
