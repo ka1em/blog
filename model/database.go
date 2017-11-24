@@ -22,9 +22,17 @@ var (
 const REDIS_MAX_IDLE = 100
 const REDIS_MAX_ACTIVE = 100
 
+const (
+	REDIS_KEY_PREFIX = "BLOG:"
+	REDIS_KEY_LOGIN  = REDIS_KEY_PREFIX + "LOGIN:"
+	REDIS_KEY_USER   = REDIS_KEY_PREFIX + "USER:"
+	REDIS_KEY_PAGE   = REDIS_KEY_PREFIX + "PAGE:"
+)
+
 func init() {
 	SchemaDecoder = schema.NewDecoder()
 }
+
 func DBInit() {
 	connDB()
 	connRedisPool()
