@@ -51,9 +51,13 @@ func connDB() {
 }
 
 func connRedisPool() {
-	redisPool = &redis.Pool{
+	redisPool = getRedisPool(setting.RedisHost, setting.RedisPort)
+}
+
+func getRedisPool(host, port string) *redis.Pool {
+	return &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			conn, err := redis.Dial("tcp", setting.RedisHost+":"+setting.RedisPort)
+			conn, err := redis.Dial("tcp", host+":"+port)
 			return conn, err
 		},
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
