@@ -5,6 +5,8 @@ import (
 
 	"blog/common/setting"
 
+	"time"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
@@ -14,15 +16,18 @@ import (
 var (
 	SchemaDecoder *schema.Decoder // schema decoder
 	db            *gorm.DB
-	redisConn     redis.Conn
+	redisPool     *redis.Pool
 )
+
+const REDIS_MAX_IDLE = 100
+const REDIS_MAX_ACTIVE = 100
 
 func init() {
 	SchemaDecoder = schema.NewDecoder()
 }
 func DBInit() {
 	connDB()
-	connRedis()
+	connRedisPool()
 }
 
 func connDB() {
@@ -45,12 +50,19 @@ func connDB() {
 	}
 }
 
-func connRedis() {
-	var err error
+func connRedisPool() {
 	address := fmt.Sprintf("%s:%s", setting.RedisHost, setting.RedisPort)
-
-	redisConn, err = redis.Dial("tcp", address)
-	if err != nil {
-		panic(err.Error())
+	redisPool = &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			conn, err := redis.Dial("tcp", address)
+			return conn, err
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
+		MaxIdle:     REDIS_MAX_IDLE,
+		MaxActive:   REDIS_MAX_ACTIVE,
+		IdleTimeout: time.Second * 60,
 	}
 }
