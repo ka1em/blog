@@ -1,7 +1,6 @@
 package model
 
 import (
-	"blog/common/setting"
 	"blog/common/zlog"
 	"crypto/rand"
 	"encoding/base64"
@@ -145,7 +144,7 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	session.Options = &sessions.Options{
 		MaxAge:   60 * 60 * 24,
 		HttpOnly: true,
-		Secure:   setting.SSLMode,
+		//Secure:   setting.SSLMode,
 	}
 
 	if err := session.Save(r, w); err != nil {

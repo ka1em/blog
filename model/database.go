@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"blog/common/setting"
+	"blog/common/zlog"
 
 	"time"
 
@@ -56,10 +57,17 @@ func connDB() {
 	).Error; err != nil {
 		panic(err.Error())
 	}
+	zlog.ZapLog.Debug("connect mysql ok")
 }
 
 func connRedisPool() {
 	redisPool = getRedisPool(setting.RedisHost, setting.RedisPort)
+	conn := redisPool.Get()
+	defer conn.Close()
+	if _, err := conn.Do("PING"); err != nil {
+		panic(err.Error())
+	}
+	zlog.ZapLog.Debug("connect redis ok")
 }
 
 func getRedisPool(host, port string) *redis.Pool {

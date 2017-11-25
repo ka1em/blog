@@ -1,14 +1,13 @@
 package cmd
 
 import (
-	"log"
-	"net/http"
-	"time"
 	"blog/common/setting"
 	"blog/common/zlog"
 	"blog/model"
 	"blog/router"
-	"crypto/tls"
+	"log"
+	"net/http"
+	"time"
 
 	"github.com/urfave/cli"
 	"github.com/urfave/negroni"
@@ -45,8 +44,8 @@ func runWeb(c *cli.Context) {
 	}
 
 	setting.NewContext(confFile)
-	model.DBInit()
 	zlog.ZapLogInit()
+	model.DBInit()
 
 	r := router.InitRouters()
 
@@ -64,36 +63,6 @@ func runWeb(c *cli.Context) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	switch setting.SSLMode {
-	case false:
-		log.Fatal(s.ListenAndServe())
-	case true:
-		var tlsMinVersion uint16
-		switch setting.TLSMinVersion {
-		case "SSL30":
-			tlsMinVersion = tls.VersionSSL30
-		case "TLS12":
-			tlsMinVersion = tls.VersionTLS12
-		case "TLS11":
-			tlsMinVersion = tls.VersionTLS11
-		case "TLS10":
-			fallthrough
-		default:
-			tlsMinVersion = tls.VersionTLS10
-		}
-
-		s.TLSConfig = &tls.Config{
-			MinVersion:               tlsMinVersion,
-			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-			PreferServerCipherSuites: true,
-			CipherSuites: []uint16{
-				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, // Required for HTTP/2 support.
-				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-			},
-		}
-
-		log.Fatal(s.ListenAndServeTLS(setting.CertFile, setting.KeyFile))
-	}
+	zlog.ZapLog.Info("blog listening ...")
+	log.Fatal(s.ListenAndServe())
 }

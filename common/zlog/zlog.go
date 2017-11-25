@@ -60,7 +60,7 @@ func zapLogLevel(runMode string) zapcore.Level {
 	case setting.TestMode:
 		return zapcore.DebugLevel
 	case setting.ProdMode:
-		return zapcore.WarnLevel
+		return zapcore.InfoLevel
 	default:
 		log.Fatal("error run mode")
 		return 0
