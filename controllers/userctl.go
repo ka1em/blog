@@ -30,7 +30,14 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	uid, err := model.SF.NextID()
+	if err != nil {
+		zlog.ZapLog.Error(err.Error())
+		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
+		return
+	}
 	u := &model.User{
+		ID:     uid,
 		Name:   param.Name,
 		Email:  param.Email,
 		Passwd: param.Password,

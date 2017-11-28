@@ -7,7 +7,7 @@ import (
 	"github.com/sony/sonyflake"
 )
 
-var sf *sonyflake.Sonyflake
+var SF *sonyflake.Sonyflake
 
 func stringToIP(s string) (net.IP, error) {
 	ip := net.ParseIP(s)
@@ -32,8 +32,8 @@ func machineID() (uint16, error) {
 func init() {
 	var st sonyflake.Settings
 	st.MachineID = machineID
-	sf = sonyflake.NewSonyflake(st)
-	if sf == nil {
+	SF = sonyflake.NewSonyflake(st)
+	if SF == nil {
 		panic("sonyflake not created")
 	}
 }

@@ -11,9 +11,9 @@ import (
 
 // Page 文章
 type Page struct {
-	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	Guid        string     `json:"guid" gorm:"type:varchar(64);unique_index"`
-	UserID      int64      `json:"user_id,string" sql:"type:bigint(20)"`
+	UserID      uint64     `json:"user_id,string" sql:"type:bigint(20)"`
 	Title       string     `json:"title" gorm:"type:varchar(256)"`
 	Content     string     `json:"content" gorm:"type:text"`
 	CreatedAt   time.Time  `json:"created_at"`
@@ -29,11 +29,11 @@ const contentLen = 20
 
 // BeforeCreate 插入之前
 func (p *Page) BeforeCreate(scope *gorm.Scope) error {
-	id, err := sf.NextID()
+	id, err := SF.NextID()
 	if err != nil {
 		return err
 	}
-	p.ID = int64(id)
+	p.ID = id
 	p.Guid = uuid.NewV4().String()
 	p.CreatedUnix = time.Now().Unix()
 	p.UpdatedUnix = p.CreatedUnix

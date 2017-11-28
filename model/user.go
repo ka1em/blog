@@ -4,8 +4,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/garyburd/redigo/redis"
 	"github.com/jinzhu/gorm"
 	uuid "github.com/satori/go.uuid"
 )
@@ -26,7 +28,7 @@ CREATE TABLE `users` (
 
 // User 用户表
 type User struct {
-	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	Name        string     `json:"name" gorm:"not null; type:varchar(256)"`
 	Email       string     `json:"email" gorm:"not null; type:varchar(256)"`
 	Passwd      string     `json:"-" gorm:"not null; type:varchar(256)" redis:"-"`
@@ -37,14 +39,39 @@ type User struct {
 	DeletedAt   *time.Time `sql:"index"`
 	CreatedUnix int64      `json:"created_unix" gorm:"type:bigint(20)"`
 	UpdatedUnix int64      `json:"updated_unix" gorm:"type:bigint(20)"`
+	DB          *gorm.DB   `json:"-" gorm:"-" redis:"-"`
 }
 
 // Create 创建用户
 func (u *User) Create() error {
+	if u.DB == nil {
+		u.DB = db
+	}
 	if nameIsExist(u.Name) {
 		return errors.New(ErrMap[UserNameExist])
 	}
-	return db.Create(u).Error
+	return u.DB.Create(u).Error
+}
+
+// SetCache 缓存用户
+func (u *User) SetCache() (string, error) {
+	key := REDIS_KEY_USER + fmt.Sprintf("%d", u.ID)
+	r := RedisDao{}
+	return r.HMSet(key, u)
+}
+
+// GetCache 获取缓存用户信息
+func (u *User) GetCache(id uint64) (User, error) {
+	key := REDIS_KEY_USER + fmt.Sprintf("%d", id)
+	r := RedisDao{}
+	v, err := r.HGetAll(key)
+	if err != nil {
+		return *u, err
+	}
+	if err := redis.ScanStruct(v, u); err != nil {
+		return *u, err
+	}
+	return *u, nil
 }
 
 func nameIsExist(name string) bool {
@@ -53,11 +80,7 @@ func nameIsExist(name string) bool {
 
 // BeforeCreate 创建之前
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
-	id, err := sf.NextID()
-	if err != nil {
-		return err
-	}
-	u.ID = int64(id)
+	var err error
 	u.Salt = uuid.NewV4().String()
 	u.Passwd, err = passwordHash(u.Passwd, u.Salt)
 	if err != nil {

@@ -36,7 +36,7 @@ type Session struct {
 	DeletedAt *time.Time `sql:"index"`
 
 	SessionID   string `json:"session_id" gorm:"type:varchar(191); unique_index;not null;default '' "`
-	UserID      int64  `json:"user_id,string" gorm:"not null"`
+	UserID      uint64 `json:"user_id,string" gorm:"not null"`
 	Active      int    `json:"session_active,string" gorm:"type:tinyint(1); not null; default 0"`
 	CreatedUnix int64  `json:"created_unix" gorm:"bigint(20)"`
 	UpdatedUnix int64  `json:"updated_unix" gorm:"bigint(20)"`
@@ -47,19 +47,19 @@ func init() {
 }
 
 // GetUserID 通过sessionId从数据库查询userid
-func (s *Session) GetUserID(sessionID string, active int) (int64, bool) {
+func (s *Session) GetUserID(sessionID string, active int) (uint64, bool) {
 	ok := !db.Select("user_id").Where("session_id = ? and active = ?", sessionID, active).First(&s).RecordNotFound()
 	return s.UserID, ok
 }
 
 // Close session
-func (s *Session) Close(userID int64) error {
+func (s *Session) Close(userID uint64) error {
 	s.Active = 0
 	return db.Model(s).Where("user_id = ?", userID).Update("active").Error
 }
 
 // UpdateSession 更新session为活跃状态
-func UpdateSession(userId int64, sessionId string) error {
+func UpdateSession(userId uint64, sessionId string) error {
 	sess := db.Begin()
 
 	if err := sess.Exec("update sessions set active = 0 where user_id = ?", userId).Error; err != nil {
@@ -159,16 +159,16 @@ func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
 }
 
 // ValidSessionUID 获取context中的user_id
-func ValidSessionUID(r *http.Request) (int64, error) {
+func ValidSessionUID(r *http.Request) (uint64, error) {
 	var userIds interface{}
 
 	if userIds = r.Context().Value("USER_ID"); userIds == nil {
-		return -1, errors.New("valid session user id is nil")
+		return 0, errors.New("valid session user id is nil")
 	}
 
-	uid, err := strconv.ParseInt(userIds.(string), 10, 64)
+	uid, err := strconv.ParseUint(userIds.(string), 10, 64)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	return uid, nil

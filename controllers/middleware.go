@@ -22,7 +22,7 @@ func ValidateSession(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 	if sid, ok := session.Values["sid"]; ok {
 		s := &model.Session{}
-		var uid int64
+		var uid uint64
 		var ok bool
 		if uid, ok = s.GetUserID(sid.(string), 1); !ok {
 			zlog.ZapLog.Error(model.ErrMap[model.SessionNoUserID])

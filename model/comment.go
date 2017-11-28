@@ -10,7 +10,7 @@ import (
 type Comment struct {
 	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	PageID      int64      `json:"page_id,string" gorm:"type:bigint(20)"`
-	UserID      int64      `json:"user_id,string" gorm:"type:bigint(20)"`
+	UserID      uint64     `json:"user_id,string" gorm:"type:bigint(20)"`
 	Text        string     `json:"comment_text" gorm:"type:mediumtext"`
 	CreatedUnix int64      `json:"created_unix" gorm:"type:bigint(20)"`
 	UpdatedUnix int64      `json:"updated_unix" gorm:"type:bigint(20)"`
@@ -21,7 +21,7 @@ type Comment struct {
 
 // BeforeCreate 评论创建前的操作
 func (c *Comment) BeforeCreate(scope *gorm.Scope) error {
-	id, err := sf.NextID()
+	id, err := SF.NextID()
 	if err != nil {
 		return err
 	}
