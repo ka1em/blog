@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -9,14 +10,30 @@ func TestUser_Create(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	u := User{
-		ID:   123,
-		Name: "test 1",
-		DB:   d,
+	db = d
+
+	id, err := SF.NextID()
+	if err != nil {
+		t.Fatal(err.Error())
 	}
-	u.Create()
-	u.SetCache()
-	u2, err := u.GetCache(123)
+
+	u := &User{
+		ID:        id,
+		Name:      fmt.Sprintf("%d", id),
+		DB:        d,
+		RedisPool: getRedisPool("127.0.0.1", "6379"),
+	}
+
+	err = u.Create()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	_, err = u.SetCache()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	u2, err := u.GetCache(id)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

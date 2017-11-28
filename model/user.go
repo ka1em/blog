@@ -28,18 +28,19 @@ CREATE TABLE `users` (
 
 // User 用户表
 type User struct {
-	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
-	Name        string     `json:"name" gorm:"not null; type:varchar(256)"`
-	Email       string     `json:"email" gorm:"not null; type:varchar(256)"`
-	Passwd      string     `json:"-" gorm:"not null; type:varchar(256)" redis:"-"`
-	Salt        string     `json:"-" gorm:"type:varchar(256)" redis:"-"`
-	Role        string     `json:"role" gorm:"not null; type:varchar(64)"` //角色 admin:管理员 users:用户
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	DeletedAt   *time.Time `sql:"index"`
-	CreatedUnix int64      `json:"created_unix" gorm:"type:bigint(20)"`
-	UpdatedUnix int64      `json:"updated_unix" gorm:"type:bigint(20)"`
-	DB          *gorm.DB   `json:"-" gorm:"-" redis:"-"`
+	ID          uint64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
+	Name        string      `json:"name" gorm:"not null; type:varchar(256)"`
+	Email       string      `json:"email" gorm:"not null; type:varchar(256)"`
+	Passwd      string      `json:"-" gorm:"not null; type:varchar(256)" redis:"-"`
+	Salt        string      `json:"-" gorm:"type:varchar(256)" redis:"-"`
+	Role        string      `json:"role" gorm:"not null; type:varchar(64)"` //角色 admin:管理员 users:用户
+	CreatedAt   time.Time   `json:"created_at" redis:"-"`
+	UpdatedAt   time.Time   `json:"updated_at" redis:"-"`
+	DeletedAt   *time.Time  `sql:"index" redis:"-"`
+	CreatedUnix int64       `json:"created_unix" gorm:"type:bigint(20)"`
+	UpdatedUnix int64       `json:"updated_unix" gorm:"type:bigint(20)"`
+	DB          *gorm.DB    `json:"-" gorm:"-" redis:"-"`
+	RedisPool   *redis.Pool `redis:"-" json:"-" gorm:"-" `
 }
 
 // Create 创建用户
@@ -47,7 +48,7 @@ func (u *User) Create() error {
 	if u.DB == nil {
 		u.DB = db
 	}
-	if nameIsExist(u.Name) {
+	if u.nameIsExist(u.Name) {
 		return errors.New(ErrMap[UserNameExist])
 	}
 	return u.DB.Create(u).Error
@@ -55,27 +56,38 @@ func (u *User) Create() error {
 
 // SetCache 缓存用户
 func (u *User) SetCache() (string, error) {
+	if u.RedisPool == nil {
+		u.RedisPool = redisPool
+	}
 	key := REDIS_KEY_USER + fmt.Sprintf("%d", u.ID)
-	r := RedisDao{}
+	r := RedisDao{
+		Pool: u.RedisPool,
+	}
 	return r.HMSet(key, u)
 }
 
 // GetCache 获取缓存用户信息
 func (u *User) GetCache(id uint64) (User, error) {
+	user := User{}
+	if u.RedisPool == nil {
+		u.RedisPool = redisPool
+	}
+	r := RedisDao{
+		Pool: u.RedisPool,
+	}
 	key := REDIS_KEY_USER + fmt.Sprintf("%d", id)
-	r := RedisDao{}
 	v, err := r.HGetAll(key)
 	if err != nil {
-		return *u, err
+		return user, err
 	}
-	if err := redis.ScanStruct(v, u); err != nil {
-		return *u, err
+	if err := redis.ScanStruct(v, &user); err != nil {
+		return user, err
 	}
-	return *u, nil
+	return user, nil
 }
 
-func nameIsExist(name string) bool {
-	return !db.Where("name = ?", name).First(&User{}).RecordNotFound()
+func (u *User) nameIsExist(name string) bool {
+	return !u.DB.Where("name = ?", name).First(&User{}).RecordNotFound()
 }
 
 // BeforeCreate 创建之前

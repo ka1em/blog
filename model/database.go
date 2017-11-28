@@ -1,14 +1,13 @@
 package model
 
 import (
-	"fmt"
-
 	"blog/common/setting"
 	"blog/common/zlog"
-
+	"fmt"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
+	"github.com/go-xorm/xorm"
 	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -62,6 +61,10 @@ func connDB() {
 
 func openMysql(address string) (*gorm.DB, error) {
 	return gorm.Open("mysql", address)
+}
+
+func xormEngine(address string) (*xorm.Engine, error) {
+	return xorm.NewEngine("mysql", address)
 }
 
 func connRedisPool() {
