@@ -29,8 +29,8 @@ type User struct {
 	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
 	Name        string     `json:"name" gorm:"not null; type:varchar(256)"`
 	Email       string     `json:"email" gorm:"not null; type:varchar(256)"`
-	Passwd      string     `json:"-" gorm:"not null; type:varchar(256)"`
-	Salt        string     `json:"-" gorm:"type:varchar(256)"`
+	Passwd      string     `json:"-" gorm:"not null; type:varchar(256)" redis:"-"`
+	Salt        string     `json:"-" gorm:"type:varchar(256)" redis:"-"`
 	Role        string     `json:"role" gorm:"not null; type:varchar(64)"` //角色 admin:管理员 users:用户
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`

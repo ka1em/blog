@@ -14,7 +14,7 @@ import (
 type WXUserInfo struct {
 	ErrCode    int      `json:"errcode"`    //
 	ErrMsg     string   `json:"errmsg"`     //
-	Openid     string   `json:"openid"`     //普通用户的标识，对当前开发者帐号唯一
+	OpenID     string   `json:"openid"`     //普通用户的标识，对当前开发者帐号唯一
 	Nickname   string   `json:"nickname"`   //普通用户昵称
 	Sex        int      `json:"sex"`        //普通用户性别，1为男性，2为女性
 	Province   string   `json:"province"`   //普通用户个人资料填写的省份

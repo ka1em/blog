@@ -41,11 +41,11 @@ func DBInit() {
 
 func connDB() {
 	var err error
-
 	address := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
 		setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
 
-	if db, err = gorm.Open("mysql", address); err != nil {
+	db, err = openMysql(address)
+	if err != nil {
 		panic(err.Error())
 	}
 
@@ -58,6 +58,10 @@ func connDB() {
 		panic(err.Error())
 	}
 	zlog.ZapLog.Debug("connect mysql ok")
+}
+
+func openMysql(address string) (*gorm.DB, error) {
+	return gorm.Open("mysql", address)
 }
 
 func connRedisPool() {
@@ -77,7 +81,7 @@ func getRedisPool(host, port string) *redis.Pool {
 			return conn, err
 		},
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
+			_, err := redis.String(c.Do("PING"))
 			return err
 		},
 		MaxIdle:     REDIS_MAX_IDLE,
