@@ -30,6 +30,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 生成uid
 	uid, err := model.SF.NextID()
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
@@ -66,13 +67,13 @@ type userRegistParam struct {
 
 func (p *userRegistParam) valid() error {
 	if p.Name == "" {
-		return errors.New("regist name is nil")
+		return errors.New("register name is nil")
 	}
 	if p.Email == "" {
-		return errors.New("regist mail is nil")
+		return errors.New("register mail is nil")
 	}
 	if p.Password == "" {
-		return errors.New("regist passwd is nil")
+		return errors.New("register passwd is nil")
 	}
 	return nil
 }
@@ -107,16 +108,30 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, ok, err := model.CheckPassWord(param.Name, param.Password)
-	if err != nil {
-		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NoUserName, http.StatusBadRequest)
-		return
+	u := model.User{
+		Name:   param.Name,
+		Passwd: param.Password,
 	}
-
-	if !ok {
-		zlog.ZapLog.Error("passwd error")
-		data.ResponseJson(w, model.PasswordErr, http.StatusBadRequest)
+	_, err = u.CheckPassWord()
+	if err != nil {
+		var errType int64
+		var httpCode int
+		switch err.Error() {
+		case model.ErrMap[model.PasswordErr]:
+			errType = model.PasswordErr
+			httpCode = http.StatusBadRequest
+		case model.ErrMap[model.PasswordHashErr]:
+			errType = model.PasswordHashErr
+			httpCode = http.StatusInternalServerError
+		case model.ErrMap[model.NoUserName]:
+			errType = model.NoUserName
+			httpCode = http.StatusBadRequest
+		default:
+			errType = model.DataBaseErr
+			httpCode = http.StatusBadRequest
+		}
+		zlog.ZapLog.Error(err.Error())
+		data.ResponseJson(w, errType, httpCode)
 		return
 	}
 
@@ -127,7 +142,6 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Data["redirct_url"] = "/index"
 	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 

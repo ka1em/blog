@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/garyburd/redigo/redis"
-	"github.com/jinzhu/gorm"
+	"github.com/go-xorm/xorm"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -28,50 +28,73 @@ CREATE TABLE `users` (
 
 // User 用户表
 type User struct {
-	ID          uint64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
-	Name        string      `json:"name" gorm:"not null; type:varchar(256)"`
-	Email       string      `json:"email" gorm:"not null; type:varchar(256)"`
-	Passwd      string      `json:"-" gorm:"not null; type:varchar(256)" redis:"-"`
-	Salt        string      `json:"-" gorm:"type:varchar(256)" redis:"-"`
-	Role        string      `json:"role" gorm:"not null; type:varchar(64)"` //角色 admin:管理员 users:用户
-	CreatedAt   time.Time   `json:"created_at" redis:"-"`
-	UpdatedAt   time.Time   `json:"updated_at" redis:"-"`
-	DeletedAt   *time.Time  `sql:"index" redis:"-"`
-	CreatedUnix int64       `json:"created_unix" gorm:"type:bigint(20)"`
-	UpdatedUnix int64       `json:"updated_unix" gorm:"type:bigint(20)"`
-	DB          *gorm.DB    `json:"-" gorm:"-" redis:"-"`
-	RedisPool   *redis.Pool `redis:"-" json:"-" gorm:"-" `
+	ID     uint64 `json:"id,string" xorm:"pk notnull"`
+	Name   string `json:"name" xorm:"varchar(64) notnull unique"`
+	Email  string `json:"email" xorm:"varchar(64) notnull"`
+	Passwd string `json:"-" xorm:"varchar(256) notnull" redis:"-"`
+	Salt   string `json:"-" xorm:"varchar(256)" redis:"-"`
+	Role   string `json:"role" xorm:"varchar(64)"` //角色 admin:管理员 users:用户
+
+	Created     time.Time `xorm:"-"`
+	CreatedUnix int64     `json:"created_unix"`
+	Updated     time.Time `xorm:"-"`
+	UpdatedUnix int64     `json:"updated_unix"`
+
+	XDB       *xorm.Engine `json:"-" xorm:"-" redis:"-"`
+	RedisPool *redis.Pool  `redis:"-" json:"-" xorm:"-" `
+}
+
+func (u *User) BeforeInsert() {
+	u.CreatedUnix = time.Now().Unix()
+	u.UpdatedUnix = u.CreatedUnix
+}
+
+func (u *User) BeforeUpdate() {
+	u.UpdatedUnix = time.Now().Unix()
+}
+
+func (u *User) AfterSet(colName string, _ xorm.Cell) {
+	switch colName {
+	case "created_unix":
+		u.Created = time.Unix(u.CreatedUnix, 0).Local()
+	case "updated_unix":
+		u.Updated = time.Unix(u.UpdatedUnix, 0).Local()
+	}
 }
 
 // Create 创建用户
 func (u *User) Create() error {
-	if u.DB == nil {
-		u.DB = db
+	if u.XDB == nil {
+		u.XDB = xdb
 	}
-	if u.nameIsExist(u.Name) {
+	exist, err := u.NameWasExist()
+	if err != nil {
+		return err
+	}
+	if exist {
 		return errors.New(ErrMap[UserNameExist])
 	}
-	return u.DB.Create(u).Error
+	u.Salt = uuid.NewV4().String()
+	u.Passwd, err = passwordHash(u.Passwd, u.Salt)
+	if err != nil {
+		return err
+	}
+	_, err = u.XDB.Insert(u)
+	return err
 }
 
 // SetCache 缓存用户
 func (u *User) SetCache() (string, error) {
-	if u.RedisPool == nil {
-		u.RedisPool = redisPool
-	}
-	key := REDIS_KEY_USER + fmt.Sprintf("%d", u.ID)
 	r := RedisDao{
 		Pool: u.RedisPool,
 	}
+	key := REDIS_KEY_USER + fmt.Sprintf("%d", u.ID)
 	return r.HMSet(key, u)
 }
 
 // GetCache 获取缓存用户信息
 func (u *User) GetCache(id uint64) (User, error) {
 	user := User{}
-	if u.RedisPool == nil {
-		u.RedisPool = redisPool
-	}
 	r := RedisDao{
 		Pool: u.RedisPool,
 	}
@@ -86,26 +109,9 @@ func (u *User) GetCache(id uint64) (User, error) {
 	return user, nil
 }
 
-func (u *User) nameIsExist(name string) bool {
-	return !u.DB.Where("name = ?", name).First(&User{}).RecordNotFound()
-}
-
-// BeforeCreate 创建之前
-func (u *User) BeforeCreate(scope *gorm.Scope) error {
-	var err error
-	u.Salt = uuid.NewV4().String()
-	u.Passwd, err = passwordHash(u.Passwd, u.Salt)
-	if err != nil {
-		return err
-	}
-	u.CreatedUnix = time.Now().Unix()
-	u.UpdatedUnix = time.Now().Unix()
-	return nil
-}
-
-// BeforeUpdate 更新之前
-func (u *User) BeforeUpdate(scope *gorm.Scope) error {
-	return scope.SetColumn("updated_unix", time.Now().Unix())
+// NameWasExist 用户名存在
+func (u *User) NameWasExist() (bool, error) {
+	return u.XDB.Where("name = ?", u.Name).Get(u)
 }
 
 func passwordHash(p, salt string) (string, error) {
@@ -118,28 +124,36 @@ func passwordHash(p, salt string) (string, error) {
 }
 
 // getValidInfo 获取需要确认用户的信息
-func getValidInfo(userName string) (*User, bool) {
-	u := &User{}
-	info := []string{"id", "name", "salt", "passwd"}
-	if db.Select(info).Where("name = ?", userName).First(u).RecordNotFound() {
-		return nil, false
+func (u *User) getValidInfo(userName string) (*User, error) {
+	if u.XDB == nil {
+		u.XDB = xdb
 	}
-	return u, true
+	user := &User{}
+	exist, err := u.XDB.Where("name = ?", userName).Get(user)
+	if err != nil {
+		return user, err
+	}
+	if !exist {
+		return user, errors.New(ErrMap[NoUserName])
+	}
+	return user, err
 }
 
 // CheckPassWord 检查密码
-func CheckPassWord(name, passwd string) (*User, bool, error) {
-	u, ok := getValidInfo(name)
-	if !ok {
-		return nil, false, errors.New(ErrMap[NoUserName])
+func (u *User) CheckPassWord() (bool, error) {
+	if u.XDB == nil {
+		u.XDB = xdb
 	}
-	tmp, err := passwordHash(passwd, u.Salt)
+	user, err := u.getValidInfo(u.Name)
 	if err != nil {
-		return nil, false, err
+		return false, errors.New(ErrMap[NoUserName])
 	}
-
+	tmp, err := passwordHash(u.Passwd, user.Salt)
+	if err != nil {
+		return false, errors.New(ErrMap[PasswordHashErr])
+	}
 	if u.Passwd != tmp {
-		return nil, false, errors.New(ErrMap[PasswordErr])
+		return false, errors.New(ErrMap[PasswordErr])
 	}
-	return u, true, nil
+	return true, nil
 }

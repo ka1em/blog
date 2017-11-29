@@ -6,12 +6,17 @@ import (
 )
 
 func TestUser_Create(t *testing.T) {
-	d, err := openMysql("root:123456@tcp(localhost:3306)/lgwd")
+	//d, err := openMysql("root:123456@tcp(localhost:3306)/lgwd")
+	//if err != nil {
+	//	t.Fatal(err.Error())
+	//}
+	//db = d
+
+	d, err := xormEngine("root:123456@tcp(localhost:3306)/lgwd")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	db = d
-
+	xdb = d
 	id, err := SF.NextID()
 	if err != nil {
 		t.Fatal(err.Error())
@@ -20,7 +25,7 @@ func TestUser_Create(t *testing.T) {
 	u := &User{
 		ID:        id,
 		Name:      fmt.Sprintf("%d", id),
-		DB:        d,
+		XDB:       xdb,
 		RedisPool: getRedisPool("127.0.0.1", "6379"),
 	}
 

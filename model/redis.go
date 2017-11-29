@@ -173,3 +173,12 @@ func (r *RedisDao) HGetAll(key interface{}) ([]interface{}, error) {
 	defer c.Close()
 	return redis.Values(c.Do("HGETALL", key))
 }
+
+func (r *RedisDao) Del(key interface{}) (int, error) {
+	if r.Pool == nil {
+		r.Pool = redisPool
+	}
+	c := r.Pool.Get()
+	defer c.Close()
+	return redis.Int(c.Do("DEL", key))
+}

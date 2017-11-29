@@ -15,7 +15,8 @@ const (
 	NoUserName
 	NoUserID
 	SessionNoUserID
-	DataBaseErr   = (iota * -1) - 20000 // -20000
+	DataBaseErr = (iota * -1) - 20000 // -20000
+	PasswordHashErr
 	MiddlewareErr = (iota * -1) - 30000 // -30000
 	NeedLogin
 )
@@ -25,14 +26,15 @@ const DefaultPageSize = 20
 // ErrMap 错误map
 var ErrMap = map[int64]string{
 	Success:         "success",
-	UserNameExist:   "error: user name was exist",
-	ParamsErr:       "error: params was error",
-	MiddlewareErr:   "error: middleware error",
-	NeedLogin:       "error: not login",
-	PasswordErr:     "error: password error",
-	NoUserName:      "error: no user name",
-	NoUserID:        "error: no user id",
-	SessionNoUserID: "error: session no user id",
+	UserNameExist:   "user name was exist",
+	ParamsErr:       "params was error",
+	MiddlewareErr:   "middleware error",
+	NeedLogin:       "not login",
+	PasswordErr:     "password error",
+	NoUserName:      "no user name",
+	NoUserID:        "no user id",
+	SessionNoUserID: "session no user id",
+	PasswordHashErr: "password hash error",
 }
 
 // Data return json data

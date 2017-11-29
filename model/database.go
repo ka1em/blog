@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/garyburd/redigo/redis"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	"github.com/gorilla/schema"
 	"github.com/jinzhu/gorm"
@@ -16,6 +18,7 @@ import (
 var (
 	SchemaDecoder *schema.Decoder // schema decoder
 	db            *gorm.DB
+	xdb           *xorm.Engine
 	redisPool     *redis.Pool
 )
 
@@ -23,10 +26,10 @@ const REDIS_MAX_IDLE = 100
 const REDIS_MAX_ACTIVE = 100
 
 const (
-	REDIS_KEY_PREFIX = "BLOG:"
-	REDIS_KEY_LOGIN  = REDIS_KEY_PREFIX + "LOGIN:"
-	REDIS_KEY_USER   = REDIS_KEY_PREFIX + "USER:"
-	REDIS_KEY_PAGE   = REDIS_KEY_PREFIX + "PAGE:"
+	REDIS_KEY_PREFIX  = "BLOG:"
+	REDIS_KEY_SESSION = REDIS_KEY_PREFIX + "SESSION:"
+	REDIS_KEY_USER    = REDIS_KEY_PREFIX + "USER:"
+	REDIS_KEY_PAGE    = REDIS_KEY_PREFIX + "PAGE:"
 )
 
 func init() {
@@ -56,7 +59,32 @@ func connDB() {
 	).Error; err != nil {
 		panic(err.Error())
 	}
-	zlog.ZapLog.Debug("connect mysql ok")
+	zlog.ZapLog.Debug("gorm connect mysql ok")
+}
+
+func connXDB() {
+	var err error
+	address := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
+		setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
+
+	xdb, err = xormEngine(address)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	xdb.ShowSQL(true)
+	xdb.Logger().SetLevel(core.LOG_DEBUG)
+	xdb.SetMapper(core.GonicMapper{})
+	xdb.Sync2()
+
+	//f, err := os.Create("sql.log")
+	//if err != nil {
+	//	println(err.Error())
+	//	return
+	//}
+	//xdb.SetLogger(xorm.NewSimpleLogger(f))
+
+	zlog.ZapLog.Debug("xorm connect mysql ok")
 }
 
 func openMysql(address string) (*gorm.DB, error) {
