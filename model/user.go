@@ -97,7 +97,8 @@ func (u *User) GetCache(id uint64) (User, error) {
 
 // NameWasExist 用户名存在
 func (u *User) NameWasExist() (bool, error) {
-	return u.XDB.Where("name = ?", u.Name).Get(u)
+	var user User
+	return u.XDB.Where("name = ?", u.Name).Get(&user)
 }
 
 func passwordHash(p, salt string) (string, error) {
