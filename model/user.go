@@ -12,20 +12,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-/*
-CREATE TABLE `users` (
- `id` int(11)
-  unsigned NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(32) NOT NULL DEFAULT '',
-   `user_guid` varchar(256) NOT NULL DEFAULT '',
-    `user_email` varchar(128) NOT NULL DEFAULT '',
-    `user_password` varchar(128) NOT NULL DEFAULT '',
-      `user_salt` varchar(128) NOT NULL DEFAULT '',
-       `user_joined_timestamp` timestamp NULL DEFAULT NULL,
-       PRIMARY KEY (`id`)
-       ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-*/
-
 // User 用户表
 type User struct {
 	ID     uint64 `json:"id,string" xorm:"pk notnull"`
@@ -35,13 +21,13 @@ type User struct {
 	Salt   string `json:"-" xorm:"varchar(256)" redis:"-"`
 	Role   string `json:"role" xorm:"varchar(64)"` //角色 admin:管理员 users:用户
 
-	Created     time.Time `xorm:"-"`
+	Created     time.Time `xorm:"-" redis:"-"`
 	CreatedUnix int64     `json:"created_unix"`
-	Updated     time.Time `xorm:"-"`
+	Updated     time.Time `xorm:"-" redis:"-"`
 	UpdatedUnix int64     `json:"updated_unix"`
 
 	XDB       *xorm.Engine `json:"-" xorm:"-" redis:"-"`
-	RedisPool *redis.Pool  `redis:"-" json:"-" xorm:"-" `
+	RedisPool *redis.Pool  `json:"-" xorm:"-" redis:"-"`
 }
 
 func (u *User) BeforeInsert() {

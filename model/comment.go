@@ -3,54 +3,77 @@ package model
 import (
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"github.com/garyburd/redigo/redis"
+	"github.com/go-errors/errors"
+	"github.com/go-xorm/xorm"
 )
 
 // Comment 评论
 type Comment struct {
-	ID          int64      `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
-	PageID      int64      `json:"page_id,string" gorm:"type:bigint(20)"`
-	UserID      uint64     `json:"user_id,string" gorm:"type:bigint(20)"`
-	Text        string     `json:"comment_text" gorm:"type:mediumtext"`
-	CreatedUnix int64      `json:"created_unix" gorm:"type:bigint(20)"`
-	UpdatedUnix int64      `json:"updated_unix" gorm:"type:bigint(20)"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	DeletedAt   *time.Time `json:"-" sql:"index"`
+	ID       uint64 `json:"id,string" xorm:"pk not null"`
+	PageID   uint64 `json:"page_id,string" xorm:"not null"`
+	UserID   uint64 `json:"user_id,string" xorm:"not null"`
+	Text     string `json:"comment_text" xorm:"text"`
+	ToUserID uint64 `json:"to_user_id,string"`
+
+	Created     time.Time `xorm:"-" redis:"-"`
+	CreatedUnix int64     `json:"created_unix"`
+	Updated     time.Time `xorm:"-" redis:"-"`
+	UpdatedUnix int64     `json:"updated_unix"`
+
+	XDB       *xorm.Engine `json:"-" xorm:"-" redis:"-"`
+	RedisPool *redis.Pool  `json:"-" xorm:"-" redis:"-"`
 }
 
-// BeforeCreate 评论创建前的操作
-func (c *Comment) BeforeCreate(scope *gorm.Scope) error {
-	id, err := SF.NextID()
-	if err != nil {
-		return err
-	}
-	c.ID = int64(id)
+func (c *Comment) BeforeInsert() {
 	c.CreatedUnix = time.Now().Unix()
 	c.UpdatedUnix = c.CreatedUnix
-	return nil
 }
 
-// BeforeUpdate 评论更新前操作
-func (c *Comment) BeforeUpdate(scope *gorm.Scope) error {
-	return scope.SetColumn("updated_unix", time.Now().Unix())
+func (c *Comment) BeforeUpdate() {
+	c.UpdatedUnix = time.Now().Unix()
+}
+
+func (c *Comment) AfterSet(colName string, _ xorm.Cell) {
+	switch colName {
+	case "created_unix":
+		c.Created = time.Unix(c.CreatedUnix, 0).Local()
+	case "updated_unix":
+		c.Updated = time.Unix(c.UpdatedUnix, 0).Local()
+	}
 }
 
 // Add 添加评论
 func (c *Comment) Add() error {
-	return db.Create(c).Error
+	if c.XDB == nil {
+		c.XDB = xdb
+	}
+	_, err := c.XDB.Insert(c)
+	return err
 }
 
 // Get 获取评论
-func (c *Comment) Get(pIndex, pSize int) ([]*Comment, error) {
-	list := []*Comment{}
-	if err := db.Order("created_at desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&list).Error; err != nil {
-		return list, err
+func (c *Comment) Get(pIndex, pSize int) ([]Comment, error) {
+	if c.XDB == nil {
+		c.XDB = xdb
 	}
-	return list, nil
+	var list []Comment
+	err := c.XDB.Where("page_id = ?", c.PageID).Limit(pSize, (pIndex-1)*pSize).Find(&list)
+	return list, err
 }
 
 // Update 更新评论
 func (c *Comment) Update() error {
-	return db.Model(c).Where("id = ? and user_id = ?", c.ID, c.UserID).Update("text").Error
+	if c.XDB == nil {
+		c.XDB = xdb
+	}
+	n, err := c.XDB.Where("id = ? and user_id = ?", c.ID, c.UserID).Update(c)
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		// TODO
+		return errors.New("no recored")
+	}
+	return nil
 }

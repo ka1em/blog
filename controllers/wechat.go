@@ -36,10 +36,10 @@ func WeChatValidGET(w http.ResponseWriter, r *http.Request) {
 }
 
 type weChatValidParam struct {
-	Signature string `form:"signature"`
-	Timestamp string `form:"timestamp"`
-	Nonce     string `form:"nonce"`
-	EchoStr   string `form:"echostr"`
+	Signature string `schema:"signature"`
+	Timestamp string `schema:"timestamp"`
+	Nonce     string `schema:"nonce"`
+	EchoStr   string `schema:"echostr"`
 }
 
 func wxSign(timeStamp, nonce string) string {

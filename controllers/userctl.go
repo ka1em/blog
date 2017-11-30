@@ -4,6 +4,7 @@ import (
 	"blog/common/zlog"
 	"blog/model"
 	"net/http"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -82,12 +83,12 @@ func (p *userRegistParam) valid() error {
 func LoginPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 	//创建session_id
-	sid, err := model.PreCreateSession(w, r)
-	if err != nil {
-		zlog.ZapLog.Errorf("%s", err.Error())
-		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
-		return
-	}
+	//sid, err := model.PreCreateSession(w, r)
+	//if err != nil {
+	//	zlog.ZapLog.Errorf("%s", err.Error())
+	//	data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
+	//	return
+	//}
 
 	if err := r.ParseForm(); err != nil {
 		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
@@ -112,7 +113,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		Name:   param.Name,
 		Passwd: param.Password,
 	}
-	_, err = u.CheckPassWord()
+	_, err := u.CheckPassWord()
 	if err != nil {
 		var errType int64
 		var httpCode int
@@ -136,7 +137,12 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//登录成功，更新session，关联userid和sessionid
-	if err := model.UpdateSession(u.ID, sid); err != nil {
+	s := model.Session{
+		//SID:         sid, // TODO
+		UserID:      u.ID,
+		CreatedUnix: time.Now().Unix(),
+	}
+	if err := s.Save(); err != nil {
 		zlog.ZapLog.Error("zlog err %s", err.Error())
 		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
@@ -163,21 +169,26 @@ func (p *loginParams) valid() error {
 // LogoutGET 登出
 func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
-
-	uid, err := model.ValidSessionUID(r)
-	if err != nil {
-		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NoUserID, http.StatusBadRequest)
-		return
-	}
-
-	s := &model.Session{}
-
-	if err := s.Close(uid); err != nil {
-		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.ParamsErr, http.StatusInternalServerError)
-		return
-	}
+	// todo
+	//
+	//uid, err := model.ValidSessionUID(r)
+	//if err != nil {
+	//	zlog.ZapLog.Error(err.Error())
+	//	data.ResponseJson(w, model.NoUserID, http.StatusBadRequest)
+	//	return
+	//}
+	////sid, err := model.ValidSessionID(r)
+	//
+	////s := &model.Session{
+	////	SID: sid,
+	////	//UserID: uid,
+	////}
+	//
+	//if err := s.Del(); err != nil {
+	//	zlog.ZapLog.Error(err.Error())
+	//	data.ResponseJson(w, model.ParamsErr, http.StatusInternalServerError)
+	//	return
+	//}
 
 	data.ResponseJson(w, model.Success, http.StatusOK)
 }

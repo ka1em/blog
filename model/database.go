@@ -3,6 +3,7 @@ package model
 import (
 	"blog/common/setting"
 	"blog/common/zlog"
+
 	"fmt"
 	"time"
 
@@ -17,9 +18,9 @@ import (
 
 var (
 	SchemaDecoder *schema.Decoder // schema decoder
-	db            *gorm.DB
-	xdb           *xorm.Engine
-	redisPool     *redis.Pool
+	//db            *gorm.DB
+	xdb       *xorm.Engine
+	redisPool *redis.Pool
 )
 
 const REDIS_MAX_IDLE = 100
@@ -37,29 +38,29 @@ func init() {
 }
 
 func DBInit() {
-	connDB()
+	connXDB()
 	connRedisPool()
 }
 
 func connDB() {
-	var err error
-	address := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
-		setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
-
-	db, err = openMysql(address)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	if err := db.AutoMigrate(
-		&User{},
-		&Session{},
-		&Page{},
-		&Comment{},
-	).Error; err != nil {
-		panic(err.Error())
-	}
-	zlog.ZapLog.Debug("gorm connect mysql ok")
+	//var err error
+	//address := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
+	//	setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
+	//
+	//db, err = openMysql(address)
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+	//
+	//if err := db.AutoMigrate(
+	//	&User{},
+	//	&Session{},
+	//	&Page{},
+	//	&Comment{},
+	//).Error; err != nil {
+	//	panic(err.Error())
+	//}
+	//zlog.ZapLog.Debug("gorm connect mysql ok")
 }
 
 func connXDB() {
@@ -75,7 +76,10 @@ func connXDB() {
 	xdb.ShowSQL(true)
 	xdb.Logger().SetLevel(core.LOG_DEBUG)
 	xdb.SetMapper(core.GonicMapper{})
-	xdb.Sync2()
+	xdb.Sync2(
+		new(User),
+		new(Page),
+	)
 
 	//f, err := os.Create("sql.log")
 	//if err != nil {

@@ -3,12 +3,12 @@ package controllers
 import (
 	"blog/common/zlog"
 	"blog/model"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
 )
 
 // APICommentPOST 创建评论
@@ -34,9 +34,14 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
 		return
 	}
+	cid, err := model.SF.NextID()
+	if err != nil {
+		zlog.ZapLog.Error(err.Error())
+		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
+		return
+	}
 	cm := &model.Comment{
-		//CommentName:  param.Name,
-		//CommentEmail: param.Email,
+		ID:     cid,
 		Text:   param.Comment,
 		PageID: param.PageID,
 		UserID: uid,
@@ -52,10 +57,11 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 }
 
 type commentPostParam struct {
-	Name    string `schema:"name"`
-	Email   string `schema:"email"`
-	Comment string `schema:"comment,required"`
-	PageID  int64  `schema:"page_id,required"`
+	Name     string `schema:"name"`
+	Email    string `schema:"email"`
+	Comment  string `schema:"comment,required"`
+	PageID   uint64 `schema:"page_id,required"`
+	ToUserID uint64 `schema:"to_user_id"`
 }
 
 // APICommentGET 获取评论
@@ -85,7 +91,7 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	id := vars["id"]
-	idn, err := strconv.ParseInt(id, 10, 64)
+	idn, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
@@ -121,6 +127,6 @@ func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 }
 
 type commentPutParam struct {
-	UserID  int64  `schema:"user_id,required"`
+	UserID  uint64 `schema:"user_id,required"`
 	Comment string `schema:"comment,required"`
 }

@@ -126,7 +126,7 @@ func (s *Session) Del() error {
 //	return sess.Commit().Error
 //}
 
-func generateSessionID() (string, error) {
+func GenerateSessionID() (string, error) {
 	sid := make([]byte, 24)
 	if _, err := io.ReadFull(rand.Reader, sid); err != nil {
 		return "", err
@@ -154,7 +154,7 @@ func generateSessionID() (string, error) {
 //		return sid.(string), nil
 //	}
 //
-//	sessionID, err := generateSessionID()
+//	sessionID, err := GenerateSessionID()
 //	if err != nil {
 //		return "", err
 //	}
@@ -173,33 +173,33 @@ func generateSessionID() (string, error) {
 //}
 
 // PreCreateSession 验证用户名之前，先行创建session
-func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
-	session, err := SessionStore.Get(r, CookieName)
-	if err != nil {
-		return "", err
-	}
-	if session.IsNew {
-		sessionID, err := generateSessionID()
-		if err != nil {
-			return "", err
-		}
-		session.Values["sid"] = sessionID
-		session.Options = &sessions.Options{
-			MaxAge:   60 * 60 * 24,
-			HttpOnly: true,
-			//Secure:   setting.SSLMode,
-		}
-		if err := session.Save(r, w); err != nil {
-			return "", err
-		}
-	}
-
-	if err := UpdateSession(0, sessionID); err != nil {
-		return "", err
-	}
-
-	return sessionID, nil
-}
+//func PreCreateSession(w http.ResponseWriter, r *http.Request) (string, error) {
+//	sst, err := SessionStore.Get(r, CookieName)
+//	if err != nil {
+//		return "", err
+//	}
+//	if sst.IsNew {
+//		sessionID, err := GenerateSessionID()
+//		if err != nil {
+//			return "", err
+//		}
+//		sst.Values["sid"] = sessionID
+//		sst.Options = &sessions.Options{
+//			MaxAge:   60 * 60 * 24,
+//			HttpOnly: true,
+//			//Secure:   setting.SSLMode,
+//		}
+//		if err := sst.Save(r, w); err != nil {
+//			return "", err
+//		}
+//	}
+//
+//	if err := UpdateSession(0, sessionID); err != nil {
+//		return "", err
+//	}
+//
+//	return sessionID, nil
+//}
 
 // ValidSessionUID 获取context中的user_id
 func ValidSessionUID(r *http.Request) (uint64, error) {
@@ -214,4 +214,12 @@ func ValidSessionUID(r *http.Request) (uint64, error) {
 	}
 
 	return uid, nil
+}
+
+func ValidSessionID(r *http.Request) (string, error) {
+	sid := r.Context().Value("SID")
+	if sid == nil {
+		return "", errors.New("valid session user id is nil")
+	}
+	return sid.(string), nil
 }

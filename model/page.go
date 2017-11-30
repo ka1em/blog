@@ -1,71 +1,81 @@
 package model
 
 import (
+	"errors"
 	"time"
 
-	"blog/common/zlog"
-
-	"github.com/jinzhu/gorm"
-	"github.com/satori/go.uuid"
+	"github.com/garyburd/redigo/redis"
+	"github.com/go-xorm/xorm"
 )
 
 // Page 文章
 type Page struct {
-	ID          uint64     `json:"id,string" gorm:"primary_key" sql:"type:bigint(20)"`
-	Guid        string     `json:"guid" gorm:"type:varchar(64);unique_index"`
-	UserID      uint64     `json:"user_id,string" sql:"type:bigint(20)"`
-	Title       string     `json:"title" gorm:"type:varchar(256)"`
-	Content     string     `json:"content" gorm:"type:text"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	DeletedAt   *time.Time `json:"-" sql:"index"`
-	CreatedUnix int64      `json:"created_unix,string" sql:"type:bigint(20)"`
-	UpdatedUnix int64      `json:"updated_unix,string" sql:"type:bigint(20)"`
+	ID      uint64 `json:"id,string" xorm:"pk notnull"`
+	Guid    string `json:"guid" xorm:"varchar(64)"`
+	UserID  uint64 `json:"user_id,string"`
+	Title   string `json:"title" xorm:"varchar(256)"`
+	Content string `json:"content" xorm:"text"`
 
-	Comments []*Comment `json:"comments,omitempty" gorm:"-"`
+	Created     time.Time `json:"-" xorm:"-" redis:"-"`
+	CreatedUnix int64     `json:"created_unix"`
+	Updated     time.Time `json:"-" xorm:"-" redis:"-"`
+	UpdatedUnix int64     `json:"updated_unix"`
+
+	XDB       *xorm.Engine `json:"-" xorm:"-" redis:"-"`
+	RedisPool *redis.Pool  `json:"-" redis:"-" json:"-" xorm:"-" `
+
+	Comments []*Comment `json:"comments,omitempty" xorm:"-" redis:"-"`
 }
 
 const contentLen = 20
 
-// BeforeCreate 插入之前
-func (p *Page) BeforeCreate(scope *gorm.Scope) error {
-	id, err := SF.NextID()
-	if err != nil {
-		return err
-	}
-	p.ID = id
-	p.Guid = uuid.NewV4().String()
+func (p *Page) BeforeInsert() {
 	p.CreatedUnix = time.Now().Unix()
 	p.UpdatedUnix = p.CreatedUnix
-	return nil
 }
 
-// BeforeUpdate 更新时间
-func (p *Page) BeforeUpdate(scope *gorm.Scope) error {
-	return scope.SetColumn("updated_unix", time.Now().Unix())
+func (p *Page) BeforeUpdate() {
+	p.UpdatedUnix = time.Now().Unix()
+}
+
+func (p *Page) AfterSet(colName string, _ xorm.Cell) {
+	switch colName {
+	case "created_unix":
+		p.Created = time.Unix(p.CreatedUnix, 0).Local()
+	case "updated_unix":
+		p.Updated = time.Unix(p.UpdatedUnix, 0).Local()
+	}
 }
 
 // Add 添加page
 func (p *Page) Add() error {
-	return db.Create(p).Error
+	if p.XDB == nil {
+		p.XDB = xdb
+	}
+	_, err := p.XDB.Insert(p)
+	return err
 }
 
 // GetPageByID 获取
-func GetPageByID(pageID uint64) (Page, error) {
-	p := Page{}
-	if err := db.Where("id = ?", pageID).First(&p).Error; err != nil {
-		return Page{}, err
+func (p *Page) GetPageByID() (Page, error) {
+	if p.XDB == nil {
+		p.XDB = xdb
 	}
-	return p, nil
+	page := Page{}
+	exist, err := p.XDB.Where("id = ?", p.ID).Get(&page)
+	if !exist {
+		return page, errors.New("not exist")
+	}
+	return page, err
 }
 
 // GetPages 获取page
-func GetPages(pIndex, pSize int) (pages []*Page, err error) {
-	if err := db.Order("created_at  desc").Limit(pSize).Offset((pIndex - 1) * pSize).Find(&pages).Error; err != nil {
-		zlog.ZapLog.Error(err.Error())
-		return nil, err
+func (p *Page) GetPages(pIndex, pSize int) (pages []*Page, err error) {
+	if p.XDB == nil {
+		p.XDB = xdb
 	}
-	return pages, nil
+	err = p.XDB.Limit(pSize, (pIndex-1)*pSize).Desc("created").Find(&pages)
+	return
 }
 
 // TruncatedText 截短字符串

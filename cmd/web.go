@@ -3,6 +3,7 @@ package cmd
 import (
 	"blog/common/setting"
 	"blog/common/zlog"
+	"blog/controllers"
 	"blog/model"
 	"blog/router"
 	"log"
@@ -55,6 +56,8 @@ func runWeb(c *cli.Context) {
 	n.Use(negroni.NewLogger())
 
 	n.UseHandler(r)
+	n.UseFunc(controllers.ValidateSession)
+
 	s := &http.Server{
 		Addr:           ":" + port,
 		Handler:        n,
