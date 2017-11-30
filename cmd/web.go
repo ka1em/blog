@@ -55,8 +55,8 @@ func runWeb(c *cli.Context) {
 	n.Use(negroni.NewRecovery())
 	n.Use(negroni.NewLogger())
 
-	n.UseHandler(r)
 	n.UseFunc(controllers.ValidateSession)
+	n.UseHandler(r)
 
 	s := &http.Server{
 		Addr:           ":" + port,

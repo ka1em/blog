@@ -126,20 +126,20 @@ func (u *User) getValidInfo(userName string) (*User, error) {
 }
 
 // CheckPassWord 检查密码
-func (u *User) CheckPassWord() (bool, error) {
+func (u *User) CheckPassWord() (*User, error) {
 	if u.XDB == nil {
 		u.XDB = xdb
 	}
-	user, err := u.getValidInfo(u.Name)
+	realUser, err := u.getValidInfo(u.Name)
 	if err != nil {
-		return false, errors.New(ErrMap[NoUserName])
+		return realUser, errors.New(ErrMap[NoUserName])
 	}
-	tmp, err := passwordHash(u.Passwd, user.Salt)
+	tmp, err := passwordHash(u.Passwd, realUser.Salt)
 	if err != nil {
-		return false, errors.New(ErrMap[PasswordHashErr])
+		return realUser, errors.New(ErrMap[PasswordHashErr])
 	}
-	if u.Passwd != tmp {
-		return false, errors.New(ErrMap[PasswordErr])
+	if realUser.Passwd != tmp {
+		return realUser, errors.New(ErrMap[PasswordErr])
 	}
-	return true, nil
+	return realUser, nil
 }

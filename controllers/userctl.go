@@ -35,7 +35,7 @@ func RegisterPost(w http.ResponseWriter, r *http.Request) {
 	uid, err := model.SF.NextID()
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
+		data.ResponseJson(w, model.GenIDErr, http.StatusInternalServerError)
 		return
 	}
 	u := &model.User{
@@ -82,13 +82,12 @@ func (p *userRegistParam) valid() error {
 // LoginPost 登录
 func LoginPost(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
-	//创建session_id
-	//sid, err := model.PreCreateSession(w, r)
-	//if err != nil {
-	//	zlog.ZapLog.Errorf("%s", err.Error())
-	//	data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
-	//	return
-	//}
+	se, err := model.GetCtxSession(r)
+	if err != nil {
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
+		zlog.ZapLog.Error(err.Error())
+		return
+	}
 
 	if err := r.ParseForm(); err != nil {
 		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
@@ -103,17 +102,11 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := param.valid(); err != nil {
-		zlog.ZapLog.Errorf("%+v", err)
-		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
-		return
-	}
-
 	u := model.User{
 		Name:   param.Name,
 		Passwd: param.Password,
 	}
-	_, err := u.CheckPassWord()
+	realUser, err := u.CheckPassWord()
 	if err != nil {
 		var errType int64
 		var httpCode int
@@ -137,12 +130,12 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//登录成功，更新session，关联userid和sessionid
-	s := model.Session{
-		//SID:         sid, // TODO
-		UserID:      u.ID,
+	s := &model.Session{
+		SID:         se.SID,
+		UserID:      realUser.ID,
 		CreatedUnix: time.Now().Unix(),
 	}
-	if err := s.Save(); err != nil {
+	if err := s.SetCache(); err != nil {
 		zlog.ZapLog.Error("zlog err %s", err.Error())
 		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
@@ -152,44 +145,27 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 }
 
 type loginParams struct {
-	Name     string `schema:"name"`
-	Password string `schema:"password"`
-}
-
-func (p *loginParams) valid() error {
-	if p.Name == "" {
-		return errors.New("login param name is nil ")
-	}
-	if p.Password == "" {
-		return errors.New("login param passwd is nil ")
-	}
-	return nil
+	Name     string `schema:"name,required"`
+	Password string `schema:"password,required"`
 }
 
 // LogoutGET 登出
 func LogoutGET(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
-	// todo
-	//
-	//uid, err := model.ValidSessionUID(r)
-	//if err != nil {
-	//	zlog.ZapLog.Error(err.Error())
-	//	data.ResponseJson(w, model.NoUserID, http.StatusBadRequest)
-	//	return
-	//}
-	////sid, err := model.ValidSessionID(r)
-	//
-	////s := &model.Session{
-	////	SID: sid,
-	////	//UserID: uid,
-	////}
-	//
-	//if err := s.Del(); err != nil {
-	//	zlog.ZapLog.Error(err.Error())
-	//	data.ResponseJson(w, model.ParamsErr, http.StatusInternalServerError)
-	//	return
-	//}
+	cs, err := model.GetCtxSession(r)
+	if err != nil {
+		zlog.ZapLog.Error(err.Error())
+		data.ResponseJson(w, model.NeedLogin, http.StatusUnauthorized)
+		return
+	}
 
+	if err := cs.Del(); err != nil {
+		zlog.ZapLog.Error(err.Error())
+		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
+		return
+	}
+
+	zlog.ZapLog.Debugf("log out ok: %s %d", cs.SID, cs.UserID)
 	data.ResponseJson(w, model.Success, http.StatusOK)
 }
 

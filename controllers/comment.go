@@ -15,10 +15,10 @@ import (
 func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
-	uid, err := model.ValidSessionUID(r)
+	uid, err := model.GetCtxSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NoUserID, http.StatusUnauthorized)
+		data.ResponseJson(w, model.NeedLogin, http.StatusUnauthorized)
 		return
 	}
 
@@ -37,7 +37,7 @@ func APICommentPOST(w http.ResponseWriter, r *http.Request) {
 	cid, err := model.SF.NextID()
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
+		data.ResponseJson(w, model.GenIDErr, http.StatusInternalServerError)
 		return
 	}
 	cm := &model.Comment{
@@ -76,10 +76,10 @@ func APICommentGET(w http.ResponseWriter, r *http.Request) {
 func APICommentPUT(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
-	uid, err := model.ValidSessionUID(r)
+	uid, err := model.GetCtxSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NoUserID, http.StatusUnauthorized)
+		data.ResponseJson(w, model.NeedLogin, http.StatusUnauthorized)
 		return
 	}
 

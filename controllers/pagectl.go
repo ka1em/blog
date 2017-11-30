@@ -35,7 +35,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := model.Page{}
-	pages, err := p.GetPages(param.PageIndex, param.PageSize)
+	pages, err := p.Get(param.PageIndex, param.PageSize)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
@@ -96,7 +96,7 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 	p := model.Page{
 		ID: pageID,
 	}
-	page, err := p.GetPageByID()
+	page, err := p.GetByID()
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
 		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
@@ -111,10 +111,10 @@ func APIPageGET(w http.ResponseWriter, r *http.Request) {
 func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 	data := model.GetBaseData()
 
-	uid, err := model.ValidSessionUID(r)
+	uid, err := model.GetCtxSessionUID(r)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.NoUserID, http.StatusBadRequest)
+		data.ResponseJson(w, model.NeedLogin, http.StatusUnauthorized)
 		return
 	}
 
@@ -131,12 +131,18 @@ func APIPagePOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pid, err := model.SF.NextID()
+	if err != nil {
+		zlog.ZapLog.Error("%s", err.Error())
+		data.ResponseJson(w, model.GenIDErr, http.StatusInternalServerError)
+		return
+	}
 	p := &model.Page{
+		ID:      pid,
 		Content: param.Content,
 		Title:   param.Title,
 		UserID:  uid,
 	}
-
 	if err := p.Add(); err != nil {
 		zlog.ZapLog.Error("%s", err.Error())
 		data.ResponseJson(w, model.ParamsErr, http.StatusInternalServerError)

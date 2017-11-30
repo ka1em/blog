@@ -56,8 +56,8 @@ func (p *Page) Add() error {
 	return err
 }
 
-// GetPageByID 获取
-func (p *Page) GetPageByID() (Page, error) {
+// GetByID 获取
+func (p *Page) GetByID() (Page, error) {
 	if p.XDB == nil {
 		p.XDB = xdb
 	}
@@ -69,12 +69,12 @@ func (p *Page) GetPageByID() (Page, error) {
 	return page, err
 }
 
-// GetPages 获取page
-func (p *Page) GetPages(pIndex, pSize int) (pages []*Page, err error) {
+// GetCache 获取page
+func (p *Page) Get(pIndex, pSize int) (pages []*Page, err error) {
 	if p.XDB == nil {
 		p.XDB = xdb
 	}
-	err = p.XDB.Limit(pSize, (pIndex-1)*pSize).Desc("created").Find(&pages)
+	err = p.XDB.Limit(pSize, (pIndex-1)*pSize).Desc("created_unix").Find(&pages)
 	return
 }
 

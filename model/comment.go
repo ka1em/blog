@@ -52,7 +52,7 @@ func (c *Comment) Add() error {
 	return err
 }
 
-// Get 获取评论
+// GetCache 获取评论
 func (c *Comment) Get(pIndex, pSize int) ([]Comment, error) {
 	if c.XDB == nil {
 		c.XDB = xdb

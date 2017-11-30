@@ -17,6 +17,7 @@ const (
 	SessionNoUserID
 	DataBaseErr = (iota * -1) - 20000 // -20000
 	PasswordHashErr
+	GenIDErr
 	MiddlewareErr = (iota * -1) - 30000 // -30000
 	NeedLogin
 )
@@ -33,6 +34,7 @@ var ErrMap = map[int64]string{
 	PasswordErr:     "password error",
 	NoUserName:      "no user name",
 	NoUserID:        "no user id",
+	GenIDErr:        "gen id err",
 	SessionNoUserID: "session no user id",
 	PasswordHashErr: "password hash error",
 }
