@@ -1,6 +1,7 @@
 package gorm
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -14,7 +15,7 @@ type DefaultForeignKeyNamer struct {
 }
 
 type commonDialect struct {
-	db SQLCommon
+	db *sql.DB
 	DefaultForeignKeyNamer
 }
 
@@ -26,20 +27,20 @@ func (commonDialect) GetName() string {
 	return "common"
 }
 
-func (s *commonDialect) SetDB(db SQLCommon) {
+func (s *commonDialect) SetDB(db *sql.DB) {
 	s.db = db
 }
 
 func (commonDialect) BindVar(i int) string {
-	return "$$$" // ?
+	return "$$" // ?
 }
 
 func (commonDialect) Quote(key string) string {
 	return fmt.Sprintf(`"%s"`, key)
 }
 
-func (s *commonDialect) DataTypeOf(field *StructField) string {
-	var dataValue, sqlType, size, additionalType = ParseFieldStructForDialect(field, s)
+func (commonDialect) DataTypeOf(field *StructField) string {
+	var dataValue, sqlType, size, additionalType = ParseFieldStructForDialect(field)
 
 	if sqlType == "" {
 		switch dataValue.Kind() {
@@ -124,12 +125,12 @@ func (s commonDialect) CurrentDatabase() (name string) {
 
 func (commonDialect) LimitAndOffsetSQL(limit, offset interface{}) (sql string) {
 	if limit != nil {
-		if parsedLimit, err := strconv.ParseInt(fmt.Sprint(limit), 0, 0); err == nil && parsedLimit >= 0 {
+		if parsedLimit, err := strconv.ParseInt(fmt.Sprint(limit), 0, 0); err == nil && parsedLimit > 0 {
 			sql += fmt.Sprintf(" LIMIT %d", parsedLimit)
 		}
 	}
 	if offset != nil {
-		if parsedOffset, err := strconv.ParseInt(fmt.Sprint(offset), 0, 0); err == nil && parsedOffset >= 0 {
+		if parsedOffset, err := strconv.ParseInt(fmt.Sprint(offset), 0, 0); err == nil && parsedOffset > 0 {
 			sql += fmt.Sprintf(" OFFSET %d", parsedOffset)
 		}
 	}
@@ -148,9 +149,4 @@ func (DefaultForeignKeyNamer) BuildForeignKeyName(tableName, field, dest string)
 	keyName := fmt.Sprintf("%s_%s_%s_foreign", tableName, field, dest)
 	keyName = regexp.MustCompile("(_*[^a-zA-Z]+_*|_+)").ReplaceAllString(keyName, "_")
 	return keyName
-}
-
-// IsByteArrayOrSlice returns true of the reflected value is an array or slice
-func IsByteArrayOrSlice(value reflect.Value) bool {
-	return (value.Kind() == reflect.Array || value.Kind() == reflect.Slice) && value.Type().Elem() == reflect.TypeOf(uint8(0))
 }
