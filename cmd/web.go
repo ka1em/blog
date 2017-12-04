@@ -23,8 +23,10 @@ const (
 
 // Web blog后端启动命令
 var Web = cli.Command{
-	Name:  "web",
-	Usage: "Start web server",
+	Name: "web",
+	Usage: `./blog web
+./blog web -p 10001 -c conf/local.ini
+`,
 	Description: `blog server is the only thing you need to run,
 and it takes care of all the other things for you`,
 	Action: runWeb,
@@ -66,6 +68,6 @@ func runWeb(c *cli.Context) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	zlog.ZapLog.Info("blog listening ...")
+	zlog.ZapLog.Infof("blog listening :%d...", port)
 	log.Fatal(s.ListenAndServe())
 }

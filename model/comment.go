@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/garyburd/redigo/redis"
-	"github.com/go-errors/errors"
 	"github.com/go-xorm/xorm"
 )
 
@@ -58,7 +57,7 @@ func (c *Comment) Get(pIndex, pSize int) ([]Comment, error) {
 		c.XDB = xdb
 	}
 	var list []Comment
-	err := c.XDB.Where("page_id = ?", c.PageID).Limit(pSize, (pIndex-1)*pSize).Find(&list)
+	err := c.XDB.Where("page_id = ?", c.PageID).Desc("created_unix").Limit(pSize, (pIndex-1)*pSize).Find(&list)
 	return list, err
 }
 
@@ -72,8 +71,7 @@ func (c *Comment) Update() error {
 		return err
 	}
 	if n == 0 {
-		// TODO
-		return errors.New("no recored")
+		return xorm.ErrNotExist
 	}
 	return nil
 }

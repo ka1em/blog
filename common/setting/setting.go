@@ -17,7 +17,8 @@ var (
 	RedisHost string
 	RedisPort string
 
-	LogPath string // LogPath 日志路径
+	LogPath    string // LogPath 日志路径
+	SQLLogPath string // xorm日志路径
 
 	WxAppID     string
 	WxAppSecret string
@@ -50,6 +51,7 @@ func NewContext(file string) {
 
 	RunMode = secServer.Key("RunMode").MustString("dev")
 	LogPath = secServer.Key("LogPath").MustString("stdout")
+	SQLLogPath = secServer.Key("SQLLogPath").MustString("")
 	WxAppID = secServer.Key("WxAppID").MustString("")
 	WxAppSecret = secServer.Key("WxAppSecret").MustString("")
 
