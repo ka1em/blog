@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"time"
 
+	"os"
+
 	"github.com/garyburd/redigo/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	"github.com/gorilla/schema"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
@@ -26,13 +27,6 @@ var (
 const REDIS_MAX_IDLE = 100
 const REDIS_MAX_ACTIVE = 100
 
-const (
-	REDIS_KEY_PREFIX  = "BLOG:"
-	REDIS_KEY_SESSION = REDIS_KEY_PREFIX + "SESSION:"
-	REDIS_KEY_USER    = REDIS_KEY_PREFIX + "USER:"
-	REDIS_KEY_PAGE    = REDIS_KEY_PREFIX + "PAGE:"
-)
-
 func init() {
 	SchemaDecoder = schema.NewDecoder()
 }
@@ -40,27 +34,6 @@ func init() {
 func DBInit() {
 	connXDB()
 	connRedisPool()
-}
-
-func connDB() {
-	//var err error
-	//address := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
-	//	setting.DBUser, setting.DBPass, setting.DBHost, setting.DBPort, setting.DBBase, setting.DBParm)
-	//
-	//db, err = openMysql(address)
-	//if err != nil {
-	//	panic(err.Error())
-	//}
-	//
-	//if err := db.AutoMigrate(
-	//	&User{},
-	//	&Session{},
-	//	&Page{},
-	//	&Comment{},
-	//).Error; err != nil {
-	//	panic(err.Error())
-	//}
-	//zlog.ZapLog.Debug("gorm connect mysql ok")
 }
 
 func connXDB() {
@@ -73,26 +46,24 @@ func connXDB() {
 		panic(err.Error())
 	}
 
-	xdb.ShowSQL(true)
-	xdb.Logger().SetLevel(core.LOG_DEBUG)
+	if setting.RunMode == setting.DevMode || setting.RunMode == setting.TestMode {
+		if setting.SQLLogPath != "stdout" {
+			f, err := os.Create(setting.SQLLogPath)
+			if err != nil {
+				panic(err.Error())
+			}
+			xdb.SetLogger(xorm.NewSimpleLogger(f))
+		}
+		xdb.ShowSQL(true)
+		xdb.Logger().SetLevel(core.LOG_DEBUG)
+	}
 	xdb.SetMapper(core.GonicMapper{})
 	xdb.Sync2(
 		new(User),
 		new(Page),
 	)
 
-	//f, err := os.Create("sql.log")
-	//if err != nil {
-	//	println(err.Error())
-	//	return
-	//}
-	//xdb.SetLogger(xorm.NewSimpleLogger(f))
-
 	zlog.ZapLog.Debug("xorm connect mysql ok")
-}
-
-func openMysql(address string) (*gorm.DB, error) {
-	return gorm.Open("mysql", address)
 }
 
 func xormEngine(address string) (*xorm.Engine, error) {

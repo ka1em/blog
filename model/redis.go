@@ -2,6 +2,13 @@ package model
 
 import "github.com/garyburd/redigo/redis"
 
+const (
+	REDIS_KEY_PREFIX  = "BLOG:"
+	REDIS_KEY_SESSION = REDIS_KEY_PREFIX + "SESSION:"
+	REDIS_KEY_USER    = REDIS_KEY_PREFIX + "USER:"
+	REDIS_KEY_PAGE    = REDIS_KEY_PREFIX + "PAGE:"
+)
+
 // RedisDao redis存储
 type RedisDao struct {
 	Pool *redis.Pool
