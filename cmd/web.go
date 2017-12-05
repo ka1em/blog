@@ -68,6 +68,6 @@ func runWeb(c *cli.Context) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	zlog.ZapLog.Infof("blog listening :%d...", port)
+	zlog.ZapLog.Infof("blog listening :%s...", port)
 	log.Fatal(s.ListenAndServe())
 }

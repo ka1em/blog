@@ -31,10 +31,10 @@ func TestHandler(w http.ResponseWriter, r *http.Request) {
 	Count.m.Unlock()
 
 	Count.m.RLock()
-	data.Data["count"] = Count
+	data.Data["count"] = Count.Count
 	Count.m.RUnlock()
 
-	zlog.ZapLog.Info("%+v %s %s", r.Form, r.RemoteAddr, r.RequestURI)
+	zlog.ZapLog.Infof("%+v %s %s", r.Form, r.RemoteAddr, r.RequestURI)
 	data.Data["remoteAddr"] = r.RemoteAddr
 	data.Data["requestURI"] = r.RequestURI
 	data.Data["body"] = r.Body
