@@ -38,7 +38,7 @@ func PageIndexGET(w http.ResponseWriter, r *http.Request) {
 	pages, err := p.Get(param.PageIndex, param.PageSize)
 	if err != nil {
 		zlog.ZapLog.Error(err.Error())
-		data.ResponseJson(w, model.ParamsErr, http.StatusBadRequest)
+		data.ResponseJson(w, model.DataBaseErr, http.StatusInternalServerError)
 		return
 	}
 
