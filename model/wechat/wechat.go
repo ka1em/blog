@@ -41,6 +41,7 @@ type AccessToken struct {
 func GetWeChatAccessToken(code string) (AccessToken, error) {
 	at := AccessToken{}
 	v := url.Values{}
+
 	v.Set("code", code)
 	v.Set("appid", setting.WxAppID)
 	v.Set("secret", setting.WxAppSecret)
@@ -60,27 +61,24 @@ func GetWeChatAccessToken(code string) (AccessToken, error) {
 }
 
 // GetWeChatUnionID 获取微信unionid
-func GetWeChatUnionID(code string) (unionID string, err error) {
+func GetWeChatUnionID(code string) (string, error) {
 	at, err := GetWeChatAccessToken(code)
-	if err != nil {
-		return
-	}
-	unionID = at.UnionID
-	return
+	return at.UnionID, err
 }
 
 // GetWeChatUserInfo 获取微信用户信息
 func GetWeChatUserInfo(code string) (WXUserInfo, error) {
+	w := WXUserInfo{}
+
 	at, err := GetWeChatAccessToken(code)
 	if err != nil {
-		return WXUserInfo{}, err
+		return w, err
 	}
 
 	v := url.Values{}
+
 	v.Set("access_token", at.AccessToken)
 	v.Set("openid", at.OpenID)
-
-	w := WXUserInfo{}
 
 	resp, body, errs := gorequest.New().Get(WXUserInfoURL + v.Encode()).EndStruct(&w)
 	if len(errs) > 0 {
